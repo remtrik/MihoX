@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flclashx/clash/core.dart';
+import 'package:flclashx/clash/service.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/core_version.dart';
 import 'package:flclashx/common/yaml_dump.dart';
@@ -530,6 +531,8 @@ class _CoreUpdateItemState extends State<_CoreUpdateItem> {
       _busy = true;
       _status = AppLocalizations.of(context).coreUpdateDownloading;
     });
+    await clashService?.shutdown();
+    await Future.delayed(const Duration(seconds: 1));
     final error = await request.downloadCoreUpdate(url, appPath.corePath);
     if (!mounted) return;
     if (error != null) {

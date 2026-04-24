@@ -138,8 +138,13 @@ class Request {
       final tmpFile = File(tmpPath);
       if (!await tmpFile.exists()) return 'Download failed';
       final targetFile = File(targetPath);
-      if (await targetFile.exists()) {
-        await targetFile.delete();
+      for (var attempt = 0; attempt < 10; attempt++) {
+        try {
+          if (await targetFile.exists()) await targetFile.delete();
+          break;
+        } catch (_) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
       }
       await tmpFile.rename(targetPath);
       if (!Platform.isWindows) {
