@@ -222,7 +222,6 @@ class AboutView extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: 4),
-                      const _CoreVersionWidget(),
                     ],
                   )
                 ],

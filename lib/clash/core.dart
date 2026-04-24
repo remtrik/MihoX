@@ -244,6 +244,14 @@ class ClashCore {
     return int.parse(value);
   }
 
+  Future<String> getCoreVersion() async {
+    try {
+      return await clashInterface.getCoreVersion();
+    } catch (_) {
+      return '';
+    }
+  }
+
   void resetTraffic() {
     clashInterface.resetTraffic();
   }

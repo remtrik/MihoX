@@ -120,12 +120,13 @@ class Request {
       queryParameters: {'per_page': 20},
     );
     if (response.statusCode != 200) return null;
+    final current = currentCoreVersion.replaceAll(RegExp(r'^v'), '');
     final releases = response.data as List<dynamic>;
     for (final release in releases) {
       final tag = release['tag_name'] as String? ?? '';
       if (!tag.startsWith('core-')) continue;
-      final remoteVersion = tag.replaceFirst('core-', '');
-      if (remoteVersion == currentCoreVersion) return null;
+      final remote = tag.replaceFirst('core-', '').replaceAll(RegExp(r'^v'), '');
+      if (remote == current) return null;
       return release as Map<String, dynamic>;
     }
     return null;

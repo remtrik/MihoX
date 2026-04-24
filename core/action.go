@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"unsafe"
+
+	"github.com/metacubex/mihomo/constant"
 )
 
 type Action struct {
@@ -106,6 +108,9 @@ func handleAction(action *Action, result ActionResult) {
 			return
 		}
 		result.success(config)
+		return
+	case getCoreVersionMethod:
+		result.success(constant.Version)
 		return
 	case closeConnectionMethod:
 		id := action.Data.(string)
