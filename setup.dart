@@ -607,10 +607,10 @@ class BuildCommand extends Command {
           .replaceAll("{{PUBLISHER_NAME}}", "pluralplay")
           .replaceAll("{{PUBLISHER_URL}}", "https://github.com/pluralplay/FlClashX")
           .replaceAll("{{INSTALL_DIR_NAME}}", "{autopf}\\${Build.appName}")
-          .replaceAll("{{OUTPUT_BASE_FILENAME}}", "${Build.appName}-windows-$archName")
+          .replaceAll("{{OUTPUT_BASE_FILENAME}}", "${Build.appName}-windows-$archName-setup")
           .replaceAll("{{SETUP_ICON_FILE}}", join(current, "windows", "runner", "resources", "app_icon.ico"))
           .replaceAll("{{PRIVILEGES_REQUIRED}}", "admin")
-          .replaceAll("{{ARCH}}", archName == "amd64" ? "x64" : "arm64")
+          .replaceAll("{{ARCH}}", archName == "amd64" ? "x64compatible" : "arm64")
           .replaceAll("{{SOURCE_DIR}}", buildDir)
           .replaceAll("{{EXECUTABLE_NAME}}", "${Build.appName}.exe");
 
@@ -629,6 +629,10 @@ class BuildCommand extends Command {
         RegExp(r'\{% for locale in LOCALES %\}.*?\{% endfor %\}', dotAll: true),
         langLines.join('\n'),
       );
+      processed = processed.replaceAllMapped(
+        RegExp(r"\{%\s*if\s+PRIVILEGES_REQUIRED\s*==\s*'admin'\s*%\}(.*?)\{%\s*endif\s*%\}", dotAll: true),
+        (m) => m.group(1)!,
+      );
 
       final issOut = File(join(Build.distPath, "setup.iss"));
       issOut.writeAsStringSync(processed);
@@ -636,6 +640,7 @@ class BuildCommand extends Command {
         name: "inno setup",
         ["iscc", issOut.path],
       );
+      issOut.deleteSync();
       print("✅ EXE installer created");
     }
   }
@@ -660,18 +665,185 @@ class BuildCommand extends Command {
     );
 
     final version = Build.readVersion();
+    final appName = Build.appName;
     final archName = arch.name;
     final bundleDir = join(current, "build", "linux", targetMap[arch]!.replaceAll("linux-", ""), "release", "bundle");
     final distDir = Directory(Build.distPath);
     if (!distDir.existsSync()) distDir.createSync(recursive: true);
 
-    final tarName = "${Build.appName}-linux-$archName.tar.gz";
-    final tarPath = join(Build.distPath, tarName);
-    await Build.exec(
-      name: "create tar.gz",
-      ["tar", "czf", tarPath, "-C", bundleDir, "."],
+    final iconPath = join(current, "assets", "images", "icon.png");
+    final debArch = arch == Arch.amd64 ? "amd64" : "arm64";
+    final rpmArch = arch == Arch.amd64 ? "x86_64" : "aarch64";
+
+    // --- DEB ---
+    final debRoot = join(current, "build", "deb_root");
+    final debInstallDir = join(debRoot, "opt", appName);
+    final debDesktopDir = join(debRoot, "usr", "share", "applications");
+    final debIconDir = join(debRoot, "usr", "share", "icons", "hicolor", "256x256", "apps");
+    final debControlDir = join(debRoot, "DEBIAN");
+
+    for (final d in [debInstallDir, debDesktopDir, debIconDir, debControlDir]) {
+      await Directory(d).create(recursive: true);
+    }
+    await Build.exec(["cp", "-r", "$bundleDir/.", debInstallDir]);
+    File(join(debIconDir, "$appName.png")).writeAsBytesSync(File(iconPath).readAsBytesSync());
+    File(join(debDesktopDir, "com.follow.clashx.desktop")).writeAsStringSync(
+      "[Desktop Entry]\n"
+      "Type=Application\n"
+      "Name=$appName\n"
+      "GenericName=$appName\n"
+      "Comment=$appName\n"
+      "Exec=/opt/$appName/$appName\n"
+      "Icon=$appName\n"
+      "Terminal=false\n"
+      "Categories=Network;\n"
+      "Keywords=FlClashX;Clash;Proxy;\n"
+      "StartupNotify=true\n",
     );
-    print("✅ tar.gz created: $tarPath");
+    File(join(debControlDir, "control")).writeAsStringSync(
+      "Package: flclashx\n"
+      "Version: $version\n"
+      "Section: x11\n"
+      "Priority: optional\n"
+      "Architecture: $debArch\n"
+      "Depends: libayatana-appindicator3-dev, libkeybinder-3.0-dev\n"
+      "Maintainer: pluralplay <mail@pluralplay.rw>\n"
+      "Description: $appName\n",
+    );
+    final debPath = join(Build.distPath, "$appName-linux-$archName.deb");
+    await Build.exec(name: "build deb", ["dpkg-deb", "--build", debRoot, debPath]);
+    await Directory(debRoot).delete(recursive: true);
+    print("✅ DEB created: $debPath");
+
+    // --- RPM (amd64 only) ---
+    if (arch == Arch.amd64) {
+      final rpmBuildRoot = join(current, "build", "rpm_root");
+      final rpmInstallDir = join(rpmBuildRoot, "opt", appName);
+      final rpmDesktopDir = join(rpmBuildRoot, "usr", "share", "applications");
+      final rpmIconDir = join(rpmBuildRoot, "usr", "share", "icons", "hicolor", "256x256", "apps");
+      for (final d in [rpmInstallDir, rpmDesktopDir, rpmIconDir]) {
+        await Directory(d).create(recursive: true);
+      }
+      await Build.exec(["cp", "-r", "$bundleDir/.", rpmInstallDir]);
+      File(join(rpmIconDir, "$appName.png")).writeAsBytesSync(File(iconPath).readAsBytesSync());
+      File(join(rpmDesktopDir, "com.follow.clashx.desktop")).writeAsStringSync(
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        "Name=$appName\n"
+        "GenericName=$appName\n"
+        "Comment=$appName\n"
+        "Exec=/opt/$appName/$appName\n"
+        "Icon=$appName\n"
+        "Terminal=false\n"
+        "Categories=Network;\n"
+        "Keywords=FlClashX;Clash;Proxy;\n"
+        "StartupNotify=true\n",
+      );
+
+      final specPath = join(current, "build", "$appName.spec");
+      File(specPath).writeAsStringSync(
+        "Name: flclashx\n"
+        "Version: $version\n"
+        "Release: 1\n"
+        "Summary: $appName\n"
+        "License: Other\n"
+        "Group: Applications/Internet\n"
+        "Packager: pluralplay <mail@pluralplay.rw>\n"
+        "AutoReqProv: no\n"
+        "\n"
+        "%description\n"
+        "$appName proxy client\n"
+        "\n"
+        "%install\n"
+        "cp -r %{_builddir}/root/* %{buildroot}/\n"
+        "\n"
+        "%files\n"
+        "/opt/$appName/*\n"
+        "/usr/share/applications/com.follow.clashx.desktop\n"
+        "/usr/share/icons/hicolor/256x256/apps/$appName.png\n",
+      );
+
+      final rpmBuildDir = join(current, "build", "rpmbuild");
+      await Directory(join(rpmBuildDir, "BUILD", "root")).create(recursive: true);
+      await Build.exec(["cp", "-r", "$rpmBuildRoot/.", join(rpmBuildDir, "BUILD", "root")]);
+      await Build.exec(name: "build rpm", [
+        "rpmbuild", "-bb", specPath,
+        "--define", "_topdir $rpmBuildDir",
+        "--define", "_builddir ${join(rpmBuildDir, "BUILD")}",
+        "--target", rpmArch,
+      ]);
+
+      final rpmOutputDir = join(rpmBuildDir, "RPMS", rpmArch);
+      final rpmFiles = Directory(rpmOutputDir).listSync().where((f) => f.path.endsWith(".rpm"));
+      if (rpmFiles.isNotEmpty) {
+        final rpmOutPath = join(Build.distPath, "$appName-linux-$archName.rpm");
+        Build.copyFile(rpmFiles.first.path, rpmOutPath);
+        print("✅ RPM created: $rpmOutPath");
+      }
+      await Directory(rpmBuildRoot).delete(recursive: true);
+      await Directory(rpmBuildDir).delete(recursive: true);
+      File(specPath).deleteSync();
+    }
+
+    // --- AppImage (amd64 only) ---
+    if (arch == Arch.amd64) {
+      final appDir = join(current, "build", "AppDir");
+      final appBinDir = join(appDir, "usr", "bin");
+      final appLibDir = join(appDir, "usr", "lib");
+      final appShareDesktop = join(appDir, "usr", "share", "applications");
+      final appShareIcon = join(appDir, "usr", "share", "icons", "hicolor", "256x256", "apps");
+      for (final d in [appBinDir, appLibDir, appShareDesktop, appShareIcon]) {
+        await Directory(d).create(recursive: true);
+      }
+
+      final bundleFiles = Directory(bundleDir).listSync();
+      for (final f in bundleFiles) {
+        final name = basename(f.path);
+        if (name == "lib") {
+          await Build.exec(["cp", "-r", f.path, appDir + "/usr/"]);
+        } else if (f is File) {
+          Build.copyFile(f.path, join(appBinDir, name));
+        } else {
+          await Build.exec(["cp", "-r", f.path, join(appBinDir, name)]);
+        }
+      }
+
+      File(join(appShareIcon, "$appName.png")).writeAsBytesSync(File(iconPath).readAsBytesSync());
+      Build.copyFile(iconPath, join(appDir, "$appName.png"));
+      File(join(appShareDesktop, "com.follow.clashx.desktop")).writeAsStringSync(
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        "Name=$appName\n"
+        "GenericName=$appName\n"
+        "Comment=$appName\n"
+        "Exec=$appName\n"
+        "Icon=$appName\n"
+        "Terminal=false\n"
+        "Categories=Network;\n"
+        "Keywords=FlClashX;Clash;Proxy;\n"
+        "StartupNotify=true\n",
+      );
+      Build.copyFile(join(appShareDesktop, "com.follow.clashx.desktop"), join(appDir, "com.follow.clashx.desktop"));
+      File(join(appDir, "AppRun")).writeAsStringSync(
+        "#!/bin/bash\n"
+        'SELF=\$(readlink -f "\$0")\n'
+        'HERE=\${SELF%/*}\n'
+        'export PATH="\${HERE}/usr/bin:\${PATH}"\n'
+        'export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"\n'
+        'exec "\${HERE}/usr/bin/$appName" "\$@"\n',
+      );
+      await Build.exec(["chmod", "+x", join(appDir, "AppRun")]);
+      await Build.exec(["chmod", "+x", join(appBinDir, appName)]);
+
+      final appImagePath = join(Build.distPath, "$appName-linux-$archName.AppImage");
+      await Build.exec(
+        name: "build AppImage",
+        ["appimagetool", appDir, appImagePath],
+        environment: {"ARCH": "x86_64"},
+      );
+      await Directory(appDir).delete(recursive: true);
+      print("✅ AppImage created: $appImagePath");
+    }
   }
 
   _buildAndroidApp({
@@ -692,10 +864,15 @@ class BuildCommand extends Command {
     );
 
     final splitDir = join(current, "build", "app", "outputs", "flutter-apk");
+    final archMap = {
+      "app-arm64-v8a-release.apk": "${Build.appName}-android-arm64-v8a.apk",
+      "app-armeabi-v7a-release.apk": "${Build.appName}-android-armeabi-v7a.apk",
+      "app-x86_64-release.apk": "${Build.appName}-android-x86_64.apk",
+    };
     for (final f in Directory(splitDir).listSync()) {
-      if (f.path.endsWith(".apk")) {
-        final name = basename(f.path);
-        Build.copyFile(f.path, join(Build.distPath, name));
+      final name = basename(f.path);
+      if (archMap.containsKey(name)) {
+        Build.copyFile(f.path, join(Build.distPath, archMap[name]!));
       }
     }
 
