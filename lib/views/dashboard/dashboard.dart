@@ -260,7 +260,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
       return Expanded(
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.only(
+              left: 16, right: 16, top: 12,
+              bottom: 12 + MediaQuery.of(context).padding.bottom,
+            ),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
               child: const Column(
