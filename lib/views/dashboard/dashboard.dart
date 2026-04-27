@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
@@ -80,7 +81,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
             final heroOnly = headers['flclashx-newboard'];
             final newDashboard = ref.watch(appSettingProvider.select((s) => s.newDashboard));
 
-            if (denyEditing == 'true' || heroOnly == 'true' || newDashboard) {
+            if (denyEditing == 'true' || heroOnly == 'true' || newDashboard == true) {
               return const SizedBox.shrink();
             }
 
@@ -232,9 +233,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
           ),
         );
       }
-      final newDashboard = ref.watch(currentProfileProvider
-          .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true'
-          || ref.watch(appSettingProvider.select((s) => s.newDashboard));
+      final headerNewBoard = ref.watch(currentProfileProvider
+          .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true';
+      final settingNewDashboard = ref.watch(appSettingProvider.select((s) => s.newDashboard));
+      final newDashboard = settingNewDashboard ?? headerNewBoard;
 
       if (!newDashboard) {
         return Expanded(
@@ -259,9 +261,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
 
       return Expanded(
         child: Padding(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: 16, right: 16, top: 12,
-            bottom: 32,
+            bottom: Platform.isAndroid ? 55 : 16,
           ),
           child: const Column(
             mainAxisAlignment: MainAxisAlignment.end,

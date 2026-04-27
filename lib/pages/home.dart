@@ -32,9 +32,10 @@ class HomePage extends StatelessWidget {
               navigationItems: navigationItems,
               currentIndex: currentIndex,
             );
-            final isNewDashboard = (ref.watch(currentProfileProvider
-                    .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true'
-                || ref.watch(appSettingProvider.select((s) => s.newDashboard)))
+            final headerNewBoard = ref.watch(currentProfileProvider
+                    .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true';
+            final settingNewDashboard = ref.watch(appSettingProvider.select((s) => s.newDashboard));
+            final isNewDashboard = (settingNewDashboard ?? headerNewBoard)
                 && pageLabel == PageLabel.dashboard;
             final showBottomBar = viewMode == ViewMode.mobile && !isNewDashboard;
             final bottomNavigationBar = viewMode == ViewMode.mobile

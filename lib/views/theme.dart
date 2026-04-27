@@ -7,6 +7,7 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/selector.dart';
 import 'package:flclashx/providers/config.dart';
+import 'package:flclashx/providers/state.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -475,9 +476,12 @@ class _NewDashboardItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref.watch(
+    final settingValue = ref.watch(
       appSettingProvider.select((state) => state.newDashboard),
     );
+    final headerValue = ref.watch(currentProfileProvider
+        .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true';
+    final enabled = settingValue ?? headerValue;
     return ListItem.switchItem(
       leading: const Icon(Icons.dashboard_customize),
       horizontalTitleGap: 12,

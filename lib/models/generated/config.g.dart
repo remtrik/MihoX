@@ -34,7 +34,7 @@ _$AppSettingPropsImpl _$$AppSettingPropsImplFromJson(
       recoveryStrategy: $enumDecodeNullable(
               _$RecoveryStrategyEnumMap, json['recoveryStrategy']) ??
           RecoveryStrategy.compatible,
-      newDashboard: json['newDashboard'] as bool? ?? false,
+      newDashboard: json['newDashboard'] as bool?,
     );
 
 Map<String, dynamic> _$$AppSettingPropsImplToJson(

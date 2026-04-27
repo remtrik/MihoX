@@ -90,7 +90,7 @@ Future<void> _handleStart() async {
     }
 
     final profile = globalState.config.currentProfile;
-    final title = profile?.label ?? profile?.id ?? "FlClashX";
+    final title = _buildNotificationTitle(profile);
     unawaited(clashLib?.updateNotificationParams(title: title));
 
     final rt = await clashLib?.startVpn() ?? 0;
@@ -105,6 +105,48 @@ Future<void> _handleStart() async {
     commonPrint.log("Tile onStart error: $e\n$stackTrace");
     unawaited(app?.tip("Start error: $e"));
   }
+}
+
+String _buildNotificationTitle(Profile? profile) {
+  if (profile == null) return 'FlClashX';
+  final profileName = profile.label ?? profile.id;
+
+  String serviceName = '';
+  final svc = profile.providerHeaders['flclashx-servicename'];
+  if (svc != null && svc.isNotEmpty) {
+    try {
+      final normalized = base64.normalize(svc);
+      serviceName = utf8.decode(base64.decode(normalized)).trim();
+    } catch (_) {
+      serviceName = svc.trim();
+    }
+  }
+
+  final displayName = serviceName.isNotEmpty ? serviceName : profileName;
+
+  String serverName = '';
+  final serverInfoHeader = profile.providerHeaders['flclashx-serverinfo'];
+  if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
+    String decodedGroupName;
+    try {
+      final normalized = base64.normalize(serverInfoHeader);
+      decodedGroupName = utf8.decode(base64.decode(normalized)).trim();
+    } catch (_) {
+      decodedGroupName = serverInfoHeader.trim();
+    }
+    serverName = profile.selectedMap[decodedGroupName] ?? '';
+  }
+  if (serverName.isEmpty) {
+    for (final entry in profile.selectedMap.entries) {
+      final v = entry.value;
+      if (v.isNotEmpty && v != 'DIRECT' && v != 'REJECT') {
+        serverName = v;
+        break;
+      }
+    }
+  }
+
+  return serverName.isNotEmpty ? '$displayName / $serverName' : displayName;
 }
 
 Future<void> _handleStop() async {

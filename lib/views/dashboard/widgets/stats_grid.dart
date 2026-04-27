@@ -28,6 +28,18 @@ String _formatBytes(int bytes) {
   return '${value.toStringAsFixed(1)} ${units[i]}';
 }
 
+(String, String) _splitBytes(int bytes) {
+  if (bytes <= 0) return ('0', 'B');
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  var value = bytes.toDouble();
+  var i = 0;
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
+  }
+  return (value.toStringAsFixed(1), units[i]);
+}
+
 class StatsGrid extends ConsumerWidget {
   const StatsGrid({super.key});
 
@@ -108,6 +120,10 @@ class _IpPill extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+            width: 1.5,
+          ),
         ),
         child: Row(
           children: [
@@ -159,39 +175,46 @@ class _TrafficPill extends StatelessWidget {
             ? Colors.orange.shade400.withValues(alpha: 0.2)
             : colorScheme.primary.withValues(alpha: 0.15);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Stack(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          width: 1.5,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.5),
+        child: Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.data_usage_rounded, size: 14, color: colorScheme.onSurfaceVariant),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${_formatBytes(used)} / ${_formatBytes(total)}',
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+              child: Row(
+                children: [
+                  Icon(Icons.data_usage_rounded, size: 14, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${_splitBytes(used).$1} / ${_formatBytes(total)}',
+                      style: context.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Positioned.fill(
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: progress,
-              child: Container(color: fillColor),
+            Positioned.fill(
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: Container(color: fillColor),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -215,6 +238,9 @@ class _ExpiryPill extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
       ),
       child: Row(
         children: [
@@ -260,6 +286,9 @@ class _StatPill extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
       ),
       child: Row(
         children: [

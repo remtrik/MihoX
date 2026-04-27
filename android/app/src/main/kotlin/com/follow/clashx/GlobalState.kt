@@ -100,7 +100,10 @@ object GlobalState {
                     }
                     BroadcastAction.SERVICE_DESTROYED.action -> {
                         Log.d(TAG, "SERVICE_DESTROYED received")
+                        startRequestedAt = 0L
+                        runTime = 0L
                         runStateFlow.tryEmit(RunState.STOP)
+                        getCurrentTilePlugin()?.handleStop()
                     }
                 }
             }

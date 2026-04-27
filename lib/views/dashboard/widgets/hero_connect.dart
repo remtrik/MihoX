@@ -9,6 +9,7 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/providers/providers.dart';
 import 'package:flclashx/state.dart';
+import 'package:flclashx/views/profiles/add_profile.dart';
 import 'package:flclashx/widgets/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,9 +83,13 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(startButtonSelectorStateProvider);
-    if (!state.isInit || !state.hasProfile) return const SizedBox.shrink();
-
     final colorScheme = Theme.of(context).colorScheme;
+
+    if (!state.hasProfile) {
+      return _buildEmptyCard(context, colorScheme);
+    }
+
+    final isReady = state.isInit;
     final traffics = ref.watch(trafficsProvider).list;
     final lastTraffic = traffics.isNotEmpty ? traffics.last : null;
 
@@ -114,21 +119,10 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          width: 1.5,
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: _isStart
-              ? [
-                  colorScheme.primary.withValues(alpha: 0.2),
-                  colorScheme.primaryContainer.withValues(alpha: 0.35),
-                ]
-              : [
-                  colorScheme.surfaceContainerHigh.withValues(alpha: 0.85),
-                  colorScheme.surfaceContainer.withValues(alpha: 0.85),
-                ],
-        ),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.85),
       ),
       child: Column(
         children: [
@@ -153,7 +147,8 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
                     progress: _toggleAnimation.value,
                     isStart: _isStart,
                     showSpeed: _showSpeed,
-                    onTap: _handleTap,
+                    isReady: isReady,
+                    onTap: isReady ? _handleTap : null,
                     colorScheme: colorScheme,
                     lastTraffic: lastTraffic,
                   ),
@@ -165,7 +160,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
                       icon: Icons.refresh_rounded,
                       isLoading: profile.isUpdating,
                       color: colorScheme.onSecondaryContainer,
-                      bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.4),
+                      bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.8),
                       onTap: profile.isUpdating
                           ? null
                           : () => globalState.appController.updateProfile(profile),
@@ -178,7 +173,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
                     child: _IconBtn(
                       icon: Icons.contact_support,
                       color: colorScheme.onSecondaryContainer,
-                      bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.4),
+                      bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.8),
                       onTap: () => globalState.openUrl(headers['support-url']!),
                     ),
                   ),
@@ -204,8 +199,10 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
+                          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                           border: Border.all(
-                            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+                            width: 1.5,
                           ),
                         ),
                         child: Row(
@@ -217,6 +214,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
                                 serverName,
                                 style: context.textTheme.labelLarge?.copyWith(
                                   fontWeight: FontWeight.w500,
+                                  color: colorScheme.onSurface,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -243,6 +241,76 @@ class _HeroConnectState extends ConsumerState<HeroConnect>
       ),
     );
   }
+
+  Widget _buildEmptyCard(BuildContext context, ColorScheme colorScheme) {
+    final mode = ref.watch(patchClashConfigProvider.select((s) => s.mode));
+    final globalModeEnabled = ref.watch(globalModeEnabledProvider);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          width: 1.5,
+        ),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.85),
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              final url = await globalState.showCommonDialog<String>(
+                child: const URLFormDialog(),
+              );
+              if (url != null) {
+                globalState.appController.addProfileFormURL(url);
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+                  width: 1.5,
+                ),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_rounded, size: 20, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Text(
+                    appLocalizations.addProfile,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (globalModeEnabled)
+                _ModeButton(mode: mode, colorScheme: colorScheme)
+              else
+                const SizedBox(width: 38),
+              const Spacer(),
+              _NavMenuButton(colorScheme: colorScheme),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ConnectRing extends StatelessWidget {
@@ -250,6 +318,7 @@ class _ConnectRing extends StatelessWidget {
     required this.progress,
     required this.isStart,
     required this.showSpeed,
+    required this.isReady,
     required this.onTap,
     required this.colorScheme,
     this.lastTraffic,
@@ -258,16 +327,25 @@ class _ConnectRing extends StatelessWidget {
   final double progress;
   final bool isStart;
   final bool showSpeed;
-  final VoidCallback onTap;
+  final bool isReady;
+  final VoidCallback? onTap;
   final ColorScheme colorScheme;
   final Traffic? lastTraffic;
 
   @override
   Widget build(BuildContext context) {
+    final disabledColor = colorScheme.onSurface.withValues(alpha: 0.12);
     final activeColor = Colors.green.shade500;
     final inactiveColor = colorScheme.surfaceContainerHighest;
-    final ringColor = Color.lerp(inactiveColor, activeColor, progress)!;
-    final iconColor = Color.lerp(colorScheme.onSurfaceVariant, activeColor, progress)!;
+    final ringColor = isReady
+        ? Color.lerp(inactiveColor, activeColor, progress)!
+        : disabledColor;
+    final iconColor = isReady
+        ? Color.lerp(colorScheme.onSurfaceVariant, activeColor, progress)!
+        : colorScheme.onSurface.withValues(alpha: 0.38);
+    final bgColor = isReady
+        ? colorScheme.surfaceContainerLow
+        : colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
     const size = 140.0;
 
     return GestureDetector(
@@ -277,41 +355,48 @@ class _ConnectRing extends StatelessWidget {
         height: size,
         child: CustomPaint(
           painter: _RingPainter(
-            progress: progress,
+            progress: isReady ? progress : 0,
             color: ringColor,
-            bgColor: colorScheme.surfaceContainerLow,
+            bgColor: bgColor,
           ),
           child: Center(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: showSpeed && lastTraffic != null
-                  ? Column(
-                      key: const ValueKey('speed'),
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${lastTraffic!.up}',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: activeColor,
-                            fontFamily: FontFamily.jetBrainsMono.value,
-                          ),
-                        ),
-                        Icon(Icons.swap_vert_rounded, size: 16, color: activeColor.withValues(alpha: 0.5)),
-                        Text(
-                          '${lastTraffic!.down}',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: activeColor,
-                            fontFamily: FontFamily.jetBrainsMono.value,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Icon(
+              child: !isReady
+                  ? Icon(
                       Icons.power_settings_new_rounded,
-                      key: const ValueKey('power'),
+                      key: const ValueKey('disabled'),
                       size: 48,
                       color: iconColor,
-                    ),
+                    )
+                  : showSpeed && lastTraffic != null
+                      ? Column(
+                          key: const ValueKey('speed'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${lastTraffic!.up}',
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: activeColor,
+                                fontFamily: FontFamily.jetBrainsMono.value,
+                              ),
+                            ),
+                            Icon(Icons.swap_vert_rounded, size: 16, color: activeColor.withValues(alpha: 0.5)),
+                            Text(
+                              '${lastTraffic!.down}',
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: activeColor,
+                                fontFamily: FontFamily.jetBrainsMono.value,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Icon(
+                          Icons.power_settings_new_rounded,
+                          key: const ValueKey('power'),
+                          size: 48,
+                          color: iconColor,
+                        ),
             ),
           ),
         ),
@@ -366,7 +451,7 @@ class _RingPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius - strokeWidth - 4,
-      Paint()..color = bgColor.withValues(alpha: 0.5),
+      Paint()..color = bgColor.withValues(alpha: 0.7),
     );
   }
 
@@ -457,7 +542,7 @@ class _NavMenuButton extends StatelessWidget {
       height: 38,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.4),
+        color: colorScheme.secondaryContainer.withValues(alpha: 0.8),
       ),
       child: Center(
         child: Icon(Icons.settings_rounded, size: 20, color: colorScheme.onSecondaryContainer),
@@ -534,7 +619,7 @@ class _ModeButton extends StatelessWidget {
         height: 38,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: colorScheme.secondaryContainer.withValues(alpha: 0.4),
+          color: colorScheme.secondaryContainer.withValues(alpha: 0.8),
         ),
         child: Center(
           child: Icon(_modeIcon(mode), size: 20, color: colorScheme.onSecondaryContainer),
@@ -557,12 +642,12 @@ class _AnnounceBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: colorScheme.tertiaryContainer.withValues(alpha: 0.3),
+        color: colorScheme.secondaryContainer,
       ),
       child: Text(
         text,
         style: context.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onTertiaryContainer,
+          color: colorScheme.onSecondaryContainer,
           height: 1.4,
         ),
       ),
@@ -609,7 +694,7 @@ class _ServiceBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
+        color: colorScheme.secondaryContainer,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
