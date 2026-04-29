@@ -32,6 +32,7 @@ class FlVpnService : VpnService(), IBaseService {
     private val binder = LocalBinder()
     private val gson = Gson()
     private var tunActive = false
+    override var destroyed = false
 
     private val healthCheckModule = HealthCheckModule(this)
 
@@ -268,6 +269,7 @@ class FlVpnService : VpnService(), IBaseService {
         State.runTime = 0L
         tunActive = false
         SavedParams.setVpnActive(false)
+        handleDestroy()
         runCatching { com.follow.clashx.core.Core.stopTun() }
         loader.stop()
         stopSelf()

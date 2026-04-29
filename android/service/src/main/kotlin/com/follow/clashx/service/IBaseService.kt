@@ -9,11 +9,16 @@ interface IBaseService {
     suspend fun handleStart(options: VpnOptions)
     suspend fun handleStop()
 
+    var destroyed: Boolean
+
     fun handleCreate() {
+        destroyed = false
         GlobalState.application.sendInternalBroadcast(BroadcastAction.SERVICE_CREATED.action)
     }
 
     fun handleDestroy() {
+        if (destroyed) return
+        destroyed = true
         GlobalState.application.sendInternalBroadcast(BroadcastAction.SERVICE_DESTROYED.action)
     }
 }

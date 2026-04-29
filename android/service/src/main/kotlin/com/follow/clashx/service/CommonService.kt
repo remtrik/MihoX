@@ -18,6 +18,7 @@ class CommonService : Service(), IBaseService {
     }
 
     private val binder = LocalBinder()
+    override var destroyed = false
 
     private val loader = moduleLoader {
         install(::NetworkObserveModule)
@@ -56,6 +57,7 @@ class CommonService : Service(), IBaseService {
 
     override suspend fun handleStop() {
         State.runTime = 0L
+        handleDestroy()
         loader.stop()
         stopSelf()
     }
