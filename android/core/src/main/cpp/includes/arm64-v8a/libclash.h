@@ -45,7 +45,7 @@ static const char* resolve_process(resolve_process_func fn, void *tun_interface,
     if (fn) {
         return fn(tun_interface, protocol, source, target, uid);
     }
-    return "";
+    return NULL;
 }
 
 static void release_object(release_object_func fn, void *obj) {

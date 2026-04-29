@@ -45,7 +45,7 @@ object GlobalState {
 
     val runLock = Mutex()
     @Volatile var runTime: Long = 0L
-    var flutterEngine: FlutterEngine? = null
+    @Volatile var flutterEngine: FlutterEngine? = null
     @Volatile var startRequestedAt: Long = 0L
 
     private var broadcastJob: Job? = null

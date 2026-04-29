@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/component/process"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/dns"
@@ -98,6 +99,17 @@ func handleStopTun() {
 
 func handleStartTun(fd int, callback unsafe.Pointer) bool {
 	handleStopTun()
+	runLock.Lock()
+	if currentConfig == nil {
+		runLock.Unlock()
+		syscall.Close(fd)
+		if callback != nil {
+			releaseObject(callback)
+		}
+		return false
+	}
+	tunCfg := currentConfig.General.Tun
+	runLock.Unlock()
 	tunLock.Lock()
 	defer tunLock.Unlock()
 	now := time.Now()
@@ -108,11 +120,15 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 			limit:    semaphore.NewWeighted(4),
 		}
 		initTunHook()
-		tunListener, err := t.Start(fd, currentConfig.General.Tun)
+		tunListener, err := t.Start(fd, tunCfg)
 		if err != nil {
 			log.Errorln("handleStartTun: t.Start failed: %v", err)
 			syscall.Close(fd)
 			removeTunHook()
+			if tunHandler != nil {
+				releaseObject(tunHandler.callback)
+				tunHandler = nil
+			}
 			return false
 		}
 		if tunListener != nil {
@@ -120,8 +136,14 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 			tunHandler.listener = tunListener
 		} else {
 			removeTunHook()
+			if tunHandler != nil {
+				releaseObject(tunHandler.callback)
+				tunHandler = nil
+			}
 			return false
 		}
+	} else if callback != nil {
+		releaseObject(callback)
 	}
 	return true
 }
@@ -159,8 +181,11 @@ func removeTunHook() {
 }
 
 func handleGetAndroidVpnOptions() string {
-	tunLock.Lock()
-	defer tunLock.Unlock()
+	runLock.Lock()
+	defer runLock.Unlock()
+	if currentConfig == nil {
+		return ""
+	}
 	mixedPort := currentConfig.General.MixedPort
 	// With the HTTP/SOCKS inbound disabled there is no proxy endpoint to
 	// advertise via VpnService.setHttpProxy — force it off so Android doesn't
@@ -216,7 +241,11 @@ func nextHandle(action *Action, result ActionResult) bool {
 		result.success(handleGetAndroidVpnOptions())
 		return true
 	case updateDnsMethod:
-		data := action.Data.(string)
+		data, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return true
+		}
 		handleUpdateDns(data)
 		result.success(true)
 		return true
@@ -260,9 +289,7 @@ func getRunTime() *C.char {
 
 //export stopTun
 func stopTun() {
-	go func() {
-		handleStopTun()
-	}()
+	handleStopTun()
 }
 
 //export getCurrentProfileName
@@ -290,8 +317,10 @@ func updateDns(s *C.char) {
 //export resetConnections
 func resetConnections() {
 	go func() {
-		handleCloseConnections()
-		handleResetConnections()
+		runLock.Lock()
+		defer runLock.Unlock()
+		resolver.ResetConnection()
+		closeConnections()
 		log.Infoln("[Network] connections reset after network change")
 	}()
 }

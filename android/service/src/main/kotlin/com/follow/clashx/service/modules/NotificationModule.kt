@@ -21,10 +21,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class NotificationModule(service: Service) : Module(service) {
-    private val scope = CoroutineScope(SupervisorJob())
+    private var scope = CoroutineScope(SupervisorJob())
     private var paramsJob: Job? = null
 
     override suspend fun install() {
+        scope = CoroutineScope(SupervisorJob())
         ensureChannel()
         val title = State.notificationParamsFlow.value.title
         val notification = buildNotification(title)

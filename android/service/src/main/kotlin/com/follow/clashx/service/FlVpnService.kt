@@ -18,6 +18,7 @@ import com.follow.clashx.service.modules.HealthCheckModule
 import com.follow.clashx.service.modules.NetworkObserveModule
 import com.follow.clashx.service.modules.NotificationModule
 import com.google.gson.Gson
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -31,8 +32,8 @@ class FlVpnService : VpnService(), IBaseService {
 
     private val binder = LocalBinder()
     private val gson = Gson()
-    private var tunActive = false
-    override var destroyed = false
+    @Volatile private var tunActive = false
+    @Volatile override var destroyed = false
 
     private val healthCheckModule = HealthCheckModule(this)
 
@@ -101,7 +102,7 @@ class FlVpnService : VpnService(), IBaseService {
                 return@withLock
             }
 
-            val coreResult = withTimeoutOrNull(30_000L) {
+            val coreResult = withTimeoutOrNull(15_000L) {
                 suspendCancellableCoroutine { cont ->
                     Core.quickStart(params.init, params.setup, params.state, object : InvokeInterface {
                         override fun onResult(result: String) {
@@ -173,13 +174,17 @@ class FlVpnService : VpnService(), IBaseService {
     }
 
     override fun onRevoke() {
-        GlobalState.launch { State.runLock.withLock { handleStop() } }
+        runBlocking {
+            withTimeoutOrNull(5000L) {
+                State.runLock.withLock { handleStop() }
+            }
+        }
         super.onRevoke()
     }
 
     override fun onDestroy() {
         runCatching { com.follow.clashx.core.Core.stopTun() }
-        runCatching { GlobalState.launch { loader.stop() } }
+        runCatching { runBlocking { withTimeoutOrNull(3000L) { loader.stop() } } }
         tunActive = false
         handleDestroy()
         super.onDestroy()
@@ -189,7 +194,6 @@ class FlVpnService : VpnService(), IBaseService {
         State.options = options
         val builder = Builder()
             .setSession("FlClashX")
-            .setMtu(1500)
         for (dns in options.dnsServers.ifEmpty { listOf("8.8.8.8", "1.1.1.1") }) {
             builder.addDnsServer(dns)
         }
@@ -244,24 +248,31 @@ class FlVpnService : VpnService(), IBaseService {
         val pfd = builder.establish() ?: error("VpnService.Builder.establish() returned null")
         val fd = pfd.detachFd()
         tunActive = true
-        loader.start()
+        try {
+            loader.start()
 
-        com.follow.clashx.core.Core.startTun(
-            fd = fd,
-            protect = { fdToProtect -> protect(fdToProtect) },
-            resolverProcess = { protocol, source, target, uid ->
-                val resolvedUid = if (uid > 0) uid else {
-                    try {
-                        val cm = getSystemService(ConnectivityManager::class.java)
-                        val proto = if (protocol == 6) android.system.OsConstants.IPPROTO_TCP
-                                    else android.system.OsConstants.IPPROTO_UDP
-                        cm.getConnectionOwnerUid(proto, source, target)
-                    } catch (_: Exception) { -1 }
-                }
-                if (resolvedUid <= 0) return@startTun ""
-                packageManager.getPackagesForUid(resolvedUid)?.firstOrNull() ?: ""
-            },
-        )
+            val started = com.follow.clashx.core.Core.startTun(
+                fd = fd,
+                protect = { fdToProtect -> protect(fdToProtect) },
+                resolverProcess = { protocol, source, target, uid ->
+                    val resolvedUid = if (uid > 0) uid else {
+                        try {
+                            val cm = getSystemService(ConnectivityManager::class.java)
+                            val proto = if (protocol == 6) android.system.OsConstants.IPPROTO_TCP
+                                        else android.system.OsConstants.IPPROTO_UDP
+                            cm.getConnectionOwnerUid(proto, source, target)
+                        } catch (_: Exception) { -1 }
+                    }
+                    if (resolvedUid <= 0) return@startTun ""
+                    packageManager.getPackagesForUid(resolvedUid)?.firstOrNull() ?: ""
+                },
+            )
+            if (!started) error("Core.startTun failed")
+        } catch (e: Exception) {
+            tunActive = false
+            runCatching { android.os.ParcelFileDescriptor.adoptFd(fd).close() }
+            throw e
+        }
     }
 
     override suspend fun handleStop() {
@@ -269,9 +280,9 @@ class FlVpnService : VpnService(), IBaseService {
         State.runTime = 0L
         tunActive = false
         SavedParams.setVpnActive(false)
-        handleDestroy()
         runCatching { com.follow.clashx.core.Core.stopTun() }
         loader.stop()
+        handleDestroy()
         stopSelf()
     }
 

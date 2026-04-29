@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 )
 
 var conn net.Conn
+var connMu sync.Mutex
 
 func (result ActionResult) send() {
 	data, err := result.Json()
@@ -29,6 +31,8 @@ func sendMessage(message Message) {
 }
 
 func send(data []byte) {
+	connMu.Lock()
+	defer connMu.Unlock()
 	if conn == nil {
 		return
 	}

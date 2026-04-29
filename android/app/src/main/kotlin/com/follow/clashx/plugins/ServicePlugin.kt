@@ -38,7 +38,7 @@ class ServicePlugin :
     CoroutineScope {
 
     private var job = SupervisorJob()
-    override val coroutineContext = job + Dispatchers.Main
+    override val coroutineContext get() = job + Dispatchers.Main
 
     private lateinit var channel: MethodChannel
     private val eventSemaphore = Semaphore(10)
@@ -46,6 +46,7 @@ class ServicePlugin :
     @Volatile private var attached = false
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        job = SupervisorJob()
         channel = MethodChannel(binding.binaryMessenger, "${Components.PACKAGE_NAME}/service")
         channel.setMethodCallHandler(this)
         attached = true
@@ -122,6 +123,7 @@ class ServicePlugin :
 
     private fun onServiceDisconnected(message: String) {
         Log.w("ServicePlugin", "remote service disconnected: $message")
+        com.follow.clashx.common.SavedParams.setVpnActive(false)
         CommonGlobalState.launch {
             GlobalState.runLock.withLock {
                 GlobalState.runTime = 0L

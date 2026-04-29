@@ -18,10 +18,10 @@ class CommonService : Service(), IBaseService {
     }
 
     private val binder = LocalBinder()
-    override var destroyed = false
+    @Volatile override var destroyed = false
 
     private val loader = moduleLoader {
-        install(::NetworkObserveModule)
+        install { NetworkObserveModule(it) }
         install(::NotificationModule)
     }
 
@@ -46,7 +46,7 @@ class CommonService : Service(), IBaseService {
     }
 
     override fun onDestroy() {
-        runCatching { GlobalState.launch { loader.stop() } }
+        runCatching { kotlinx.coroutines.runBlocking { kotlinx.coroutines.withTimeoutOrNull(3000L) { loader.stop() } } }
         handleDestroy()
         super.onDestroy()
     }
@@ -57,8 +57,8 @@ class CommonService : Service(), IBaseService {
 
     override suspend fun handleStop() {
         State.runTime = 0L
-        handleDestroy()
         loader.stop()
+        handleDestroy()
         stopSelf()
     }
 }

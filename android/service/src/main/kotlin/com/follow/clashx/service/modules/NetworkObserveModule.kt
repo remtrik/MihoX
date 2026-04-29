@@ -23,19 +23,30 @@ class NetworkObserveModule(
     private var registered = false
     private var currentNetwork: Network? = null
     private var lastCapabilities: NetworkCapabilities? = null
+    private var lastActivityTime = 0L
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
             val prev = currentNetwork
-            val wasLost = prev == null
+            val now = android.os.SystemClock.elapsedRealtime()
+            val gap = now - lastActivityTime
+            lastActivityTime = now
             currentNetwork = network
-            if (prev != null && prev != network) {
-                GlobalState.log("Network changed: $prev -> $network, reconnecting core")
-                resetAndCheck("network-change")
-            } else if (wasLost) {
-                GlobalState.log("Network restored: $network, resetting stale connections")
-                resetAndCheck("network-restored")
+
+            when {
+                prev != null && prev != network -> {
+                    GlobalState.log("Network changed: $prev -> $network")
+                    resetAndCheck("network-change")
+                }
+                prev == null -> {
+                    GlobalState.log("Network restored: $network")
+                    resetAndCheck("network-restored")
+                }
+                gap > 2000L -> {
+                    GlobalState.log("Network wake after ${gap}ms idle on $network")
+                    resetAndCheck("network-wake")
+                }
             }
         }
 
@@ -50,20 +61,22 @@ class NetworkObserveModule(
 
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
             super.onCapabilitiesChanged(network, capabilities)
+            lastActivityTime = android.os.SystemClock.elapsedRealtime()
             if (network != currentNetwork) return
             val prev = lastCapabilities
             lastCapabilities = capabilities
             if (prev == null) return
-            val hadInternet = prev.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            if (!hadInternet && hasInternet) {
-                GlobalState.log("Internet capability restored on $network")
-                resetAndCheck("capability-restored")
+            val hadValidated = prev.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            val hasValidated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            if (!hadValidated && hasValidated) {
+                GlobalState.log("Network validated on $network")
+                resetAndCheck("validated")
             }
         }
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
             super.onLinkPropertiesChanged(network, linkProperties)
+            lastActivityTime = android.os.SystemClock.elapsedRealtime()
             val dns = linkProperties.dnsServers.map { it.hostAddress ?: "" }.filter { it.isNotBlank() }
             runCatching {
                 com.follow.clashx.core.Core.updateDns(gson.toJson(dns))
@@ -83,6 +96,7 @@ class NetworkObserveModule(
         val cm = service.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val request = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
             .build()
         runCatching {
             cm.registerNetworkCallback(request, callback)

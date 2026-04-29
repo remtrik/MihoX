@@ -9,11 +9,17 @@ class ModuleLoader(private val service: Service) {
         modules.add(factory(service))
     }
 
+    @Volatile private var started = false
+
     suspend fun start() {
+        if (started) stop()
+        started = true
         modules.forEach { it.install() }
     }
 
     suspend fun stop() {
+        if (!started) return
+        started = false
         modules.asReversed().forEach {
             runCatching { it.uninstall() }
         }

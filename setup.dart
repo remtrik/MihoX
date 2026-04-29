@@ -436,8 +436,13 @@ class BuildCommand extends Command {
       ].join(','),
       help: 'The $name build env',
     );
-    // Android builds always create both split and universal APKs
-    // No additional flags needed
+    if (target == Target.windows) {
+      argParser.addFlag(
+        "msix",
+        help: "Build MSIX package for Microsoft Store",
+        defaultsTo: false,
+      );
+    }
   }
 
   @override
@@ -569,6 +574,7 @@ class BuildCommand extends Command {
     required String env,
     required String coreVersion,
     required String token,
+    bool msix = false,
   }) async {
     await Build.exec(
       name: "flutter build windows",
@@ -640,6 +646,21 @@ class BuildCommand extends Command {
       );
       issOut.deleteSync();
       print("✅ EXE installer created");
+    }
+
+    if (msix) {
+      await Build.exec(
+        name: "create msix",
+        ["dart", "run", "msix:create"],
+      );
+      final winArch2 = arch == Arch.arm64 ? "arm64" : "x64";
+      final msixDir = join(current, "build", "windows", winArch2, "runner", "Release");
+      final msixFiles = Directory(msixDir).listSync().where((f) => f.path.endsWith(".msix"));
+      if (msixFiles.isNotEmpty) {
+        final msixOutPath = join(Build.distPath, "${Build.appName}-windows-${arch.name}.msix");
+        Build.copyFile(msixFiles.first.path, msixOutPath);
+        print("✅ MSIX created: $msixOutPath");
+      }
     }
   }
 
@@ -930,12 +951,14 @@ class BuildCommand extends Command {
     switch (target) {
       case Target.windows:
         final token = await Build.calcSha256(corePaths.first);
+        final buildMsix = argResults?["msix"] == true;
         await Build.buildHelper(target, token, arch: arch);
         await _buildWindowsApp(
           arch: arch!,
           env: env,
           coreVersion: coreVersion,
           token: token,
+          msix: buildMsix,
         );
         return;
       case Target.linux:

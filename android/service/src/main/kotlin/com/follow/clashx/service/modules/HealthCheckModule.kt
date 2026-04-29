@@ -22,6 +22,7 @@ class HealthCheckModule(service: Service) : Module(service) {
     private var consecutiveFailures = 0
 
     override suspend fun install() {
+        periodicJob?.cancel()
         consecutiveFailures = 0
         periodicJob = GlobalState.launch {
             while (true) {

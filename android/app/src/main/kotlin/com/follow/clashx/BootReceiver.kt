@@ -3,6 +3,8 @@ package com.follow.clashx
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.VpnService
 import android.util.Log
 import com.follow.clashx.common.SavedParams
@@ -22,6 +24,11 @@ class BootReceiver : BroadcastReceiver() {
 
         if (!vpnActive || !hasProfile) return
 
+        if (isVpnAlreadyActive(context)) {
+            Log.d(TAG, "VPN already active (system Always-On), skipping")
+            return
+        }
+
         val vpnPrepare = VpnService.prepare(context)
         if (vpnPrepare != null) {
             Log.d(TAG, "VPN permission not granted, clearing active state")
@@ -40,5 +47,12 @@ class BootReceiver : BroadcastReceiver() {
             Log.e(TAG, "Failed to start FlVpnService: ${e.message}")
             GlobalState.runStateFlow.tryEmit(RunState.STOP)
         }
+    }
+
+    private fun isVpnAlreadyActive(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val activeNetwork = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(activeNetwork) ?: return false
+        return caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
     }
 }

@@ -20,6 +20,7 @@ suspend fun Drawable.getBase64(): String {
         val bitmap = drawable.toBitmap()
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        bitmap.recycle()
         Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
     }
 }

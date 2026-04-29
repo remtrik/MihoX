@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.lang.ref.WeakReference
+import java.util.Collections
 import java.util.zip.ZipFile
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
@@ -55,9 +56,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private var vpnCallBack: (() -> Unit)? = null
 
-    private val iconMap = object : LinkedHashMap<String, String?>(128, 0.75f, true) {
-        override fun removeEldestEntry(eldest: Map.Entry<String, String?>?): Boolean = size > 200
-    }
+    private val iconMap: MutableMap<String, String?> = Collections.synchronizedMap(
+        object : LinkedHashMap<String, String?>(128, 0.75f, true) {
+            override fun removeEldestEntry(eldest: Map.Entry<String, String?>?): Boolean = size > 200
+        }
+    )
 
     private val packages = mutableListOf<Package>()
 
@@ -246,13 +249,13 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             file
         )
 
+        val flags =
+            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+
         val intent = Intent(Intent.ACTION_VIEW).setDataAndType(
             uri,
             "text/plain"
-        )
-
-        val flags =
-            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        ).addFlags(flags)
 
         val resInfoList = FlClashXApplication.getAppContext().packageManager.queryIntentActivities(
             intent, PackageManager.MATCH_DEFAULT_ONLY

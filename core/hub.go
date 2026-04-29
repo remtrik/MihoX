@@ -78,15 +78,15 @@ func handleStartListener() bool {
 			currentConfig.General.Tun.Enable = pendingTunEnable
 		}
 	}
-	runLock.Unlock()
-
 	// setupConfig already ran executor.ApplyConfig when the profile was loaded,
 	// so proxies/rules/DNS/providers are live. Starting only needs to (re)bind
 	// listeners and (re)create the TUN device — calling ApplyConfig again would
 	// re-run updateProxies, loadProvider(wg.Wait()), updateDNS and runtime.GC()
 	// for no reason and was the main source of the long "start" delay.
+	updateListeners()
+	runLock.Unlock()
+
 	go func() {
-		updateListeners()
 		resolver.ResetConnection()
 		startHealthCheckForwarder()
 		startRequestForwarder()
@@ -117,12 +117,16 @@ func handleForceGc() {
 }
 
 func handleShutdown() bool {
+	runLock.Lock()
+	defer runLock.Unlock()
 	stopHealthCheckForwarder()
 	stopRequestForwarder()
 	stopListeners()
 	executor.Shutdown()
 	runtime.GC()
 	isInit = false
+	isRunning = false
+	currentConfig = nil
 	return true
 }
 
@@ -490,10 +494,7 @@ func handleCloseConnections() bool {
 
 func closeConnections() {
 	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
-		err := c.Close()
-		if err != nil {
-			return false
-		}
+		_ = c.Close()
 		return true
 	})
 }
@@ -688,10 +689,13 @@ func handleGetConfig(path string) (*config.RawConfig, error) {
 }
 
 func handleHealthCheck(groupName string, fn func(value string)) {
+	runLock.Lock()
+	testUrl := currentTestURL
+	runLock.Unlock()
 	go func() {
 		proxies := tunnel.Proxies()
 		expectedStatus, _ := utils.NewUnsignedRanges[uint16]("")
-		defaultUrl := currentTestURL
+		defaultUrl := testUrl
 
 		for name, proxy := range proxies {
 			if groupName != "" && name != groupName {
