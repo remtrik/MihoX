@@ -93,6 +93,11 @@ mixin AndroidClashInterface {
 abstract class ClashHandlerInterface with ClashInterface {
   Map<String, Completer> callbackCompleterMap = {};
 
+  /// Per-call type-appropriate default value, so a failed call can complete the
+  /// typed completer with the right default instead of `null` (which throws a
+  /// TypeError on a non-nullable type and strands the caller until timeout).
+  Map<String, dynamic> callbackDefaultMap = {};
+
   Future<void> handleResult(ActionResult result) async {
     final completer = callbackCompleterMap[result.id];
     try {
@@ -140,6 +145,7 @@ abstract class ClashHandlerInterface with ClashInterface {
         mDefaultValue = {};
       }
     }
+    callbackDefaultMap[id] = mDefaultValue;
 
     sendMessage(
       json.encode(
@@ -155,6 +161,7 @@ abstract class ClashHandlerInterface with ClashInterface {
       timeout: timeout,
       onLast: () {
         callbackCompleterMap.remove(id);
+        callbackDefaultMap.remove(id);
       },
       onTimeout: onTimeout ??
           () => mDefaultValue as T,

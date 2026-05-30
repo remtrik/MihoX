@@ -99,6 +99,11 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
     try {
       await _channel.invokeMethod<bool>('shutdown');
     } catch (_) {}
+    // shutdown unbinds the remote service; re-arm init state so a later preload()/
+    // reconnectIfNeeded() forces a fresh bind + event-listener registration instead
+    // of reporting "ready" against a dead service.
+    _crashCount = 0;
+    if (_initCompleter.isCompleted) _initCompleter = Completer<bool>();
     return true;
   }
 
@@ -152,7 +157,9 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
           final completer = callbackCompleterMap.remove(id);
           if (completer != null && !completer.isCompleted) {
             commonPrint.log('_failPendingCompleter: method=$method reason=$reason');
-            completer.complete(null);
+            // Complete with the typed default (not null) so a Completer<bool/String/Map>
+            // resolves immediately instead of throwing TypeError and hanging to timeout.
+            completer.complete(callbackDefaultMap.remove(id));
           }
         }
       }
@@ -164,26 +171,58 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   // --- fork-specific straight-through methods (native returns direct result) --
 
   @override
-  Future<String> getAndroidVpnOptions() async =>
-      (await _channel.invokeMethod<String>('getAndroidVpnOptions')) ?? '';
+  Future<String> getAndroidVpnOptions() async {
+    try {
+      return (await _channel
+              .invokeMethod<String>('getAndroidVpnOptions')
+              .timeout(const Duration(seconds: 10))) ??
+          '';
+    } catch (e) {
+      commonPrint.log('getAndroidVpnOptions error: $e');
+      return '';
+    }
+  }
 
   @override
   Future<bool> updateDns(String value) async {
-    await _channel.invokeMethod('updateDns', value);
-    return true;
+    try {
+      await _channel
+          .invokeMethod('updateDns', value)
+          .timeout(const Duration(seconds: 10));
+      return true;
+    } catch (e) {
+      commonPrint.log('updateDns error: $e');
+      return false;
+    }
   }
 
   @override
   Future<DateTime?> getRunTime() async {
-    final rt = await _channel.invokeMethod('getRunTime');
-    final ms = (rt is int) ? rt : int.tryParse('$rt');
-    if (ms == null || ms == 0) return null;
-    return DateTime.fromMillisecondsSinceEpoch(ms);
+    try {
+      final rt = await _channel
+          .invokeMethod('getRunTime')
+          .timeout(const Duration(seconds: 10));
+      final ms = (rt is int) ? rt : int.tryParse('$rt');
+      if (ms == null || ms == 0) return null;
+      return DateTime.fromMillisecondsSinceEpoch(ms);
+    } catch (e) {
+      commonPrint.log('getRunTime error: $e');
+      return null;
+    }
   }
 
   @override
-  Future<String> getCurrentProfileName() async =>
-      (await _channel.invokeMethod<String>('getCurrentProfileName')) ?? '';
+  Future<String> getCurrentProfileName() async {
+    try {
+      return (await _channel
+              .invokeMethod<String>('getCurrentProfileName')
+              .timeout(const Duration(seconds: 10))) ??
+          '';
+    } catch (e) {
+      commonPrint.log('getCurrentProfileName error: $e');
+      return '';
+    }
+  }
 
   // --- VPN lifecycle --------------------------------------------------------
 
@@ -192,7 +231,11 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   Future<int> startVpn() async {
     final optionsRaw = await getAndroidVpnOptions();
     final merged = _mergeAccessControl(optionsRaw);
-    final res = await _channel.invokeMethod('start', {'data': merged});
+    // Defensive backstop: the native side always replies (even on permission
+    // denial -> 0), but never block the start flow indefinitely if it doesn't.
+    final res = await _channel
+        .invokeMethod('start', {'data': merged})
+        .timeout(const Duration(seconds: 60), onTimeout: () => 0);
     return (res is int) ? res : int.tryParse('$res') ?? 0;
   }
 
@@ -241,12 +284,10 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   Future<void> updateNotificationParams({
     required String title,
     String server = '',
-    bool onlyStatisticsProxy = false,
   }) async {
     await _channel.invokeMethod('updateNotificationParams', json.encode({
       'title': title,
       'stopText': server,
-      'onlyStatisticsProxy': onlyStatisticsProxy,
     }));
   }
 

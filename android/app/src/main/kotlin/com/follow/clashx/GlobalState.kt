@@ -102,6 +102,15 @@ object GlobalState {
                         Log.d(TAG, "SERVICE_DESTROYED received")
                         CommonGlobalState.launch {
                             runLock.withLock {
+                                // A late DESTROYED from a previous service instance can arrive
+                                // after a fresh start. If a start was just requested and the VPN
+                                // flag is active, the new instance is coming up — don't clobber it.
+                                val recentStart =
+                                    android.os.SystemClock.elapsedRealtime() - startRequestedAt < 15_000L
+                                if (com.follow.clashx.common.SavedParams.isVpnActive() && recentStart) {
+                                    Log.d(TAG, "SERVICE_DESTROYED ignored: fresh start in progress")
+                                    return@withLock
+                                }
                                 startRequestedAt = 0L
                                 runTime = 0L
                                 runStateFlow.tryEmit(RunState.STOP)
@@ -140,21 +149,40 @@ object GlobalState {
             val recentStart = android.os.SystemClock.elapsedRealtime() - startRequestedAt < 15_000L
             runCatching {
                 Service.bind()
-                val rt = Service.getRunTimeString().toLongOrNull() ?: 0L
-                runTime = rt
+                val rtStr = Service.getRunTimeString() // null => AIDL probe failed/timed out
+                val rt = rtStr?.toLongOrNull() ?: 0L
+                // isVpnActive() (the cross-process file) already established the tunnel
+                // SHOULD be running. Only an authoritative successful probe (rtStr != null)
+                // returning rt == 0 (and no recent start) may downgrade to STOP; a failed
+                // probe must not flip the UI off while the tunnel is genuinely up.
                 val state = when {
+                    rtStr == null -> RunState.START
                     rt != 0L -> RunState.START
                     recentStart -> RunState.START
                     else -> RunState.STOP
                 }
-                runStateFlow.tryEmit(state)
+                if (rtStr != null) runTime = rt
+                if (runStateFlow.value != state) runStateFlow.tryEmit(state)
             }.onFailure {
                 Log.w(TAG, "syncState failed: ${it.message}")
-                if (!recentStart) {
-                    runTime = 0L
-                    runStateFlow.tryEmit(RunState.STOP)
-                }
+                if (runStateFlow.value != RunState.START) runStateFlow.tryEmit(RunState.START)
             }
+        }
+    }
+
+    /**
+     * Reads the persisted clash mode ("rule"/"global"/"direct") straight from Flutter's
+     * SharedPreferences so widgets render the correct mode even before the Flutter engine
+     * has started (cold boot / always-on). Returns null if unavailable.
+     */
+    fun readPersistedMode(): String? {
+        val prefs = CommonGlobalState.application
+            .getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
+        val configJson = prefs.getString("flutter.clash_config", null) ?: return null
+        return try {
+            org.json.JSONObject(configJson).optString("mode", "").ifBlank { null }
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -175,12 +203,14 @@ object GlobalState {
 
     fun handleToggle() {
         CommonGlobalState.launch {
-            handleSyncState()
             runLock.withLock {
-                when (runStateFlow.value) {
-                    RunState.STOP, RunState.PENDING -> triggerStart()
-                    RunState.START -> triggerStop()
-                }
+                // Decide start-vs-stop from the fast cross-process file flag (plus the
+                // in-memory state) rather than a slow AIDL sync, so a headless START
+                // fires the foreground service while the widget/tile FGS-start grant is
+                // still valid (avoids ForegroundServiceStartNotAllowedException paths).
+                val running = com.follow.clashx.common.SavedParams.isVpnActive() ||
+                    runStateFlow.value == RunState.START
+                if (running) triggerStop() else triggerStart()
             }
         }
     }
@@ -261,7 +291,10 @@ object GlobalState {
     }
 
     private suspend fun triggerStop() {
-        if (runStateFlow.value == RunState.STOP) return
+        // Proceed if the cross-process flag says active even when the in-memory state
+        // is a stale STOP (e.g. a headless cold-start the UI never observed).
+        if (runStateFlow.value == RunState.STOP &&
+            !com.follow.clashx.common.SavedParams.isVpnActive()) return
 
         startRequestedAt = 0L
         com.follow.clashx.common.SavedParams.setVpnActive(false)
@@ -286,6 +319,11 @@ object GlobalState {
         val ctx = CommonGlobalState.application
         val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
         if (pm.isIgnoringBatteryOptimizations(ctx.packageName)) return
+        // Offer the exemption dialog at most once (ever) instead of on every app launch,
+        // otherwise the "allow background activity" prompt spams the user each open when
+        // the OS exemption isn't granted (or is managed elsewhere on some OEMs).
+        if (com.follow.clashx.common.SavedParams.isBatteryRequestShown()) return
+        com.follow.clashx.common.SavedParams.markBatteryRequestShown()
         runCatching {
             val intent = Intent(
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,

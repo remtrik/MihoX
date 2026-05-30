@@ -27,10 +27,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 
 class ServicePlugin :
     FlutterPlugin,
@@ -41,7 +40,7 @@ class ServicePlugin :
     override val coroutineContext get() = job + Dispatchers.Main
 
     private lateinit var channel: MethodChannel
-    private val eventSemaphore = Semaphore(10)
+    private val eventChannel = Channel<String?>(Channel.UNLIMITED)
     private val gson = Gson()
     @Volatile private var attached = false
 
@@ -50,6 +49,13 @@ class ServicePlugin :
         channel = MethodChannel(binding.binaryMessenger, "${Components.PACKAGE_NAME}/service")
         channel.setMethodCallHandler(this)
         attached = true
+        // Single FIFO consumer so events (logs/traffic/state) reach Flutter strictly in
+        // order, instead of racing across a Semaphore-bounded parallel dispatch pool.
+        launch {
+            for (value in eventChannel) {
+                invokeOnMain("event", value)
+            }
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -172,9 +178,22 @@ class ServicePlugin :
             VpnOptions()
         }
         if (options.enable && GlobalState.runStateFlow.value != RunState.START) {
-            GlobalState.getCurrentAppPlugin()?.requestVpnPermission {
+            val plugin = GlobalState.getCurrentAppPlugin()
+            if (plugin != null) {
+                plugin.requestVpnPermission { granted ->
+                    if (granted) {
+                        doStartService(options, result)
+                    } else {
+                        // User denied/cancelled the VPN consent dialog: resolve the
+                        // pending Flutter call with rt=0 instead of leaving it hanging.
+                        com.follow.clashx.common.SavedParams.setVpnActive(false)
+                        GlobalState.runStateFlow.tryEmit(RunState.STOP)
+                        result.successOnMain(0L)
+                    }
+                }
+            } else {
                 doStartService(options, result)
-            } ?: doStartService(options, result)
+            }
         } else {
             doStartService(options, result)
         }
@@ -280,11 +299,7 @@ class ServicePlugin :
     }
 
     private fun dispatchEvent(value: String?) {
-        CommonGlobalState.launch {
-            eventSemaphore.withPermit {
-                invokeOnMain("event", value)
-            }
-        }
+        eventChannel.trySend(value)
     }
 
     private fun invokeOnMain(method: String, argument: Any?) {

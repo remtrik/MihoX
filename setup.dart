@@ -827,6 +827,35 @@ class BuildCommand extends Command {
         }
       }
 
+      // Bundle libkeybinder-3.0.so.0 — a system dependency of the global-hotkey
+      // plugin that is NOT part of the Flutter bundle. Without it the AppImage
+      // crashes on hosts that lack libkeybinder ("error while loading shared
+      // libraries: libkeybinder-3.0.so.0: cannot open shared object file").
+      var keybinderSrc = "";
+      final ldconfig = await Process.run(
+        "bash",
+        ["-c", "ldconfig -p | grep -m1 'libkeybinder-3.0.so.0'"],
+      );
+      final ldOut = ldconfig.stdout.toString().trim();
+      if (ldOut.contains("=>")) {
+        keybinderSrc = ldOut.split("=>").last.trim();
+      }
+      if (keybinderSrc.isEmpty || !File(keybinderSrc).existsSync()) {
+        keybinderSrc = const [
+          "/usr/lib/x86_64-linux-gnu/libkeybinder-3.0.so.0",
+          "/usr/lib/libkeybinder-3.0.so.0",
+          "/lib/x86_64-linux-gnu/libkeybinder-3.0.so.0",
+          "/usr/local/lib/libkeybinder-3.0.so.0",
+        ].firstWhere((p) => File(p).existsSync(), orElse: () => "");
+      }
+      if (keybinderSrc.isNotEmpty) {
+        // -L resolves the symlink so the real .so.0 file is copied into the AppDir.
+        await Build.exec(["cp", "-L", keybinderSrc, join(appLibDir, "libkeybinder-3.0.so.0")]);
+        print("✅ bundled libkeybinder from $keybinderSrc");
+      } else {
+        print("⚠️  libkeybinder-3.0.so.0 not found; AppImage may fail on hosts without it");
+      }
+
       File(join(appShareIcon, "$appName.png")).writeAsBytesSync(File(iconPath).readAsBytesSync());
       Build.copyFile(iconPath, join(appDir, "$appName.png"));
       File(join(appShareDesktop, "com.follow.clashx.desktop")).writeAsStringSync(

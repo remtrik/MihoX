@@ -54,7 +54,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private lateinit var scope: CoroutineScope
 
-    private var vpnCallBack: (() -> Unit)? = null
+    private var vpnCallBack: ((granted: Boolean) -> Unit)? = null
 
     private val iconMap: MutableMap<String, String?> = Collections.synchronizedMap(
         object : LinkedHashMap<String, String?>(128, 0.75f, true) {
@@ -158,9 +158,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun tip(message: String?) {
-        if (GlobalState.flutterEngine == null) {
-            Toast.makeText(FlClashXApplication.getAppContext(), message, Toast.LENGTH_LONG).show()
-        }
+        // Always surface the tip. The previous `flutterEngine == null` guard silently
+        // dropped every tip() coming from a Dart-invoked tile/widget flow.
+        Toast.makeText(FlClashXApplication.getAppContext(), message, Toast.LENGTH_LONG).show()
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -296,7 +296,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private suspend fun getPackageIcon(packageName: String): String? {
         val packageManager = FlClashXApplication.getAppContext().packageManager
-        if (iconMap[packageName] == null) {
+        // containsKey, not == null: a failed/icon-less lookup caches null so we don't
+        // re-hit PackageManager on every subsequent request for the same package.
+        if (!iconMap.containsKey(packageName)) {
             iconMap[packageName] = try {
                 packageManager?.getApplicationIcon(packageName)?.getBase64()
             } catch (_: Exception) {
@@ -307,6 +309,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         return iconMap[packageName]
     }
 
+    @Synchronized
     private fun getPackages(): List<Package> {
         val packageManager = FlClashXApplication.getAppContext().packageManager
         if (packages.isNotEmpty()) return packages
@@ -317,8 +320,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }?.map {
                 Package(
                     packageName = it.packageName,
-                    label = it.applicationInfo?.loadLabel(packageManager).toString(),
-                    system = (it.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM)) == 1,
+                    label = it.applicationInfo?.loadLabel(packageManager)?.toString() ?: it.packageName,
+                    system = ((it.applicationInfo?.flags ?: 0) and ApplicationInfo.FLAG_SYSTEM) != 0,
                     lastUpdateTime = it.lastUpdateTime,
                     internet = it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
                 )
@@ -340,7 +343,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         }
     }
 
-    fun requestVpnPermission(callBack: () -> Unit) {
+    fun requestVpnPermission(callBack: (granted: Boolean) -> Unit) {
         vpnCallBack = callBack
         val intent = VpnService.prepare(FlClashXApplication.getAppContext())
         if (intent != null) {
@@ -350,7 +353,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 return
             }
         }
-        vpnCallBack?.invoke()
+        // Already granted, or no activity to host the consent dialog: proceed.
+        vpnCallBack = null
+        callBack(true)
     }
 
     fun requestNotificationsPermission() {
@@ -471,8 +476,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode == VPN_PERMISSION_REQUEST_CODE && resultCode == FlutterActivity.RESULT_OK) {
-            vpnCallBack?.invoke()
+        if (requestCode == VPN_PERMISSION_REQUEST_CODE) {
+            val cb = vpnCallBack
+            vpnCallBack = null
+            cb?.invoke(resultCode == FlutterActivity.RESULT_OK)
         }
         return true
     }

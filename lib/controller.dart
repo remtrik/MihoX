@@ -95,7 +95,8 @@ class AppController {
       }
       if (groupName != decodedGroupName) return;
     }
-    vpn?.updateServerName(proxyName);
+    final groups = _ref.read(groupsProvider);
+    vpn?.updateServerName(groups.resolveToLeafProxy(proxyName));
   }
 
   /// Initialize foreground notification cache with current profile and server
@@ -136,7 +137,7 @@ class AppController {
       }
       final group = groups.getGroup(decodedGroupName);
       if (group != null) {
-        serverName = group.realNow;
+        serverName = groups.resolveToLeafProxy(group.realNow);
       }
       if (serverName.isEmpty) {
         serverName = profile.selectedMap[decodedGroupName] ?? "";
@@ -144,7 +145,7 @@ class AppController {
     }
     if (serverName.isEmpty) {
       for (final g in groups) {
-        final now = g.realNow;
+        final now = groups.resolveToLeafProxy(g.realNow);
         if (now.isNotEmpty && now != 'DIRECT' && now != 'REJECT') {
           serverName = now;
           break;
@@ -733,6 +734,9 @@ class AppController {
       });
     }
     addCheckIpNumDebounce();
+    // Re-persist cold-start params so tile/widget/Always-on headless restarts reflect
+    // the currently active profile, not a stale one from app init.
+    unawaited(_persistColdStartParams());
   }
 
   void handleChangeProfile() {
@@ -915,6 +919,25 @@ class AppController {
 
   Future<void> handleRestart() async {
     commonPrint.log("Starting application restart...");
+
+    // Stop the current core BEFORE relaunching so the new instance can connect
+    // cleanly: a core that survives the restart (notably the Windows helper-started
+    // process) keeps the socket/binary busy and blocks the fresh core from binding
+    // or replacing the updated .exe. Guarded by a timeout so the restart can't hang.
+    await Future.any([
+      Future(() async {
+        try {
+          await proxy?.stopProxy();
+        } catch (_) {}
+        try {
+          await clashCore.shutdown();
+        } catch (_) {}
+        try {
+          await clashService?.destroy();
+        } catch (_) {}
+      }),
+      Future.delayed(const Duration(seconds: 3)),
+    ]);
 
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       final executablePath = Platform.resolvedExecutable;
@@ -1110,10 +1133,10 @@ class AppController {
       );
     }
     await applyProfile();
-    unawaited(_persistColdStartParams());
   }
 
   Future<void> _persistColdStartParams() async {
+    if (clashLib == null) return;
     try {
       final clashConfig = globalState.config.patchClashConfig.copyWith.tun(
         enable: false,

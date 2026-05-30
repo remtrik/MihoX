@@ -278,6 +278,20 @@ extension GroupsExt on List<Group> {
     final index = indexWhere((element) => element.name == groupName);
     return index != -1 ? this[index] : null;
   }
+
+  /// Resolves a proxy name through nested groups (load-balance / url-test / relay /
+  /// fallback / selector) down to the actual leaf proxy in use, so notification/UI
+  /// shows the real server instead of an intermediate group name. Depth-guarded
+  /// against cyclic group references.
+  String resolveToLeafProxy(String proxyName, [int depth = 0]) {
+    if (depth > 16) return proxyName;
+    final group = getGroup(proxyName);
+    if (group == null) return proxyName; // not a group -> leaf proxy
+    final now = group.now;
+    if (now == null || now.isEmpty) return proxyName;
+    if (now == 'DIRECT' || now == 'REJECT') return now;
+    return resolveToLeafProxy(now, depth + 1);
+  }
 }
 
 extension GroupExt on Group {

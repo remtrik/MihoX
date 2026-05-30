@@ -102,7 +102,9 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 	runLock.Lock()
 	if currentConfig == nil {
 		runLock.Unlock()
-		syscall.Close(fd)
+		// fd ownership stays with the Kotlin caller, which closes it via
+		// ParcelFileDescriptor.adoptFd(fd).close() on a false return. Closing it
+		// here too would be a double-close once another thread reuses the number.
 		if callback != nil {
 			releaseObject(callback)
 		}
@@ -123,7 +125,7 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 		tunListener, err := t.Start(fd, tunCfg)
 		if err != nil {
 			log.Errorln("handleStartTun: t.Start failed: %v", err)
-			syscall.Close(fd)
+			// Single fd owner: the Kotlin caller closes it on a false return.
 			removeTunHook()
 			if tunHandler != nil {
 				releaseObject(tunHandler.callback)
