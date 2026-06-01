@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
@@ -43,7 +44,17 @@ var (
 	requestChMu         sync.Mutex
 	requestMu           sync.Mutex
 	requestSeen         = map[string]bool{}
+	// uiActive reflects whether the Flutter UI is in the foreground. When false
+	// (app backgrounded) the request forwarder is paused and the health-check
+	// forwarder slows to backgroundHealthCheckInterval, so the core stops pinging
+	// every proxy and waking Flutter for a UI nobody is looking at.
+	uiActive atomic.Bool
 )
+
+// While the UI is backgrounded, keep proxy providers warm at this slow cadence
+// (instead of minHealthCheckInterval) so url-test/fallback groups don't go stale,
+// without spamming pings/UI updates.
+const backgroundHealthCheckInterval = 5 * time.Minute
 
 func handleInitClash(paramsString string) bool {
 	var params = InitParams{}
@@ -55,6 +66,10 @@ func handleInitClash(paramsString string) bool {
 	debug.SetMemoryLimit(60 * 1024 * 1024)
 	version = params.Version
 	constant.SetHomeDir(params.HomeDir)
+	// Default to "foreground": the main process drives setUiActive(false) when it
+	// backgrounds. A headless cold-start has no UI but keeping the foreground
+	// cadence here preserves the previous behaviour (no regression).
+	uiActive.Store(true)
 	if !isInit {
 		isInit = true
 	}
@@ -89,7 +104,11 @@ func handleStartListener() bool {
 	go func() {
 		resolver.ResetConnection()
 		startHealthCheckForwarder()
-		startRequestForwarder()
+		// The request forwarder only feeds the connections UI; skip it while the
+		// app is backgrounded (setUiActive(true) starts it when the UI returns).
+		if uiActive.Load() {
+			startRequestForwarder()
+		}
 	}()
 	return true
 }
@@ -137,20 +156,29 @@ func startHealthCheckForwarder() {
 	stopCh := healthCheckStopCh
 	healthCheckChMu.Unlock()
 	go func(stopCh chan struct{}) {
-		interval := minHealthCheckInterval
-		log.Infoln("[HealthCheck] forwarder interval: %s", interval)
+		log.Infoln("[HealthCheck] forwarder fg interval: %s, bg interval: %s", minHealthCheckInterval, backgroundHealthCheckInterval)
 		select {
 		case <-time.After(3 * time.Second):
 			forwardHealthCheckDelays()
 		case <-stopCh:
 			return
 		}
-		ticker := time.NewTicker(interval)
-		defer ticker.Stop()
 		for {
+			// Recompute each cycle so backgrounding/foregrounding the UI takes
+			// effect on the next tick without restarting the goroutine.
+			interval := minHealthCheckInterval
+			if !uiActive.Load() && backgroundHealthCheckInterval > interval {
+				interval = backgroundHealthCheckInterval
+			}
 			select {
-			case <-ticker.C:
-				forwardHealthCheckDelays()
+			case <-time.After(interval):
+				if uiActive.Load() {
+					forwardHealthCheckDelays()
+				} else {
+					// Keep proxy providers warm so url-test/fallback selection
+					// stays valid, but don't ping/emit to a backgrounded UI.
+					touchProvidersSafely()
+				}
 			case <-stopCh:
 				return
 			}
@@ -220,6 +248,36 @@ func touchProviders() {
 			continue
 		}
 		pp.Touch()
+	}
+}
+
+// touchProvidersSafely is forwardHealthCheckDelays' touch step under runLock,
+// without emitting delays — used to keep providers warm while the UI is hidden.
+func touchProvidersSafely() {
+	runLock.Lock()
+	if currentConfig != nil {
+		touchProviders()
+	}
+	runLock.Unlock()
+}
+
+// handleSetUiActive toggles the foreground flag. On the active->inactive edge it
+// pauses the request forwarder; on inactive->active it restarts it (when a
+// listener is running) and flushes current delays so the UI repopulates at once.
+func handleSetUiActive(active bool) {
+	if uiActive.Swap(active) == active {
+		return
+	}
+	if active {
+		runLock.Lock()
+		running := isRunning
+		runLock.Unlock()
+		if running {
+			startRequestForwarder()
+		}
+		go forwardHealthCheckDelays()
+	} else {
+		stopRequestForwarder()
 	}
 }
 

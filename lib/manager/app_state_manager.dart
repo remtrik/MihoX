@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flclashx/clash/core.dart';
 import 'package:flclashx/clash/lib.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
@@ -122,11 +123,19 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       if (Platform.isAndroid) {
         globalState.stopUpdateTasks();
         globalState.appController.stopRunTimeTimer();
+        globalState.stopGroupsUpdateTask();
+        // Tell the core the UI is backgrounded: it pauses the request forwarder
+        // and stretches the health-check forwarder to a slow interval so it stops
+        // pinging every proxy every few seconds for a UI nobody is looking at.
+        clashCore.setUiActive(false);
       }
     } else {
       render?.resume();
       if (state == AppLifecycleState.resumed && Platform.isAndroid) {
         clashLib?.reconnectIfNeeded();
+        clashCore.setUiActive(true);
+        globalState.startGroupsUpdateTask();
+        globalState.appController.updateGroupsDebounce();
         if (globalState.isStart) {
           globalState.startUpdateTasks();
           globalState.appController.startRunTimeTimer();

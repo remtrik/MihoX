@@ -460,6 +460,18 @@ class IpInfo {
       _ => throw const FormatException("invalid json"),
     };
 
+  static IpInfo fromIpApiComJson(Map<String, dynamic> json) => switch (json) {
+      {
+        "query": final String ip,
+        "countryCode": final String countryCode,
+      } =>
+        IpInfo(
+          ip: ip,
+          countryCode: countryCode,
+        ),
+      _ => throw const FormatException("invalid json"),
+    };
+
   @override
   String toString() => 'IpInfo{ip: $ip, countryCode: $countryCode}';
 }

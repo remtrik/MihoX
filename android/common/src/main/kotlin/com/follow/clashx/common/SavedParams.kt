@@ -8,12 +8,12 @@ object SavedParams {
     private const val PARAMS_FILE = "flclashx_always_on.json"
     private const val ACTIVE_FILE = "flclashx_vpn_active"
     private const val NOTIF_TITLE_FILE = "flclashx_notif_title"
-    private const val BATTERY_REQ_FILE = "flclashx_battery_req"
+    private const val START_TIME_FILE = "flclashx_start_time"
 
     private val paramsFile by lazy { File(GlobalState.application.filesDir, PARAMS_FILE) }
     private val activeFile by lazy { File(GlobalState.application.filesDir, ACTIVE_FILE) }
     private val notifTitleFile by lazy { File(GlobalState.application.filesDir, NOTIF_TITLE_FILE) }
-    private val batteryReqFile by lazy { File(GlobalState.application.filesDir, BATTERY_REQ_FILE) }
+    private val startTimeFile by lazy { File(GlobalState.application.filesDir, START_TIME_FILE) }
 
     data class QuickStartParams(val init: String, val setup: String, val state: String)
 
@@ -55,19 +55,31 @@ object SavedParams {
 
     fun setVpnActive(active: Boolean) {
         runCatching {
-            if (active) activeFile.writeText("1") else activeFile.delete()
+            if (active) {
+                activeFile.writeText("1")
+            } else {
+                activeFile.delete()
+                clearStartTime()
+            }
         }.onFailure { GlobalState.log("setVpnActive($active) error: ${it.message}") }
     }
 
     fun isVpnActive(): Boolean = activeFile.exists()
 
-    /** One-shot flag: the battery-optimization-exemption dialog has been offered once,
-     *  so we never auto-prompt it again (avoids spamming the request on every launch). */
-    fun isBatteryRequestShown(): Boolean = batteryReqFile.exists()
+    // Persisted tunnel start timestamp (epoch ms). Lets a freshly-restarted UI process
+    // recover the real uptime — and confirm the tunnel is up — when the AIDL runtime
+    // probe isn't ready yet, instead of reading 0 and stopping the live VPN.
+    fun setStartTime(ms: Long) {
+        runCatching { writeAtomic(startTimeFile, ms.toString()) }
+            .onFailure { GlobalState.log("setStartTime error: ${it.message}") }
+    }
 
-    fun markBatteryRequestShown() {
-        runCatching { batteryReqFile.writeText("1") }
-            .onFailure { GlobalState.log("markBatteryRequestShown error: ${it.message}") }
+    fun getStartTime(): Long? =
+        runCatching { startTimeFile.readText().trim().toLongOrNull() }.getOrNull()
+
+    fun clearStartTime() {
+        runCatching { if (startTimeFile.exists()) startTimeFile.delete() }
+            .onFailure { GlobalState.log("clearStartTime error: ${it.message}") }
     }
 
     fun saveNotificationTitle(title: String) {

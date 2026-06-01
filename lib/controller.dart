@@ -171,6 +171,9 @@ class AppController {
     await StatusBarManager.updateIcon(isConnected: isStart);
 
     if (isStart) {
+      // Drop the previous exit-IP immediately so the panel shows "determining" right
+      // away instead of flashing the old IP until the debounced check runs.
+      detectionState.markChecking();
       // Initialize foreground notification cache before starting
       initForegroundCache();
       await globalState.handleStart([

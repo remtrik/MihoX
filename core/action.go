@@ -252,6 +252,11 @@ func handleAction(action *Action, result ActionResult) {
 			result.success(value)
 		})
 		return
+	case setUiActiveMethod:
+		active, _ := action.Data.(bool)
+		handleSetUiActive(active)
+		result.success(true)
+		return
 	case crashMethod:
 		result.success(true)
 		handleCrash()

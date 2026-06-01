@@ -19,7 +19,7 @@ class ConnectionsView extends ConsumerStatefulWidget {
 }
 
 class _ConnectionsViewState extends ConsumerState<ConnectionsView>
-    with PageMixin {
+    with PageMixin, WidgetsBindingObserver {
   final _connectionsStateNotifier = ValueNotifier<ConnectionsState>(
     const ConnectionsState(),
   );
@@ -75,6 +75,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     ref.listenManual(
       isCurrentPageProvider(
         PageLabel.connections,
@@ -103,7 +104,21 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Don't keep polling getConnections() every 2s while the app is backgrounded.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      timer?.cancel();
+      timer = null;
+    } else if (state == AppLifecycleState.resumed && _isPageVisible) {
+      timer?.cancel();
+      _updateConnections();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     timer?.cancel();
     _connectionsStateNotifier.dispose();
     _scrollController.dispose();

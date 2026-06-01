@@ -147,6 +147,24 @@ class GlobalState {
     timer = null;
   }
 
+  // Background proxy-group refresh (latency/now). Paused while the app is in the
+  // background so it doesn't poll the core every 60s for a UI nobody is looking
+  // at; resumed (with an immediate refresh) when the app comes back to front.
+  void startGroupsUpdateTask() {
+    if (groupsUpdateTimer != null && groupsUpdateTimer!.isActive) return;
+    groupsUpdateTimer = Timer(const Duration(seconds: 60), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        appController.updateGroupsDebounce();
+        startGroupsUpdateTask();
+      });
+    });
+  }
+
+  void stopGroupsUpdateTask() {
+    groupsUpdateTimer?.cancel();
+    groupsUpdateTimer = null;
+  }
+
   Future<void> handleStart([UpdateTasks? tasks]) async {
     startTime ??= DateTime.now();
     await clashCore.startListener();
@@ -678,6 +696,18 @@ class DetectionState {
     _lastManualCheck = DateTime.now();
     _checkIp();
     return true;
+  }
+
+  /// Drop any stale exit-IP immediately (e.g. the instant the tunnel starts) so the
+  /// UI shows the "determining" state right away instead of flashing the previous IP
+  /// during the ~1.2s debounce before the next [_checkIp] runs.
+  void markChecking() {
+    _clearSetTimeoutTimer();
+    state.value = state.value.copyWith(
+      isLoading: true,
+      isTesting: false,
+      ipInfo: null,
+    );
   }
 
   Future<void> _checkIp() async {

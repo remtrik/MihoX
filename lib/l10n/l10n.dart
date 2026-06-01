@@ -1314,6 +1314,16 @@ class AppLocalizations {
     return Intl.message('Checking...', name: 'checking', desc: '', args: []);
   }
 
+  /// `Determining IP...`
+  String get determiningIp {
+    return Intl.message('Determining IP...', name: 'determiningIp', desc: '', args: []);
+  }
+
+  /// `Locations`
+  String get locations {
+    return Intl.message('Locations', name: 'locations', desc: '', args: []);
+  }
+
   /// `Country`
   String get country {
     return Intl.message('Country', name: 'country', desc: '', args: []);
@@ -3387,6 +3397,11 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Change`
+  String get change {
+    return Intl.message('Change', name: 'change', desc: '', args: []);
   }
 
   /// `Add Profile`

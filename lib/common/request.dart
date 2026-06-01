@@ -158,11 +158,12 @@ class Request {
     }
   }
 
+  // IPv4-only endpoints: each host resolves to an A record only, so the exit
+  // connection is forced over IPv4 and the reported IP is always v4 (never v6).
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
-    "https://ipwho.is/": IpInfo.fromIpwhoIsJson,
-    "https://api.ip.sb/geoip/": IpInfo.fromIpSbJson,
-    "https://ipapi.co/json/": IpInfo.fromIpApiCoJson,
-    "https://ipinfo.io/json/": IpInfo.fromIpInfoIoJson,
+    "https://api-ipv4.ip.sb/geoip": IpInfo.fromIpSbJson,
+    "http://ip-api.com/json/?fields=status,countryCode,query":
+        IpInfo.fromIpApiComJson,
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {

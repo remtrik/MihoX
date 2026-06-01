@@ -2,6 +2,7 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/views/views.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class Navigation {
 
@@ -19,14 +20,14 @@ class Navigation {
   }) => [
       const NavigationItem(
         keep: false,
-        icon: Icon(Icons.space_dashboard),
+        icon: Icon(Symbols.home, fill: 1),
         label: PageLabel.dashboard,
         view: DashboardView(
           key: GlobalObjectKey(PageLabel.dashboard),
         ),
       ),
       NavigationItem(
-        icon: const Icon(Icons.article),
+        icon: const Icon(Symbols.travel_explore, fill: 1),
         label: PageLabel.proxies,
         view: const ProxiesView(
           key: GlobalObjectKey(
@@ -38,7 +39,7 @@ class Navigation {
             : [],
       ),
       const NavigationItem(
-        icon: Icon(Icons.folder),
+        icon: Icon(Symbols.user_attributes, fill: 1),
         label: PageLabel.profiles,
         view: ProfilesView(
           key: GlobalObjectKey(
@@ -93,7 +94,7 @@ class Navigation {
             : [],
       ),
       const NavigationItem(
-        icon: Icon(Icons.construction),
+        icon: Icon(Symbols.settings, fill: 1),
         label: PageLabel.tools,
         view: ToolsView(
           key: GlobalObjectKey(

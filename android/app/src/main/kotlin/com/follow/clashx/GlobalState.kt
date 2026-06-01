@@ -2,9 +2,6 @@ package com.follow.clashx
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.PowerManager
-import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.follow.clashx.common.BroadcastAction
@@ -162,9 +159,30 @@ object GlobalState {
                     else -> RunState.STOP
                 }
                 if (rtStr != null) runTime = rt
+                if (state == RunState.START) {
+                    if (runTime != 0L) {
+                        // Cache the authoritative start time so a fresh UI process can
+                        // recover it when its own AIDL probe isn't ready yet.
+                        com.follow.clashx.common.SavedParams.setStartTime(runTime)
+                    } else {
+                        // Tunnel is up but we have no runtime (fresh process, probe not
+                        // ready). Report the cached start time (or now) so the UI re-attaches
+                        // instead of reading 0, deciding "stopped", and killing the VPN.
+                        runTime = com.follow.clashx.common.SavedParams.getStartTime()
+                            ?: System.currentTimeMillis().also {
+                                com.follow.clashx.common.SavedParams.setStartTime(it)
+                            }
+                    }
+                }
                 if (runStateFlow.value != state) runStateFlow.tryEmit(state)
             }.onFailure {
                 Log.w(TAG, "syncState failed: ${it.message}")
+                if (runTime == 0L) {
+                    runTime = com.follow.clashx.common.SavedParams.getStartTime()
+                        ?: System.currentTimeMillis().also {
+                            com.follow.clashx.common.SavedParams.setStartTime(it)
+                        }
+                }
                 if (runStateFlow.value != RunState.START) runStateFlow.tryEmit(RunState.START)
             }
         }
@@ -312,26 +330,6 @@ object GlobalState {
         CommonGlobalState.launch {
             runCatching { Service.stopListener() }
             runCatching { Service.stopService() }
-        }
-    }
-
-    fun requestBatteryOptimizationExemption() {
-        val ctx = CommonGlobalState.application
-        val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
-        if (pm.isIgnoringBatteryOptimizations(ctx.packageName)) return
-        // Offer the exemption dialog at most once (ever) instead of on every app launch,
-        // otherwise the "allow background activity" prompt spams the user each open when
-        // the OS exemption isn't granted (or is managed elsewhere on some OEMs).
-        if (com.follow.clashx.common.SavedParams.isBatteryRequestShown()) return
-        com.follow.clashx.common.SavedParams.markBatteryRequestShown()
-        runCatching {
-            val intent = Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.parse("package:${ctx.packageName}"),
-            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            ctx.startActivity(intent)
-        }.onFailure {
-            Log.w(TAG, "Failed to request battery optimization exemption: ${it.message}")
         }
     }
 

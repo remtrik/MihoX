@@ -66,7 +66,6 @@ class MainActivity : FlutterActivity() {
         GlobalState.flutterEngine = flutterEngine
 
         appPlugin.requestNotificationsPermission()
-        GlobalState.requestBatteryOptimizationExemption()
         GlobalState.syncStatus()
     }
 

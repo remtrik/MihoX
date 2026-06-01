@@ -78,6 +78,8 @@ mixin ClashInterface {
   FutureOr<bool> resetConnections();
 
   Future<bool> setState(CoreState state);
+
+  Future<bool> setUiActive(bool active);
 }
 
 mixin AndroidClashInterface {
@@ -179,6 +181,15 @@ abstract class ClashHandlerInterface with ClashInterface {
   Future<bool> setState(CoreState state) => invoke<bool>(
       method: ActionMethod.setState,
       data: json.encode(state),
+    );
+
+  @override
+  Future<bool> setUiActive(bool active) => invoke<bool>(
+      method: ActionMethod.setUiActive,
+      data: active,
+      // Short timeout so an older core without this handler degrades silently
+      // instead of leaving a pending completer.
+      timeout: const Duration(seconds: 2),
     );
 
   @override

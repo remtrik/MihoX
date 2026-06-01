@@ -5,6 +5,7 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/providers/providers.dart';
 import 'package:flclashx/state.dart';
+import 'package:flclashx/views/dashboard/widgets/hero_nav_bar.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,18 +33,8 @@ class HomePage extends StatelessWidget {
               navigationItems: navigationItems,
               currentIndex: currentIndex,
             );
-            final headerNewBoard = ref.watch(currentProfileProvider
-                    .select((p) => p?.providerHeaders['flclashx-newboard'])) == 'true';
-            final settingNewDashboard = ref.watch(appSettingProvider.select((s) => s.newDashboard));
-            final isNewDashboard = (settingNewDashboard ?? headerNewBoard)
-                && pageLabel == PageLabel.dashboard;
-            final showBottomBar = viewMode == ViewMode.mobile && !isNewDashboard;
-            final bottomNavigationBar = viewMode == ViewMode.mobile
-                ? AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    child: showBottomBar ? navigationBar : const SizedBox.shrink(),
-                  )
-                : null;
+            final bottomNavigationBar =
+                viewMode == ViewMode.mobile ? const HeroNavBar() : null;
             final sideNavigationBar =
                 viewMode != ViewMode.mobile ? navigationBar : null;
             return CommonScaffold(

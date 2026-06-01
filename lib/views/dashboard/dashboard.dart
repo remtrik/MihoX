@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'widgets/hero_connect.dart';
 import 'widgets/start_button.dart';
-import 'widgets/stats_grid.dart';
 
 
 class DashboardView extends ConsumerStatefulWidget {
@@ -259,20 +257,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
         );
       }
 
-      return Expanded(
+      return const Expanded(
         child: Padding(
-          padding: EdgeInsets.only(
-            left: 16, right: 16, top: 12,
-            bottom: Platform.isAndroid ? 55 : 16,
-          ),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              StatsGrid(),
-              SizedBox(height: 12),
-              HeroConnect(),
-            ],
-          ),
+          padding: EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 24),
+          child: HeroConnect(),
         ),
       );
     }),

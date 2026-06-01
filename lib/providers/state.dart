@@ -629,9 +629,20 @@ VM2<int, bool> checkIp(Ref ref) {
           state.dashboardWidgets.contains(DashboardWidget.networkDetection),
     ),
   );
+  // The "new look" hero also shows the exit IP, so it needs the same re-check on
+  // proxy change. It is active when the setting is on, or (when unset) when the
+  // profile carries the `flclashx-newboard` header.
+  final settingNewDashboard =
+      ref.watch(appSettingProvider.select((state) => state.newDashboard));
+  final headerNewBoard = ref.watch(
+        currentProfileProvider
+            .select((p) => p?.providerHeaders['flclashx-newboard']),
+      ) ==
+      'true';
+  final newDashboard = settingNewDashboard ?? headerNewBoard;
   return VM2(
     a: checkIpNum,
-    b: containsDetection,
+    b: containsDetection || newDashboard,
   );
 }
 
