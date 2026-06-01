@@ -82,8 +82,6 @@ class HeroNavBar extends ConsumerWidget {
                                   child: Icon(
                                     items[i].icon.icon ?? Icons.circle,
                                     size: 26,
-                                    // Fill Material Symbols to match the filled Icons.
-                                    fill: 1,
                                     color: i == selectedIndex
                                         ? colorScheme.onPrimary
                                         : colorScheme.onSurfaceVariant,

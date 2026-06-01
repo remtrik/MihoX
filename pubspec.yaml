@@ -62,7 +62,6 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   cached_network_image: ^3.4.1
   crypto: ^3.0.7
-  material_symbols_icons: ^4.2928.1
 
 dev_dependencies:
   flutter_test:

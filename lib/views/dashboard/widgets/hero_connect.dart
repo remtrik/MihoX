@@ -62,23 +62,37 @@ List<String> _collectGroupFlags(List<Group> groups, Group group) {
   return codes;
 }
 
-// Strip flag pairs and other emoji/pictographic symbols, leaving only the
-// readable name (used for the server title).
-String _stripEmoji(String text) {
-  final runes = text.runes.toList();
-  final out = <int>[];
-  for (final r in runes) {
+// Strip only the *leading* emoji run from the name — typically the flag prefix
+// (e.g. "🇳🇱 Amsterdam"), which we already render separately as the flag icon.
+// Emoji that appear later in the name are kept intact.
+String _stripLeadingEmoji(String text) {
+  bool isEmojiRune(int r) {
     final isFlag = r >= 0x1F1E6 && r <= 0x1F1FF;
-    final isModifier = r == 0x200D || r == 0xFE0F || (r >= 0x1F3FB && r <= 0x1F3FF);
+    final isModifier =
+        r == 0x200D || r == 0xFE0F || (r >= 0x1F3FB && r <= 0x1F3FF);
     final isPictograph = (r >= 0x1F000 && r <= 0x1FAFF) ||
         (r >= 0x2600 && r <= 0x27BF) ||
         (r >= 0x2190 && r <= 0x21FF) ||
         (r >= 0x2B00 && r <= 0x2BFF) ||
         (r >= 0x2300 && r <= 0x23FF);
-    if (isFlag || isModifier || isPictograph) continue;
-    out.add(r);
+    return isFlag || isModifier || isPictograph;
   }
-  return String.fromCharCodes(out).replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  bool isSpace(int r) =>
+      r == 0x20 || r == 0x09 || r == 0xA0 || r == 0x0A || r == 0x0D;
+
+  final runes = text.runes.toList();
+  var start = 0;
+  // Consume the leading run of emoji (and any whitespace around it) so a flag
+  // prefixed with or followed by spaces is still removed; stop at the first
+  // real character and keep the remainder verbatim.
+  while (start < runes.length &&
+      (isEmojiRune(runes[start]) || isSpace(runes[start]))) {
+    start++;
+  }
+  return String.fromCharCodes(runes.sublist(start))
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 String _formatBytes(int bytes) {
@@ -181,7 +195,7 @@ class HeroConnect extends ConsumerWidget {
         }
       }
     }
-    final displayName = _stripEmoji(serverName);
+    final displayName = _stripLeadingEmoji(serverName);
     final nameCountryCode = _flagToCountryCode(serverName);
     final groupFlagCodes =
         activeGroup != null ? _collectGroupFlags(groups, activeGroup) : const <String>[];

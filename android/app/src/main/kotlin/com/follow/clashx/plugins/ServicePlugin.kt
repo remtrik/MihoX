@@ -29,7 +29,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 
 class ServicePlugin :
     FlutterPlugin,
@@ -129,13 +128,19 @@ class ServicePlugin :
 
     private fun onServiceDisconnected(message: String) {
         Log.w("ServicePlugin", "remote service disconnected: $message")
-        com.follow.clashx.common.SavedParams.setVpnActive(false)
-        CommonGlobalState.launch {
-            GlobalState.runLock.withLock {
-                GlobalState.runTime = 0L
-                GlobalState.runStateFlow.tryEmit(RunState.STOP)
-            }
-        }
+        // A RemoteService binder drop means the IPC bridge (the :remote process) was
+        // recycled — NOT that the tunnel died. FlVpnService is START_STICKY + foreground
+        // and recovers itself via coldStart as long as the persistent isVpnActive flag
+        // stays set. Clearing that flag / forcing STOP here was exactly what dropped the
+        // VPN on some phones when the app was reopened from background: the disconnect
+        // queued while :main was frozen fired on resume and sabotaged the sticky recovery
+        // (coldStart then saw isVpnActive == false and stopped itself). Instead, re-derive
+        // the real state from the flag + an AIDL probe — handleSyncState keeps START while
+        // the tunnel is genuinely up and only reports STOP when the flag is actually clear.
+        // Genuine teardowns are still covered by the SERVICE_DESTROYED broadcast + the
+        // explicit stop path. The "crash" signal makes Dart re-bind and re-register its
+        // event listener against the reconnected service.
+        CommonGlobalState.launch { GlobalState.handleSyncState() }
         invokeOnMain("crash", message)
     }
 
