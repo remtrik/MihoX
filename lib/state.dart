@@ -48,6 +48,7 @@ class GlobalState {
   late Measure measure;
   late CommonTheme theme;
   late Color accentColor;
+  // ignore: deprecated_member_use
   CorePalette? corePalette;
   DateTime? startTime;
   UpdateTasks tasks = [];
@@ -292,12 +293,13 @@ class GlobalState {
 
   Future<void> migrateOldData(Config config) async {
     final mihomoConfig = await preferences.getMihomoConfig();
+    Config tmpConfig;
     if (mihomoConfig != null) {
-      config = config.copyWith(
+      tmpConfig = config.copyWith(
         patchMihomoConfig: mihomoConfig,
       );
       await preferences.clearMihomoConfig();
-      await preferences.saveConfig(config);
+      await preferences.saveConfig(tmpConfig);
     }
   }
 

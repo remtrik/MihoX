@@ -202,6 +202,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
               ))
           .toList();
     } else {
+      // ignore: omit_local_variable_types
       final GroupNameKeyMap keyMap = {};
       children = groupNames.map((groupName) {
         keyMap[groupName] = GlobalObjectKey(groupName);

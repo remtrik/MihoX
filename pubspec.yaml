@@ -7,25 +7,27 @@ environment:
   sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
+  app_links: ^6.4.1
+  archive: ^4.0.7
+  dio: ^5.9.0
+  dynamic_color: ^1.8.1
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  dynamic_color: ^1.8.1
   intl: any
   path: ^1.9.1
   path_provider: ^2.1.5
-  shared_preferences: ^2.3.5
-  window_manager: ^0.5.1
   proxy:
     path: plugins/proxy
+  shared_preferences: ^2.3.5
   window_ext:
     path: plugins/window_ext
+  window_manager: ^0.5.1
   launch_at_startup: ^0.5.1
   json_annotation: ^4.9.0
   file_picker: ^10.3.8
   mobile_scanner: ^7.1.4
-  app_links: ^6.4.1
   win32_registry: ^2.1.0
   tray_manager: ^0.5.2
   qr_flutter: ^4.1.0
@@ -39,12 +41,10 @@ dependencies:
   url_launcher: ^6.3.1
   freezed_annotation: ^2.4.4
   image_picker: ^1.2.1
-  dio: ^5.9.0
   win32: ^5.15.0
   ffi: ^2.2.0
   re_editor: ^0.9.0
   re_highlight: ^0.0.3
-  archive: ^4.0.7
   lpinyin: ^2.0.3
   emoji_regex: ^0.0.5
   hotkey_manager: ^0.2.3
@@ -67,17 +67,17 @@ dependencies:
   material_color_utilities: ^0.13.0
 
 dev_dependencies:
+  args: ^2.7.0
+  build_runner: ^2.4.15
+  custom_lint: ^0.7.3
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  build_runner: ^2.4.15
   freezed: ^2.5.7
   json_serializable: ^6.8.0
   riverpod_generator: ^2.4.3
   riverpod_lint: ^2.3.13
-  custom_lint: ^0.7.3
-  flutter_launcher_icons: ^0.14.4
-  args: ^2.7.0
 
 flutter:
   uses-material-design: true

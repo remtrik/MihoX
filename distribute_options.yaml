@@ -3,13 +3,24 @@ output: 'dist/'
 releases:
   - name: stable
     jobs:
-      # Build android
-      - name: release-stable-android
+      # Build android arm64
+      - name: release-stable-android-arm64
         package:
           platform: android
           target: apk
           build_args:
-            target-platform: android-arm,android-arm64
+            target-platform: android-arm64
+            obfuscate: true
+            split-debug-info: debug-symbols
+            split-per-abi: true
+
+      # Build android arm
+      - name: release-stable-android-arm
+        package:
+          platform: android
+          target: apk
+          build_args:
+            target-platform: android-arm
             obfuscate: true
             split-debug-info: debug-symbols
             split-per-abi: true
@@ -31,12 +42,14 @@ releases:
         package:
           platform: linux
           target: appimage
+
   - name: stable-windows
     jobs:
       - name: release-stable-windows-exe-separate
         package:
           platform: windows
           target: exe
+
   - name: stable-android
     jobs:
       - name: release-stable-android-separate
@@ -44,7 +57,7 @@ releases:
           platform: android
           target: apk
           build_args:
-            target-platform: android-arm,android-arm64
+            target-platform: android-arm64
             obfuscate: true
             split-debug-info: debug-symbols
             split-per-abi: true
