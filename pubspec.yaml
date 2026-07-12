@@ -1,7 +1,7 @@
-name: flclashx
-description: Fork multi-platform proxy client FlClash based on ClashMeta, simple and easy to use, open-source and ad-free.
+name: mihox
+description: Fork multi-platform proxy client FlClashX based on Mihomo, simple and easy to use, open-source and ad-free.
 publish_to: "none"
-version: 0.4.0+2026012301
+version: 0.5.0+2026071015
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -11,12 +11,12 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  dynamic_color: ^1.8.1
   intl: any
-  path_provider: ^2.1.5
   path: ^1.9.1
+  path_provider: ^2.1.5
   shared_preferences: ^2.3.5
   window_manager: ^0.5.1
-  dynamic_color: ^1.8.1
   proxy:
     path: plugins/proxy
   window_ext:
@@ -39,11 +39,10 @@ dependencies:
   url_launcher: ^6.3.1
   freezed_annotation: ^2.4.4
   image_picker: ^1.2.1
-  webdav_client: ^1.2.2
   dio: ^5.9.0
   win32: ^5.15.0
-  ffi: ^2.1.5
-  re_editor: 0.8.0
+  ffi: ^2.2.0
+  re_editor: ^0.9.0
   re_highlight: ^0.0.3
   archive: ^4.0.7
   lpinyin: ^2.0.3
@@ -52,7 +51,7 @@ dependencies:
   uni_platform: ^0.1.3
   device_info_plus: ^12.3.0
   connectivity_plus: ^7.0.0
-  screen_retriever: ^0.2.0
+  screen_retriever: ^0.2.1
   defer_pointer: ^0.0.2
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
@@ -64,6 +63,8 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   cached_network_image: ^3.4.1
   crypto: ^3.0.7
+  riverpod: ^2.6.1
+  material_color_utilities: ^0.13.0
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,7 @@ dev_dependencies:
   riverpod_lint: ^2.3.13
   custom_lint: ^0.7.3
   flutter_launcher_icons: ^0.14.4
+  args: ^2.7.0
 
 flutter:
   uses-material-design: true
@@ -84,6 +86,7 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/images/avatars/
+    - assets/images/icons/
   fonts:
     - family: JetBrainsMono
       fonts:
@@ -99,11 +102,11 @@ flutter:
         - asset: assets/fonts/Unbounded-Regular.ttf
 
 ffigen:
-  name: "ClashFFI"
-  output: "lib/clash/generated/clash_ffi.dart"
+  name: "MihomoFFI"
+  output: "lib/mihomo/generated/mihomo_ffi.dart"
   headers:
     entry-points:
-      - "libclash/android/arm64-v8a/libclash.h"
+      - "libmihomo/android/arm64-v8a/libmihomo.h"
 
 flutter_intl:
   enabled: true

@@ -3,14 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:flclashx/common/app_localizations.dart';
-import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/app_localizations.dart';
+import 'package:mihox/models/models.dart';
 
 class App {
-
   factory App() {
     _instance ??= App._internal();
     return _instance!;
@@ -39,7 +38,8 @@ class App {
   late MethodChannel methodChannel;
   Function()? onExit;
 
-  Future<bool?> moveTaskToBack() async => methodChannel.invokeMethod<bool>("moveTaskToBack");
+  Future<bool?> moveTaskToBack() async =>
+      methodChannel.invokeMethod<bool>("moveTaskToBack");
 
   Future<List<Package>> getPackages() async {
     final packagesString =
@@ -61,10 +61,11 @@ class App {
     });
   }
 
-  Future<bool> openFile(String path) async => await methodChannel.invokeMethod<bool>("openFile", {
-          "path": path,
-        }) ??
-        false;
+  Future<bool> openFile(String path) async =>
+      await methodChannel.invokeMethod<bool>("openFile", {
+        "path": path,
+      }) ??
+      false;
 
   Future<ImageProvider?> getPackageIcon(String packageName) async {
     final base64 = await methodChannel.invokeMethod<String>("getPackageIcon", {
@@ -76,16 +77,17 @@ class App {
     return MemoryImage(base64Decode(base64));
   }
 
-  Future<bool?> tip(String? message) async => methodChannel.invokeMethod<bool>("tip", {
-      "message": "$message",
-    });
+  Future<bool?> tip(String? message) async =>
+      methodChannel.invokeMethod<bool>("tip", {
+        "message": "$message",
+      });
 
   Future<bool?> initShortcuts() async => methodChannel.invokeMethod<bool>(
-      "initShortcuts",
-      appLocalizations.toggle,
-    );
+        "initShortcuts",
+        appLocalizations.toggle,
+      );
 
-  Future<bool?> updateExcludeFromRecents(bool value) async => methodChannel.invokeMethod<bool>("updateExcludeFromRecents", {
+  Future<bool?> updateExcludeFromRecents({required bool value}) async => methodChannel.invokeMethod<bool>("updateExcludeFromRecents", {
       "value": value,
     });
 }

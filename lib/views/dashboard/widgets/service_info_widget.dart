@@ -1,25 +1,20 @@
 import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class ServiceInfoWidget extends ConsumerWidget {
   const ServiceInfoWidget({super.key});
 
   String? _decodeBase64IfNeeded(String? value) {
     if (value == null || value.isEmpty) return value;
-
-    try {
-      final decoded = utf8.decode(base64.decode(value));
-      return decoded;
-    } catch (e) {
-      return value;
-    }
+    return utils.decodeBase64(value);
   }
 
   Widget _buildLogo(BuildContext context, String? logoUrl) {
@@ -82,9 +77,9 @@ class ServiceInfoWidget extends ConsumerWidget {
     }
 
     final headers = profile.providerHeaders;
-    final serviceName = _decodeBase64IfNeeded(headers['flclashx-servicename']);
+    final serviceName = _decodeBase64IfNeeded(headers['mihox-servicename']);
     final supportUrl = headers['support-url'];
-    final logoUrl = _decodeBase64IfNeeded(headers['flclashx-servicelogo']);
+    final logoUrl = _decodeBase64IfNeeded(headers['mihox-servicelogo']);
 
     if (serviceName == null || serviceName.isEmpty) {
       return const SizedBox.shrink();

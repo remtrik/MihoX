@@ -1,7 +1,7 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
 
 import 'common.dart';
 import 'core.dart';

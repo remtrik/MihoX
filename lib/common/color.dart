@@ -21,10 +21,11 @@ extension ColorExtension on Color {
 
   Color get opacity0 => withAlpha(0);
 
-  int get value32bit => _floatToInt8(a) << 24 |
-        _floatToInt8(r) << 16 |
-        _floatToInt8(g) << 8 |
-        _floatToInt8(b) << 0;
+  int get value32bit =>
+      _floatToInt8(a) << 24 |
+      _floatToInt8(r) << 16 |
+      _floatToInt8(g) << 8 |
+      _floatToInt8(b) << 0;
 
   int get alpha8bit => (0xff000000 & value32bit) >> 24;
 
@@ -93,7 +94,7 @@ extension ColorExtension on Color {
 }
 
 extension ColorSchemeExtension on ColorScheme {
-  ColorScheme toPureBlack(bool isPrueBlack) => isPrueBlack
+  ColorScheme toPureBlack({bool isPureBlack = false}) => isPureBlack
       ? copyWith(
           surface: Colors.black,
           surfaceContainer: surfaceContainer.darken(

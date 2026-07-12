@@ -1739,206 +1739,6 @@ abstract class _ConnectionsState implements ConnectionsState {
       throw _privateConstructorUsedError;
 }
 
-DAV _$DAVFromJson(Map<String, dynamic> json) {
-  return _DAV.fromJson(json);
-}
-
-/// @nodoc
-mixin _$DAV {
-  String get uri => throw _privateConstructorUsedError;
-  String get user => throw _privateConstructorUsedError;
-  String get password => throw _privateConstructorUsedError;
-  String get fileName => throw _privateConstructorUsedError;
-
-  /// Serializes this DAV to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of DAV
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $DAVCopyWith<DAV> get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $DAVCopyWith<$Res> {
-  factory $DAVCopyWith(DAV value, $Res Function(DAV) then) =
-      _$DAVCopyWithImpl<$Res, DAV>;
-  @useResult
-  $Res call({String uri, String user, String password, String fileName});
-}
-
-/// @nodoc
-class _$DAVCopyWithImpl<$Res, $Val extends DAV> implements $DAVCopyWith<$Res> {
-  _$DAVCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of DAV
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? uri = null,
-    Object? user = null,
-    Object? password = null,
-    Object? fileName = null,
-  }) {
-    return _then(_value.copyWith(
-      uri: null == uri
-          ? _value.uri
-          : uri // ignore: cast_nullable_to_non_nullable
-              as String,
-      user: null == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: null == password
-          ? _value.password
-          : password // ignore: cast_nullable_to_non_nullable
-              as String,
-      fileName: null == fileName
-          ? _value.fileName
-          : fileName // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$DAVImplCopyWith<$Res> implements $DAVCopyWith<$Res> {
-  factory _$$DAVImplCopyWith(_$DAVImpl value, $Res Function(_$DAVImpl) then) =
-      __$$DAVImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String uri, String user, String password, String fileName});
-}
-
-/// @nodoc
-class __$$DAVImplCopyWithImpl<$Res> extends _$DAVCopyWithImpl<$Res, _$DAVImpl>
-    implements _$$DAVImplCopyWith<$Res> {
-  __$$DAVImplCopyWithImpl(_$DAVImpl _value, $Res Function(_$DAVImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of DAV
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? uri = null,
-    Object? user = null,
-    Object? password = null,
-    Object? fileName = null,
-  }) {
-    return _then(_$DAVImpl(
-      uri: null == uri
-          ? _value.uri
-          : uri // ignore: cast_nullable_to_non_nullable
-              as String,
-      user: null == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: null == password
-          ? _value.password
-          : password // ignore: cast_nullable_to_non_nullable
-              as String,
-      fileName: null == fileName
-          ? _value.fileName
-          : fileName // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$DAVImpl implements _DAV {
-  const _$DAVImpl(
-      {required this.uri,
-      required this.user,
-      required this.password,
-      this.fileName = defaultDavFileName});
-
-  factory _$DAVImpl.fromJson(Map<String, dynamic> json) =>
-      _$$DAVImplFromJson(json);
-
-  @override
-  final String uri;
-  @override
-  final String user;
-  @override
-  final String password;
-  @override
-  @JsonKey()
-  final String fileName;
-
-  @override
-  String toString() {
-    return 'DAV(uri: $uri, user: $user, password: $password, fileName: $fileName)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$DAVImpl &&
-            (identical(other.uri, uri) || other.uri == uri) &&
-            (identical(other.user, user) || other.user == user) &&
-            (identical(other.password, password) ||
-                other.password == password) &&
-            (identical(other.fileName, fileName) ||
-                other.fileName == fileName));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, uri, user, password, fileName);
-
-  /// Create a copy of DAV
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$DAVImplCopyWith<_$DAVImpl> get copyWith =>
-      __$$DAVImplCopyWithImpl<_$DAVImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$DAVImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _DAV implements DAV {
-  const factory _DAV(
-      {required final String uri,
-      required final String user,
-      required final String password,
-      final String fileName}) = _$DAVImpl;
-
-  factory _DAV.fromJson(Map<String, dynamic> json) = _$DAVImpl.fromJson;
-
-  @override
-  String get uri;
-  @override
-  String get user;
-  @override
-  String get password;
-  @override
-  String get fileName;
-
-  /// Create a copy of DAV
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$DAVImplCopyWith<_$DAVImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
 /// @nodoc
 mixin _$FileInfo {
   int get size => throw _privateConstructorUsedError;
@@ -2091,7 +1891,7 @@ VersionInfo _$VersionInfoFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$VersionInfo {
-  String get clashName => throw _privateConstructorUsedError;
+  String get mihomoName => throw _privateConstructorUsedError;
   String get version => throw _privateConstructorUsedError;
 
   /// Serializes this VersionInfo to a JSON map.
@@ -2110,7 +1910,7 @@ abstract class $VersionInfoCopyWith<$Res> {
           VersionInfo value, $Res Function(VersionInfo) then) =
       _$VersionInfoCopyWithImpl<$Res, VersionInfo>;
   @useResult
-  $Res call({String clashName, String version});
+  $Res call({String mihomoName, String version});
 }
 
 /// @nodoc
@@ -2128,13 +1928,13 @@ class _$VersionInfoCopyWithImpl<$Res, $Val extends VersionInfo>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? clashName = null,
+    Object? mihomoName = null,
     Object? version = null,
   }) {
     return _then(_value.copyWith(
-      clashName: null == clashName
-          ? _value.clashName
-          : clashName // ignore: cast_nullable_to_non_nullable
+      mihomoName: null == mihomoName
+          ? _value.mihomoName
+          : mihomoName // ignore: cast_nullable_to_non_nullable
               as String,
       version: null == version
           ? _value.version
@@ -2152,7 +1952,7 @@ abstract class _$$VersionInfoImplCopyWith<$Res>
       __$$VersionInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String clashName, String version});
+  $Res call({String mihomoName, String version});
 }
 
 /// @nodoc
@@ -2168,13 +1968,13 @@ class __$$VersionInfoImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? clashName = null,
+    Object? mihomoName = null,
     Object? version = null,
   }) {
     return _then(_$VersionInfoImpl(
-      clashName: null == clashName
-          ? _value.clashName
-          : clashName // ignore: cast_nullable_to_non_nullable
+      mihomoName: null == mihomoName
+          ? _value.mihomoName
+          : mihomoName // ignore: cast_nullable_to_non_nullable
               as String,
       version: null == version
           ? _value.version
@@ -2187,21 +1987,21 @@ class __$$VersionInfoImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$VersionInfoImpl implements _VersionInfo {
-  const _$VersionInfoImpl({this.clashName = "", this.version = ""});
+  const _$VersionInfoImpl({this.mihomoName = "", this.version = ""});
 
   factory _$VersionInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$VersionInfoImplFromJson(json);
 
   @override
   @JsonKey()
-  final String clashName;
+  final String mihomoName;
   @override
   @JsonKey()
   final String version;
 
   @override
   String toString() {
-    return 'VersionInfo(clashName: $clashName, version: $version)';
+    return 'VersionInfo(mihomoName: $mihomoName, version: $version)';
   }
 
   @override
@@ -2209,14 +2009,14 @@ class _$VersionInfoImpl implements _VersionInfo {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$VersionInfoImpl &&
-            (identical(other.clashName, clashName) ||
-                other.clashName == clashName) &&
+            (identical(other.mihomoName, mihomoName) ||
+                other.mihomoName == mihomoName) &&
             (identical(other.version, version) || other.version == version));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, clashName, version);
+  int get hashCode => Object.hash(runtimeType, mihomoName, version);
 
   /// Create a copy of VersionInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -2235,14 +2035,14 @@ class _$VersionInfoImpl implements _VersionInfo {
 }
 
 abstract class _VersionInfo implements VersionInfo {
-  const factory _VersionInfo({final String clashName, final String version}) =
+  const factory _VersionInfo({final String mihomoName, final String version}) =
       _$VersionInfoImpl;
 
   factory _VersionInfo.fromJson(Map<String, dynamic> json) =
       _$VersionInfoImpl.fromJson;
 
   @override
-  String get clashName;
+  String get mihomoName;
   @override
   String get version;
 
@@ -2264,6 +2064,7 @@ mixin _$Proxy {
   String get type => throw _privateConstructorUsedError;
   String? get now => throw _privateConstructorUsedError;
   String? get serverDescription => throw _privateConstructorUsedError;
+  String? get network => throw _privateConstructorUsedError;
 
   /// Serializes this Proxy to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -2279,7 +2080,12 @@ abstract class $ProxyCopyWith<$Res> {
   factory $ProxyCopyWith(Proxy value, $Res Function(Proxy) then) =
       _$ProxyCopyWithImpl<$Res, Proxy>;
   @useResult
-  $Res call({String name, String type, String? now, String? serverDescription});
+  $Res call(
+      {String name,
+      String type,
+      String? now,
+      String? serverDescription,
+      String? network});
 }
 
 /// @nodoc
@@ -2301,6 +2107,7 @@ class _$ProxyCopyWithImpl<$Res, $Val extends Proxy>
     Object? type = null,
     Object? now = freezed,
     Object? serverDescription = freezed,
+    Object? network = freezed,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -2319,6 +2126,10 @@ class _$ProxyCopyWithImpl<$Res, $Val extends Proxy>
           ? _value.serverDescription
           : serverDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      network: freezed == network
+          ? _value.network
+          : network // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -2330,7 +2141,12 @@ abstract class _$$ProxyImplCopyWith<$Res> implements $ProxyCopyWith<$Res> {
       __$$ProxyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String type, String? now, String? serverDescription});
+  $Res call(
+      {String name,
+      String type,
+      String? now,
+      String? serverDescription,
+      String? network});
 }
 
 /// @nodoc
@@ -2350,6 +2166,7 @@ class __$$ProxyImplCopyWithImpl<$Res>
     Object? type = null,
     Object? now = freezed,
     Object? serverDescription = freezed,
+    Object? network = freezed,
   }) {
     return _then(_$ProxyImpl(
       name: null == name
@@ -2368,6 +2185,10 @@ class __$$ProxyImplCopyWithImpl<$Res>
           ? _value.serverDescription
           : serverDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      network: freezed == network
+          ? _value.network
+          : network // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -2379,7 +2200,8 @@ class _$ProxyImpl implements _Proxy {
       {required this.name,
       required this.type,
       this.now,
-      this.serverDescription});
+      this.serverDescription,
+      this.network});
 
   factory _$ProxyImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProxyImplFromJson(json);
@@ -2392,10 +2214,12 @@ class _$ProxyImpl implements _Proxy {
   final String? now;
   @override
   final String? serverDescription;
+  @override
+  final String? network;
 
   @override
   String toString() {
-    return 'Proxy(name: $name, type: $type, now: $now, serverDescription: $serverDescription)';
+    return 'Proxy(name: $name, type: $type, now: $now, serverDescription: $serverDescription, network: $network)';
   }
 
   @override
@@ -2407,13 +2231,14 @@ class _$ProxyImpl implements _Proxy {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.now, now) || other.now == now) &&
             (identical(other.serverDescription, serverDescription) ||
-                other.serverDescription == serverDescription));
+                other.serverDescription == serverDescription) &&
+            (identical(other.network, network) || other.network == network));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, name, type, now, serverDescription);
+      Object.hash(runtimeType, name, type, now, serverDescription, network);
 
   /// Create a copy of Proxy
   /// with the given fields replaced by the non-null parameter values.
@@ -2436,7 +2261,8 @@ abstract class _Proxy implements Proxy {
       {required final String name,
       required final String type,
       final String? now,
-      final String? serverDescription}) = _$ProxyImpl;
+      final String? serverDescription,
+      final String? network}) = _$ProxyImpl;
 
   factory _Proxy.fromJson(Map<String, dynamic> json) = _$ProxyImpl.fromJson;
 
@@ -2448,6 +2274,8 @@ abstract class _Proxy implements Proxy {
   String? get now;
   @override
   String? get serverDescription;
+  @override
+  String? get network;
 
   /// Create a copy of Proxy
   /// with the given fields replaced by the non-null parameter values.

@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class WaveView extends StatefulWidget {
-
   const WaveView({
     super.key,
     this.waveAmplitude = 50.0,
@@ -40,27 +39,27 @@ class _WaveViewState extends State<WaveView>
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (_, constraints) => RepaintBoundary(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) => CustomPaint(
-              painter: WavePainter(
-                animationValue: _controller.value,
-                waveAmplitude: widget.waveAmplitude,
-                waveFrequency: widget.waveFrequency,
-                waveColor: widget.waveColor,
-              ),
-              size: Size(
-                constraints.maxWidth,
-                constraints.maxHeight,
+  Widget build(BuildContext context) => LayoutBuilder(
+      builder: (_, constraints) => RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) => CustomPaint(
+                painter: WavePainter(
+                  animationValue: _controller.value,
+                  waveAmplitude: widget.waveAmplitude,
+                  waveFrequency: widget.waveFrequency,
+                  waveColor: widget.waveColor,
+                ),
+                size: Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                ),
               ),
             ),
-        ),
-      ));
+          ));
 }
 
 class WavePainter extends CustomPainter {
-
   WavePainter({
     required this.animationValue,
     required this.waveAmplitude,
@@ -102,21 +101,22 @@ class WavePainter extends CustomPainter {
       _path.lineTo(x, baseHeight + y);
     }
 
-    _path.lineTo(
-      size.width,
-      baseHeight + waveAmplitude * sin(size.width * widthFactor + phase),
-    );
-
-    _path.lineTo(size.width, size.height);
-    _path.lineTo(0, size.height);
-    _path.close();
+    _path
+      ..lineTo(
+        size.width,
+        baseHeight + waveAmplitude * sin(size.width * widthFactor + phase),
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
 
     canvas.drawPath(_path, _paint);
   }
 
   @override
-  bool shouldRepaint(covariant WavePainter oldDelegate) => oldDelegate.animationValue != animationValue ||
-        oldDelegate.waveAmplitude != waveAmplitude ||
-        oldDelegate.waveFrequency != waveFrequency ||
-        oldDelegate.waveColor != waveColor;
+  bool shouldRepaint(covariant WavePainter oldDelegate) =>
+      oldDelegate.animationValue != animationValue ||
+      oldDelegate.waveAmplitude != waveAmplitude ||
+      oldDelegate.waveFrequency != waveFrequency ||
+      oldDelegate.waveColor != waveColor;
 }

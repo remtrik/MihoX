@@ -45,7 +45,8 @@ class CommonSafeArea extends StatelessWidget {
         left: math.max(left ? padding.left : 0.0, minimum.left).toDouble(),
         top: math.max(top ? realPaddingTop : 0.0, minimum.top).toDouble(),
         right: math.max(right ? padding.right : 0.0, minimum.right).toDouble(),
-        bottom: math.max(bottom ? padding.bottom : 0.0, minimum.bottom).toDouble(),
+        bottom:
+            math.max(bottom ? padding.bottom : 0.0, minimum.bottom).toDouble(),
       ),
       child: MediaQuery.removePadding(
         context: context,
@@ -62,12 +63,10 @@ class CommonSafeArea extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-        .add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties
-        .add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
-    properties.add(
-        FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
-    properties.add(
-        FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+      ..add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'))
+      ..add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'))
+      ..add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'))
+      ..add(FlagProperty('bottom',
+          value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }

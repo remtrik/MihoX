@@ -1,8 +1,8 @@
 // ignore_for_file: invalid_annotation_target
 
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
 
 part 'generated/core.freezed.dart';
 part 'generated/core.g.dart';
@@ -17,12 +17,6 @@ abstract mixin class AppMessageListener {
   void onLoaded(String providerName) {}
 }
 
-// abstract mixin class ServiceMessageListener {
-//   onProtect(Fd fd) {}
-//
-//   onProcess(ProcessData process) {}
-// }
-
 @freezed
 class SetupParams with _$SetupParams {
   const factory SetupParams({
@@ -34,15 +28,6 @@ class SetupParams with _$SetupParams {
   factory SetupParams.fromJson(Map<String, dynamic> json) =>
       _$SetupParamsFromJson(json);
 }
-
-// extension SetupParamsExt on SetupParams {
-//   Map<String, dynamic> get json {
-//     final json = Map<String, dynamic>.from(config);
-//     json["selected-map"] = selectedMap;
-//     json["test-url"] = testUrl;
-//     return json;
-//   }
-// }
 
 @freezed
 class UpdateParams with _$UpdateParams {
@@ -172,27 +157,6 @@ class Now with _$Now {
 
   factory Now.fromJson(Map<String, Object?> json) => _$NowFromJson(json);
 }
-
-// @freezed
-// class ProcessData with _$ProcessData {
-//   const factory ProcessData({
-//     required String id,
-//     required Metadata metadata,
-//   }) = _ProcessData;
-//
-//   factory ProcessData.fromJson(Map<String, Object?> json) =>
-//       _$ProcessDataFromJson(json);
-// }
-//
-// @freezed
-// class Fd with _$Fd {
-//   const factory Fd({
-//     required String id,
-//     required int value,
-//   }) = _Fd;
-//
-//   factory Fd.fromJson(Map<String, Object?> json) => _$FdFromJson(json);
-// }
 
 @freezed
 class ProviderSubscriptionInfo with _$ProviderSubscriptionInfo {

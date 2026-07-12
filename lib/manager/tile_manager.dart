@@ -1,10 +1,9 @@
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/tile.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/plugins/tile.dart';
+import 'package:mihox/state.dart';
 
 class TileManager extends StatefulWidget {
-
   const TileManager({
     super.key,
     required this.child,
@@ -27,7 +26,7 @@ class _TileContainerState extends State<TileManager> with TileListener {
 
   @override
   Future<void> onStop() async {
-    globalState.appController.updateStatus(false);
+    await globalState.appController.updateStatus(false);
     super.onStop();
   }
 
@@ -36,7 +35,7 @@ class _TileContainerState extends State<TileManager> with TileListener {
     try {
       final modeEnum = Mode.values.byName(mode);
       globalState.appController.changeMode(modeEnum);
-      // Reflect back to widget — updateClashConfigDebounce will push to core.
+      // Reflect back to widget — updateMihomoConfigDebounce will push to core.
       tile?.updateMode(mode);
     } catch (_) {}
     super.onChangeMode(mode);
@@ -49,7 +48,7 @@ class _TileContainerState extends State<TileManager> with TileListener {
     // Push current mode to native so widget picks up the right active button
     // when the main engine comes online.
     try {
-      final current = globalState.config.patchClashConfig.mode.name;
+      final current = globalState.config.patchMihomoConfig.mode.name;
       tile?.updateMode(current);
     } catch (_) {}
   }

@@ -1,6 +1,7 @@
-import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/models/models.dart';
 import 'package:riverpod/riverpod.dart';
+
 import 'context.dart';
 
 mixin AutoDisposeNotifierMixin<T> on AutoDisposeNotifier<T> {
@@ -27,20 +28,16 @@ mixin PageMixin<T extends StatefulWidget> on State<T> {
 
   void initPageState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final commonScaffoldState = context.commonScaffoldState;
-      commonScaffoldState?.actions = actions;
-      commonScaffoldState?.floatingActionButton = floatingActionButton;
-      commonScaffoldState?.onKeywordsUpdate = onKeywordsUpdate;
-      commonScaffoldState?.updateSearchState(
-        (_) => onSearch != null
-            ? AppBarSearchState(
-                onSearch: onSearch!,
-              )
-            : null,
-      );
+      context.commonScaffoldState
+        ?..actions = actions
+        ..floatingActionButton = floatingActionButton
+        ..onKeywordsUpdate = onKeywordsUpdate
+        ..updateSearchState(
+          (_) => onSearch != null ? AppBarSearchState(onSearch: onSearch!) : null,
+        );
     });
   }
-
+  
   void onPageHidden() {}
 
   List<Widget> get actions => [];

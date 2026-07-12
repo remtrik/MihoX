@@ -11,13 +11,10 @@ abstract mixin class TileListener {
 
   void onChangeMode(String mode) {}
 
-  void onDetached(){
-
-  }
+  void onDetached() {}
 }
 
 class Tile {
-
   Tile._() {
     _channel.setMethodCallHandler(_methodCallHandler);
   }
@@ -59,7 +56,7 @@ class Tile {
   void removeListener(TileListener listener) {
     _listeners.remove(listener);
   }
-  
+
   Future<void> updateTile() async {
     try {
       await _channel.invokeMethod('updateTile');
@@ -67,7 +64,7 @@ class Tile {
       // Ignore errors if tile service not available
     }
   }
-  
+
   /// Signal to native side that Dart service is ready to receive commands.
   /// This should be called after _service entrypoint has finished initialization.
   Future<void> signalServiceReady() async {
@@ -78,7 +75,7 @@ class Tile {
     }
   }
 
-  /// Push the current clash mode to the native side so the home-screen
+  /// Push the current mihomo mode to the native side so the home-screen
   /// widget can highlight the active button.
   Future<void> updateMode(String mode) async {
     try {
@@ -89,9 +86,9 @@ class Tile {
   }
 
   /// Tell the native side whether the Global-mode button should be shown
-  /// in the home-screen widget. Driven by the `flclashx-globalmode`
+  /// in the home-screen widget. Driven by the `mihox-globalmode`
   /// subscription header.
-  Future<void> updateGlobalModeEnabled(bool enabled) async {
+  Future<void> updateGlobalModeEnabled({required bool enabled}) async {
     try {
       await _channel.invokeMethod('updateGlobalModeEnabled', enabled);
     } catch (e) {
@@ -100,4 +97,4 @@ class Tile {
   }
 }
 
-final tile =  Platform.isAndroid ? Tile.instance : null;
+final tile = Platform.isAndroid ? Tile.instance : null;

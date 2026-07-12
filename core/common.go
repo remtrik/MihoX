@@ -30,13 +30,16 @@ import (
 )
 
 var (
-	currentConfig *config.Config
-	version       = 0
-	isRunning     = false
-	runLock       sync.Mutex
-	mBatch, _     = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
-	proxyDescriptions = map[string]string{}
-	pendingTunEnable  = false
+	currentConfig          *config.Config
+	version                = 0
+	isRunning              = false
+	runLock                sync.Mutex
+	mBatch, _              = batch.New(context.Background(), batch.WithConcurrencyNum[bool](50))
+	proxyDescriptions      = map[string]string{}
+	proxyNetworks          = map[string]string{}
+	pendingTunEnable       = false
+	currentTestURL         = "https://www.gstatic.com/generate_204"
+	minHealthCheckInterval = 5 * time.Second
 )
 
 type ExternalProviders []ExternalProvider
@@ -60,9 +63,38 @@ func proxiesWithProviders() map[string]constant.Proxy {
 	return allProxies
 }
 
-// extractProxyDescriptionsFromRaw caches custom server descriptions by proxy name.
+func computeMinHealthCheckInterval(rawConfig *config.RawConfig) {
+	min := 300
+	for _, g := range rawConfig.ProxyGroup {
+		var iv int
+		switch v := g["interval"].(type) {
+		case int:
+			iv = v
+		case float64:
+			iv = int(v)
+		case json.Number:
+			iv64, _ := v.Int64()
+			iv = int(iv64)
+		}
+		if iv > 0 && iv < min {
+			min = iv
+		}
+	}
+	d := time.Duration(min) * time.Second
+	// Floor at 30s (was 5s): a tiny/misconfigured group interval would otherwise url-test
+	// every proxy as often as every 5s while foreground — bursts of TLS handshakes
+	// (CPU + radio + data) for marginally fresher latency numbers.
+	if d < 30*time.Second {
+		d = 30 * time.Second
+	}
+	log.Infoln("[HealthCheck] computed min interval from %d groups: %s", len(rawConfig.ProxyGroup), d)
+	minHealthCheckInterval = d
+}
+
+// extractProxyDescriptionsFromRaw caches custom server descriptions and proxy networks by proxy name.
 func extractProxyDescriptionsFromRaw(rawConfig *config.RawConfig) {
 	descriptions := make(map[string]string, len(rawConfig.Proxy))
+	networks := make(map[string]string, len(rawConfig.Proxy))
 	for _, proxy := range rawConfig.Proxy {
 		nameValue, ok := proxy["name"]
 		if !ok {
@@ -85,15 +117,24 @@ func extractProxyDescriptionsFromRaw(rawConfig *config.RawConfig) {
 				}
 			}
 		}
-		if description == "" {
-			continue
+		network := ""
+		if value, ok := proxy["network"]; ok {
+			if text, ok := value.(string); ok {
+				network = text
+			}
 		}
-		descriptions[name] = description
+		if description != "" {
+			descriptions[name] = description
+		}
+		if network != "" {
+			networks[name] = network
+		}
 	}
 	proxyDescriptions = descriptions
+	proxyNetworks = networks
 }
 
-// proxiesWithDescriptions injects serverDescription for each proxy in API response.
+// proxiesWithDescriptions injects serverDescription and network for each proxy in API response.
 func proxiesWithDescriptions() map[string]interface{} {
 	result := make(map[string]interface{})
 	for name, proxy := range proxiesWithProviders() {
@@ -107,6 +148,11 @@ func proxiesWithDescriptions() map[string]interface{} {
 		}
 		if desc, ok := proxyDescriptions[name]; ok && desc != "" {
 			item["serverDescription"] = desc
+		}
+		if netw, ok := proxyNetworks[name]; ok && netw != "" {
+			if existing, has := item["network"]; !has || existing == "" {
+				item["network"] = netw
+			}
 		}
 		result[name] = item
 	}
@@ -338,7 +384,11 @@ func setupConfig(params *SetupParams) error {
 	var err error
 
 	extractProxyDescriptionsFromRaw(params.Config)
+	computeMinHealthCheckInterval(params.Config)
 	resetHealthCheckForwarderState()
+	if params.TestURL != "" {
+		currentTestURL = params.TestURL
+	}
 
 	parseStart := time.Now()
 	currentConfig, err = config.ParseRawConfig(params.Config)

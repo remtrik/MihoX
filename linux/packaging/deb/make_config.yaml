@@ -1,8 +1,8 @@
-display_name: FlClashX
-package_name: FlClashX
+display_name: MihoX
+package_name: MihoX
 maintainer:
-  name: pluralplay
-  email: mail@pluralplay.rw
+  name: remtrik
+  email: remtrik@mail.ru
 
 priority: optional
 section: x11
@@ -15,12 +15,12 @@ dependencies:
   - libkeybinder-3.0-dev
 
 keywords:
-  - FlClashX
-  - Clash
-  - ClashMeta
+  - MihoX
+  - Mihomo
+  - MihomoMeta
   - Proxy
 
-generic_name: FlClashX
+generic_name: MihoX
 
 categories:
   - Network

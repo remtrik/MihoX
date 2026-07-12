@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flclashx/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mihox/common/common.dart';
 
 class CommonTargetIcon extends StatelessWidget {
   const CommonTargetIcon({

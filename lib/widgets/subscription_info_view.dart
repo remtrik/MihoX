@@ -1,9 +1,8 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/models/models.dart';
 
 class SubscriptionInfoView extends StatelessWidget {
-
   const SubscriptionInfoView({
     super.key,
     this.subscriptionInfo,

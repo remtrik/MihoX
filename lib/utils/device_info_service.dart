@@ -3,14 +3,14 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flclashx/common/common.dart';
 import 'package:flutter/services.dart';
+import 'package:mihox/common/common.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 class DeviceDetails {
-  DeviceDetails({
+  const DeviceDetails({
     this.hwid,
     this.os,
     this.osVersion,
@@ -28,7 +28,7 @@ class DeviceInfoService {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
   static const String _hwidStorageKey = 'app_persistent_hwid';
   static const MethodChannel _channel =
-      MethodChannel('com.follow.clashx/device_id');
+      MethodChannel('org.remtrik.mihox/device_id');
 
   String _generateCompact16CharId(String fullId) {
     final bytes = utf8.encode(fullId);
@@ -39,7 +39,7 @@ class DeviceInfoService {
 
   Future<String?> _getAndroidId() async {
     try {
-      final String? androidId = await _channel.invokeMethod('getAndroidId');
+      final androidId = await _channel.invokeMethod('getAndroidId');
       if (androidId != null && androidId.isNotEmpty) {
         return androidId;
       }

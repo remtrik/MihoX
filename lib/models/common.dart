@@ -2,10 +2,10 @@
 
 import 'dart:math';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
 
 part 'generated/common.freezed.dart';
 part 'generated/common.g.dart';
@@ -86,10 +86,6 @@ extension ConnectionExt on Connection {
 
 String _logDateTime(_) => DateTime.now().toString();
 
-// String _logId(_) {
-//   return utils.id;
-// }
-
 @freezed
 class Log with _$Log {
   const factory Log({
@@ -100,11 +96,12 @@ class Log with _$Log {
 
   factory Log.app(
     String payload,
-  ) => Log(
-      payload: payload,
-      dateTime: _logDateTime(null),
-      // id: _logId(null),
-    );
+  ) =>
+      Log(
+        payload: payload,
+        dateTime: _logDateTime(null),
+        // id: _logId(null),
+      );
 
   factory Log.fromJson(Map<String, Object?> json) => _$LogFromJson(json);
 }
@@ -165,20 +162,6 @@ extension ConnectionsStateExt on ConnectionsState {
   }
 }
 
-const defaultDavFileName = "backup.zip";
-
-@freezed
-class DAV with _$DAV {
-  const factory DAV({
-    required String uri,
-    required String user,
-    required String password,
-    @Default(defaultDavFileName) String fileName,
-  }) = _DAV;
-
-  factory DAV.fromJson(Map<String, Object?> json) => _$DAVFromJson(json);
-}
-
 @freezed
 class FileInfo with _$FileInfo {
   const factory FileInfo({
@@ -195,7 +178,7 @@ extension FileInfoExt on FileInfo {
 @freezed
 class VersionInfo with _$VersionInfo {
   const factory VersionInfo({
-    @Default("") String clashName,
+    @Default("") String mihomoName,
     @Default("") String version,
   }) = _VersionInfo;
 
@@ -204,16 +187,15 @@ class VersionInfo with _$VersionInfo {
 }
 
 class Traffic {
-
   Traffic({int? up, int? down})
       : id = DateTime.now().millisecondsSinceEpoch,
         up = TrafficValue(value: up),
         down = TrafficValue(value: down);
 
   factory Traffic.fromMap(Map<String, dynamic> map) => Traffic(
-      up: map['up'],
-      down: map['down'],
-    );
+        up: map['up'],
+        down: map['down'],
+      );
   int id;
   TrafficValue up;
   TrafficValue down;
@@ -238,7 +220,6 @@ class Traffic {
 
 @immutable
 class TrafficValueShow {
-
   const TrafficValueShow({
     required this.value,
     required this.unit,
@@ -249,11 +230,13 @@ class TrafficValueShow {
 
 @freezed
 class Proxy with _$Proxy {
-  const factory Proxy(
-      {required String name,
-      required String type,
-      String? now,
-      String? serverDescription}) = _Proxy;
+  const factory Proxy({
+    required String name,
+    required String type,
+    String? now,
+    String? serverDescription,
+    String? network,
+  }) = _Proxy;
 
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
 }
@@ -293,7 +276,6 @@ extension GroupExt on Group {
 
 @immutable
 class TrafficValue {
-
   const TrafficValue({int? value}) : _value = value ?? 0;
   final int _value;
 
@@ -390,7 +372,6 @@ extension ColorSchemesExt on ColorSchemes {
 }
 
 class IpInfo {
-
   const IpInfo({
     required this.ip,
     required this.countryCode,
@@ -399,52 +380,52 @@ class IpInfo {
   final String countryCode;
 
   static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country": final String country,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: country,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country": final String country,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: country,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpApiCoJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpSbJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpwhoIsJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   @override
   String toString() => 'IpInfo{ip: $ip, countryCode: $countryCode}';
@@ -546,11 +527,12 @@ class Script with _$Script {
   factory Script.create({
     required String label,
     required String content,
-  }) => Script(
-      id: utils.uuidV4,
-      label: label,
-      content: content,
-    );
+  }) =>
+      Script(
+        id: utils.uuidV4,
+        label: label,
+        content: content,
+      );
 
   factory Script.fromJson(Map<String, Object?> json) => _$ScriptFromJson(json);
 }

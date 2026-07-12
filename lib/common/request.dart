@@ -5,13 +5,12 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/state.dart';
 
 class Request {
-
   Request() {
     _dio = Dio(
       BaseOptions(
@@ -20,61 +19,43 @@ class Request {
         },
       ),
     );
-    _clashDio = Dio();
-    _clashDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
+    _mihomoDio = Dio();
+    _mihomoDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
       final client = HttpClient();
       client.findProxy = (uri) {
         client.userAgent = globalState.ua;
-        return FlClashHttpOverrides.handleFindProxy(uri);
+        return MihoXHttpOverrides.handleFindProxy(uri);
       };
       return client;
     });
   }
   late final Dio _dio;
-  late final Dio _clashDio;
+  late final Dio _mihomoDio;
   String? userAgent;
 
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {
     Map<String, dynamic>? headers,
   }) async {
-    final requestHeaders = headers ?? {};
-    requestHeaders['User-Agent'] = globalState.ua;
+    final requestHeaders = {
+      ...?headers,
+      'User-Agent': globalState.ua,
+    };
 
-    final firstResponse = await _dio.get<Uint8List>(
+    return _dio.get<Uint8List>(
       url,
       options: Options(
         responseType: ResponseType.bytes,
         headers: requestHeaders,
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 400,
+        followRedirects: true,
+        maxRedirects: 5,
+        validateStatus: (status) => status != null && status < 500,
       ),
     );
-
-    if (firstResponse.isRedirect == true) {
-      final newUrl = firstResponse.headers.value('location');
-      if (newUrl == null) {
-        throw Exception('Redirect detected, but no location header was found.');
-      }
-
-      print('↪️ Redirecting to: $newUrl');
-      final finalResponse = await _dio.get<Uint8List>(
-        newUrl,
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: requestHeaders,
-          followRedirects: true,
-          maxRedirects: 5,
-          validateStatus: (status) => status != null && status < 500,
-        ),
-      );
-      return finalResponse;
-    }
-    return firstResponse;
   }
 
   Future<Response> getTextResponseForUrl(String url) async {
-    final response = await _clashDio.get(
+    final response = await _mihomoDio.get(
       url,
       options: Options(
         responseType: ResponseType.plain,
@@ -105,10 +86,9 @@ class Request {
     );
     if (response.statusCode != 200) return null;
     final data = response.data as Map<String, dynamic>;
-    final remoteVersion = data['tag_name'];
+    final remoteVersion = (data['tag_name'] as String).replaceAll('v', '');
     final version = globalState.packageInfo.version;
-    final hasUpdate =
-        utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
+    final hasUpdate = utils.compareVersions(remoteVersion, version) > 0;
     if (!hasUpdate) return null;
     return data;
   }
@@ -121,37 +101,70 @@ class Request {
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
-    var failureCount = 0;
-    final futures = _ipInfoSources.entries.map((source) async {
-      final completer = Completer<Result<IpInfo?>>();
-      final future = Dio().get<Map<String, dynamic>>(
-        source.key,
-        cancelToken: cancelToken,
-        options: Options(
-          responseType: ResponseType.json,
-        ),
+  final dio = Dio();
+  final raceCancelToken = CancelToken();
+
+  unawaited(cancelToken?.whenCancel.then((_) {
+    if (!raceCancelToken.isCancelled) {
+      raceCancelToken.cancel();
+    }
+  }));
+
+  final completer = Completer<Result<IpInfo?>>();
+  var pending = _ipInfoSources.length;
+  final errors = <String>[];
+
+  void recordFailure(String source, Object error) {
+    errors.add('$source: $error');
+    pending--;
+    if (pending == 0 && !completer.isCompleted) {
+      completer.complete(
+        Result.error('All IP info sources failed:\n${errors.join('\n')}'),
       );
-      future.then((res) {
-        if (res.statusCode == HttpStatus.ok && res.data != null) {
-          completer.complete(Result.success(source.value(res.data!)));
-        } else {
-          failureCount++;
-          if (failureCount == _ipInfoSources.length) {
-            completer.complete(Result.success(null));
-          }
-        }
-      }).catchError((e) {
-        failureCount++;
-        if (e == DioExceptionType.cancel) {
-          completer.complete(Result.error("cancelled"));
-        }
-      });
-      return completer.future;
-    });
-    final res = await Future.any(futures);
-    cancelToken?.cancel();
-    return res;
+    }
   }
+
+  for (final entry in _ipInfoSources.entries) {
+    unawaited(() async {
+      try {
+        final res = await dio.get<Map<String, dynamic>>(
+          entry.key,
+          cancelToken: raceCancelToken,
+          options: Options(
+            responseType: ResponseType.json,
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+        );
+
+        if (completer.isCompleted) return;
+
+        if (res.statusCode != HttpStatus.ok || res.data == null) {
+          recordFailure(entry.key, 'HTTP ${res.statusCode}');
+          return;
+        }
+
+        final ipInfo = entry.value(res.data!);
+        if (!completer.isCompleted) {
+          completer.complete(Result.success(ipInfo));
+        }
+      } catch (e) {
+        if (e is DioException && CancelToken.isCancel(e)) {
+          return;
+        }
+        if (!completer.isCompleted) {
+          recordFailure(entry.key, e);
+        }
+      }
+    }());
+  }
+
+  final result = await completer.future;
+  if (!raceCancelToken.isCancelled) {
+    raceCancelToken.cancel('IP lookup finished, cancelling remaining requests');
+  }
+  return result;
+}
 
   Future<bool> pingHelper() async {
     try {
@@ -225,13 +238,15 @@ class Request {
 
   Future<Map<String, dynamic>?> getCoreVersion() async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        "http://$defaultExternalController/version",
-        options: Options(
-          responseType: ResponseType.json,
-        ),
-      ).timeout(const Duration(seconds: 2));
-      
+      final response = await _dio
+          .get<Map<String, dynamic>>(
+            "http://$defaultExternalController/version",
+            options: Options(
+              responseType: ResponseType.json,
+            ),
+          )
+          .timeout(const Duration(seconds: 2));
+
       if (response.statusCode != HttpStatus.ok) return null;
       return response.data;
     } catch (_) {

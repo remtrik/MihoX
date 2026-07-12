@@ -1,35 +1,23 @@
-import 'package:flclashx/common/app_localizations.dart';
+import 'package:mihox/common/app_localizations.dart';
 
 extension DateTimeExtension on DateTime {
   bool get isBeforeNow => isBefore(DateTime.now());
 
-  bool isBeforeSecure(DateTime? dateTime) {
-    if (dateTime == null) {
-      return false;
-    }
-    return true;
-  }
+  bool isBeforeSecure(DateTime? dateTime) => dateTime != null;
 
   String get lastUpdateTimeDesc {
-    final currentDateTime = DateTime.now();
-    final difference = currentDateTime.difference(this);
-    final days = difference.inDays;
-    if (days >= 365) {
-      return "${(days / 365).floor()} ${appLocalizations.years}${appLocalizations.ago}";
-    }
-    if (days >= 30) {
-      return "${(days / 30).floor()} ${appLocalizations.months}${appLocalizations.ago}";
-    }
-    if (days >= 1) {
-      return "$days ${appLocalizations.days}${appLocalizations.ago}";
-    }
-    final hours = difference.inHours;
-    if (hours >= 1) {
-      return "$hours ${appLocalizations.hours}${appLocalizations.ago}";
-    }
-    final minutes = difference.inMinutes;
-    if (minutes >= 1) {
-      return "$minutes ${appLocalizations.minutes}${appLocalizations.ago}";
+    final difference = DateTime.now().difference(this);
+
+    final units = <(int, String)>[
+      (difference.inDays ~/ 365, appLocalizations.years),
+      (difference.inDays ~/ 30, appLocalizations.months),
+      (difference.inDays, appLocalizations.days),
+      (difference.inHours, appLocalizations.hours),
+      (difference.inMinutes, appLocalizations.minutes),
+    ];
+
+    for (final (value, unit) in units) {
+      if (value >= 1) return "$value $unit${appLocalizations.ago}";
     }
     return appLocalizations.just;
   }

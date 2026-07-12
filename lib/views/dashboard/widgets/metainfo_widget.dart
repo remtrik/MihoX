@@ -1,15 +1,17 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/views/profiles/add_profile.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/views/profiles/add_profile.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class MetainfoWidget extends ConsumerWidget {
   const MetainfoWidget({super.key});
+
+  static final _expireDateFormat = DateFormat('dd.MM.yyyy');
 
   String _getDaysDeclension(int days) {
     if (days % 100 >= 11 && days % 100 <= 19) {
@@ -52,18 +54,20 @@ class MetainfoWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allProfiles = ref.watch(profilesProvider);
+    final noProfiles = ref.watch(
+      profilesProvider.select((profiles) => profiles.isEmpty),
+    );
     final currentProfile = ref.watch(currentProfileProvider);
     final theme = Theme.of(context);
 
-    if (allProfiles.isEmpty) {
+    if (noProfiles) {
       return CommonCard(
         onPressed: () async {
           final url = await globalState.showCommonDialog<String>(
             child: const URLFormDialog(),
           );
           if (url != null) {
-            globalState.appController.addProfileFormURL(url);
+            await globalState.appController.addProfileFormURL(url);
           }
         },
         child: Center(
@@ -100,9 +104,11 @@ class MetainfoWidget extends ConsumerWidget {
     var remainingText = '';
     var showTimeLeft = false;
 
-    if (!isPerpetual) {
-      final expireDateTime =
-          DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
+    final expireDateTime = isPerpetual
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
+
+    if (expireDateTime != null) {
       final difference = expireDateTime.difference(DateTime.now());
       final days = difference.inDays;
 
@@ -123,6 +129,62 @@ class MetainfoWidget extends ConsumerWidget {
           }
         }
       }
+    }
+
+    Widget trafficSection;
+    if (isUnlimitedTraffic) {
+      const totalTraffic = "∞";
+      final usedTrafficValue =
+          subscriptionInfo.upload + subscriptionInfo.download;
+      final usedTraffic = TrafficValue(value: usedTrafficValue);
+
+      trafficSection = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${appLocalizations.traffic}: ${usedTraffic.showValue} ${usedTraffic.showUnit} / $totalTraffic GB',
+            style: theme.textTheme.bodyMedium,
+          ),
+        ],
+      );
+    } else {
+      final totalTraffic = TrafficValue(value: subscriptionInfo.total);
+      final usedTrafficValue =
+          subscriptionInfo.upload + subscriptionInfo.download;
+      final usedTraffic = TrafficValue(value: usedTrafficValue);
+
+      var progress = 0.0;
+      if (subscriptionInfo.total > 0) {
+        progress = usedTrafficValue / subscriptionInfo.total;
+      }
+      progress = progress.clamp(0.0, 1.0);
+
+      Color progressColor = Colors.green;
+      if (progress > 0.9) {
+        progressColor = Colors.red;
+      } else if (progress > 0.7) {
+        progressColor = Colors.orange;
+      }
+
+      trafficSection = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${appLocalizations.traffic}: ${usedTraffic.showValue} ${usedTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+            ),
+          ),
+        ],
+      );
     }
 
     return CommonCard(
@@ -149,11 +211,7 @@ class MetainfoWidget extends ConsumerWidget {
                         ),
                         if (supportUrl != null && supportUrl.isNotEmpty)
                           IconButton(
-                            icon: Icon(
-                              supportUrl.toLowerCase().contains('t.me')
-                                  ? Icons.telegram
-                                  : Icons.launch,
-                            ),
+                            icon: const Icon(Icons.contact_support),
                             iconSize: 34,
                             color: theme.colorScheme.primary,
                             onPressed: () {
@@ -172,59 +230,12 @@ class MetainfoWidget extends ConsumerWidget {
                       ],
                     ),
                     const Spacer(),
-                    if (!isUnlimitedTraffic)
-                      Builder(builder: (context) {
-                        final totalTraffic =
-                            TrafficValue(value: subscriptionInfo.total);
-                        final usedTrafficValue =
-                            subscriptionInfo.upload + subscriptionInfo.download;
-                        final usedTraffic =
-                            TrafficValue(value: usedTrafficValue);
-
-                        var progress = 0.0;
-                        if (subscriptionInfo.total > 0) {
-                          progress = usedTrafficValue / subscriptionInfo.total;
-                        }
-                        progress = progress.clamp(0.0, 1.0);
-
-                        Color progressColor = Colors.green;
-                        if (progress > 0.9) {
-                          progressColor = Colors.red;
-                        } else if (progress > 0.7) {
-                          progressColor = Colors.orange;
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${appLocalizations.traffic} ${usedTraffic.showValue} ${usedTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 6),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 6,
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    progressColor),
-                              ),
-                            ),
-                          ],
-                        );
-                      })
-                    else
-                      Text(
-                        appLocalizations.trafficUnlimited,
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                    trafficSection,
                     const SizedBox(height: 12),
                     Text(
                       isPerpetual
                           ? appLocalizations.subscriptionEternal
-                          : '${appLocalizations.expiresOn} ${DateFormat('dd.MM.yyyy').format(DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000))}',
+                          : '${appLocalizations.expiresOn} ${_expireDateFormat.format(expireDateTime!)}',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ],

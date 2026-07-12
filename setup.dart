@@ -4,23 +4,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart';
 import 'package:crypto/crypto.dart';
+import 'package:path/path.dart';
 
 enum Target {
   windows,
   linux,
   android,
-  macos,
 }
 
 extension TargetExt on Target {
-  String get os {
-    if (this == Target.macos) {
-      return "darwin";
-    }
-    return name;
-  }
+  String get os => name;
 
   bool get same {
     if (this == Target.android) {
@@ -30,9 +24,6 @@ extension TargetExt on Target {
       return true;
     }
     if (Platform.isLinux && this == Target.linux) {
-      return true;
-    }
-    if (Platform.isMacOS && this == Target.macos) {
       return true;
     }
     return false;
@@ -46,9 +37,6 @@ extension TargetExt on Target {
         break;
       case Target.windows:
         extensionName = ".dll";
-        break;
-      case Target.macos:
-        extensionName = ".dylib";
         break;
     }
     return extensionName;
@@ -73,15 +61,14 @@ enum Mode { core, lib }
 enum Arch { amd64, arm64, arm }
 
 class BuildItem {
-  Target target;
-  Arch? arch;
-  String? archName;
-
   BuildItem({
     required this.target,
     this.arch,
     this.archName,
   });
+  Target target;
+  Arch? arch;
+  String? archName;
 
   @override
   String toString() =>
@@ -90,14 +77,6 @@ class BuildItem {
 
 class Build {
   static List<BuildItem> get buildItems => [
-        BuildItem(
-          target: Target.macos,
-          arch: Arch.arm64,
-        ),
-        BuildItem(
-          target: Target.macos,
-          arch: Arch.amd64,
-        ),
         BuildItem(
           target: Target.linux,
           arch: Arch.arm64,
@@ -131,11 +110,11 @@ class Build {
         ),
       ];
 
-  static String get appName => "FlClashX";
+  static String get appName => "MihoX";
 
-  static String get coreName => "FlClashCore";
+  static String get coreName => "MihoXCore";
 
-  static String get libName => "libclash";
+  static String get libName => "libmihomo";
 
   static String get outDir => join(current, libName);
 
@@ -148,27 +127,64 @@ class Build {
   static String _getCc(BuildItem buildItem) {
     final environment = Platform.environment;
     if (buildItem.target == Target.android) {
-      final ndk = environment["ANDROID_NDK"];
-      assert(ndk != null);
+      final ndk = environment["ANDROID_NDK"] ?? environment["ANDROID_NDK_HOME"];
+      if (ndk == null || ndk.isEmpty) {
+        throw "ANDROID_NDK or ANDROID_NDK_HOME environment variable is not set. Please set it to your Android NDK path.";
+      }
       final prebuiltDir =
-          Directory(join(ndk!, "toolchains", "llvm", "prebuilt"));
-      final prebuiltDirList = prebuiltDir.listSync();
+          Directory(join(ndk, "toolchains", "llvm", "prebuilt"));
+      if (!prebuiltDir.existsSync()) {
+        throw "Android NDK path is invalid: ${prebuiltDir.path}";
+      }
+      final prebuiltDirList =
+          prebuiltDir.listSync().whereType<Directory>().toList();
+      if (prebuiltDirList.isEmpty) {
+        throw "No prebuilt directories found under ${prebuiltDir.path}.";
+      }
+      final hostDir = _selectAndroidNdkHostDir(prebuiltDirList);
       final map = {
         "armeabi-v7a": "armv7a-linux-androideabi21-clang",
         "arm64-v8a": "aarch64-linux-android21-clang",
-        "x86": "i686-linux-android21-clang",
+        "x86": "i686-linux-androideabi21-clang",
         "x86_64": "x86_64-linux-android21-clang"
       };
+      final compiler = map[buildItem.archName];
+      if (compiler == null) {
+        throw "Unsupported Android archName: ${buildItem.archName}";
+      }
+
       return join(
-        prebuiltDirList.first.path,
+        hostDir.path,
         "bin",
-        map[buildItem.archName],
+        compiler,
       );
     }
     return "gcc";
   }
 
-  static get tags => "with_gvisor,cmfa";
+  static Directory _selectAndroidNdkHostDir(List<Directory> dirs) {
+    final hostNames = dirs.map((dir) => basename(dir.path)).toList();
+    final preferred = <String>[
+      if (Platform.isWindows) "windows-x86_64",
+      if (Platform.isLinux) "linux-x86_64",
+    ];
+
+    for (final name in preferred) {
+      for (final dir in dirs) {
+        if (basename(dir.path) == name) {
+          return dir;
+        }
+      }
+    }
+
+    if (dirs.length == 1) {
+      return dirs.first;
+    }
+
+    throw "Unable to determine Android NDK prebuilt host directory. Found: $hostNames";
+  }
+
+  static String get tags => "with_gvisor,cmfa";
 
   static Future<void> exec(
     List<String> executable, {
@@ -197,17 +213,16 @@ class Build {
 
   static Future<String> calcSha256(String filePath) async {
     final file = File(filePath);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       throw "File not exists";
     }
     final stream = file.openRead();
     return sha256.convert(await stream.reduce((a, b) => a + b)).toString();
   }
 
-  /// Reads [core/constant/version.go] (single source of truth for mihomo version).
   static Future<String> extractCoreVersion() async {
     final versionFile = File(join("core", "constant", "version.go"));
-    if (!await versionFile.exists()) {
+    if (!versionFile.existsSync()) {
       throw "core/constant/version.go file not found";
     }
     final content = await versionFile.readAsString();
@@ -218,7 +233,6 @@ class Build {
     return match.group(1)!;
   }
 
-  /// Writes [lib/core_version.dart] so Flutter can show the same version without dart-define.
   static Future<void> syncCoreVersionDartFile() async {
     final v = await extractCoreVersion();
     final out = File(join(current, "lib", "core_version.dart"));
@@ -239,19 +253,21 @@ class Build {
   }) async {
     final isLib = mode == Mode.lib;
 
-    final items = buildItems.where(
-      (element) =>
-          element.target == target &&
-          (arch == null ? true : element.arch == arch),
-    ).toList();
+    final items = buildItems
+        .where(
+          (element) =>
+              element.target == target &&
+              (arch == null ? true : element.arch == arch),
+        )
+        .toList();
 
-    final List<String> corePaths = [];
+    final corePaths = <String>[];
 
     final targetOutFilePath = join(outDir, target.name);
     final targetOutFile = File(targetOutFilePath);
-    if (await targetOutFile.exists()) {
-      await targetOutFile.delete(recursive: true);
-      await Directory(targetOutFilePath).create(recursive: true);
+    if (targetOutFile.existsSync()) {
+      targetOutFile.deleteSync(recursive: true);
+      Directory(targetOutFilePath).createSync(recursive: true);
     }
 
     for (final item in items) {
@@ -267,7 +283,7 @@ class Build {
       final realOutPath = join(outFilePath, fileName);
       corePaths.add(realOutPath);
 
-      final Map<String, String> env = {};
+      final env = <String, String>{};
       env["GOOS"] = item.target.os;
       if (item.arch != null) {
         env["GOARCH"] = item.arch!.name;
@@ -331,20 +347,20 @@ class Build {
     }
   }
 
-  static buildHelper(Target target, String token, {Arch? arch}) async {
-    final List<String> buildArgs = [
+  static Future<void> buildHelper(Target target, String token,
+      {Arch? arch}) async {
+    final buildArgs = <String>[
       "cargo",
       "build",
       "--release",
       "--features",
       "windows-service",
     ];
-    
-    // Add target for cross-compilation
+
     if (arch == Arch.arm64 && target == Target.windows) {
       buildArgs.addAll(["--target", "aarch64-pc-windows-msvc"]);
     }
-    
+
     await exec(
       buildArgs,
       environment: {
@@ -353,15 +369,15 @@ class Build {
       name: "build helper",
       workingDirectory: _servicesDir,
     );
-    
-    // Determine output path based on architecture
+
     final String releasePath;
     if (arch == Arch.arm64 && target == Target.windows) {
-      releasePath = join(_servicesDir, "target", "aarch64-pc-windows-msvc", "release");
+      releasePath =
+          join(_servicesDir, "target", "aarch64-pc-windows-msvc", "release");
     } else {
       releasePath = join(_servicesDir, "target", "release");
     }
-    
+
     final outPath = join(
       releasePath,
       "helper${target.executableExtensionName}",
@@ -369,39 +385,22 @@ class Build {
     final targetPath = join(
       outDir,
       target.name,
-      "FlClashHelperService${target.executableExtensionName}",
+      "MihoXHelperService${target.executableExtensionName}",
     );
     await File(outPath).copy(targetPath);
   }
 
   static List<String> getExecutable(String command) => command.split(" ");
 
-  static getDistributor() async {
-    final distributorDir = join(
-      current,
-      "plugins",
-      "flutter_distributor",
-      "packages",
-      "flutter_distributor",
-    );
-
+  static Future<void> getDistributor() async {
     await exec(
-      name: "clean distributor",
-      Build.getExecutable("flutter clean"),
-      workingDirectory: distributorDir,
+      name: "activate fastforge",
+      Build.getExecutable("dart pub global activate fastforge"),
     );
-    await exec(
-      name: "upgrade distributor",
-      Build.getExecutable("flutter pub upgrade"),
-      workingDirectory: distributorDir,
-    );
-    await exec(
-      name: "get distributor",
-      Build.getExecutable("dart pub global activate -s path $distributorDir"),
-    );
+    return;
   }
 
-  static copyFile(String sourceFilePath, String destinationFilePath) {
+  static void copyFile(String sourceFilePath, String destinationFilePath) {
     final sourceFile = File(sourceFilePath);
     if (!sourceFile.existsSync()) {
       throw "SourceFilePath not exists";
@@ -421,8 +420,6 @@ class Build {
 }
 
 class BuildCommand extends Command {
-  Target target;
-
   BuildCommand({
     required this.target,
   }) {
@@ -438,25 +435,25 @@ class BuildCommand extends Command {
         help: 'The $name build archName',
       );
     }
-    argParser.addOption(
-      "out",
-      valueHelp: [
-        if (target.same) "app",
-        "core",
-      ].join(','),
-      help: 'The $name build arch',
-    );
-    argParser.addOption(
-      "env",
-      valueHelp: [
-        "pre",
-        "stable",
-      ].join(','),
-      help: 'The $name build env',
-    );
-    // Android builds always create both split and universal APKs
-    // No additional flags needed
+    argParser
+      ..addOption(
+        "out",
+        valueHelp: [
+          if (target.same) "app",
+          "core",
+        ].join(','),
+        help: 'The $name build arch',
+      )
+      ..addOption(
+        "env",
+        valueHelp: [
+          "preview",
+          "stable",
+        ].join(','),
+        help: 'The $name build env',
+      );
   }
+  Target target;
 
   @override
   String get description => "build $name application";
@@ -469,7 +466,7 @@ class BuildCommand extends Command {
       .map((e) => e.arch!)
       .toList();
 
-  _getLinuxDependencies(Arch arch) async {
+  Future<void> _getLinuxDependencies(Arch arch) async {
     await Build.exec(
       Build.getExecutable("sudo apt update -y"),
     );
@@ -512,95 +509,25 @@ class BuildCommand extends Command {
     }
   }
 
-  _getMacosDependencies() async {
-    await Build.exec(
-      Build.getExecutable("npm install -g create-dmg"),
-    );
-  }
-
-  _buildMacosApp({
-    required Arch arch,
-    required String env,
-    required String coreVersion,
-  }) async {
-    await Build.exec(
-      name: "flutter build macos",
-      [
-        "flutter",
-        "build",
-        "macos",
-        "--release",
-        "--dart-define=APP_ENV=$env",
-        "--dart-define=CORE_VERSION=$coreVersion",
-      ],
-    );
-
-    final pubspecFile = File(join(current, "pubspec.yaml"));
-    final pubspecContent = pubspecFile.readAsStringSync();
-    final versionMatch = RegExp(r'version:\s*(.+)').firstMatch(pubspecContent);
-    final version = versionMatch?.group(1)?.split('+').first ?? "0.0.0";
-
-    final appName = Build.appName;
-    final appPath = join(current, "build", "macos", "Build", "Products",
-        "Release", "$appName.app");
-
-    final distDir = Directory(Build.distPath);
-    if (!distDir.existsSync()) {
-      distDir.createSync(recursive: true);
-    }
-
-    print("Creating DMG with create-dmg...");
-
-    await Build.exec(
-      name: "create-dmg",
-      [
-        "create-dmg",
-        "--overwrite",
-        "--dmg-title",
-        appName,
-        appPath,
-        Build.distPath,
-      ],
-    );
-
-    final createdDmgName = "$appName $version.dmg";
-    final createdDmgPath = join(Build.distPath, createdDmgName);
-    final targetDmgName = "$appName-macos-${arch.name}.dmg";
-    final targetDmgPath = join(Build.distPath, targetDmgName);
-
-    final createdDmg = File(createdDmgPath);
-    if (createdDmg.existsSync()) {
-      final targetDmg = File(targetDmgPath);
-      if (targetDmg.existsSync()) {
-        targetDmg.deleteSync();
-      }
-
-      createdDmg.renameSync(targetDmgPath);
-      print("✅ DMG created: $targetDmgPath");
-    } else {
-      throw "DMG file not created: $createdDmgPath";
-    }
-  }
-
-  _buildDistributor({
+  Future<void> _buildDistributor({
     required Target target,
     required String targets,
     String args = '',
     required String env,
   }) async {
     await Build.getDistributor();
+    final distributorCommand =
+        "dart pub global run fastforge:main package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args";
     await Build.exec(
       name: name,
-      Build.getExecutable(
-        "flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env",
-      ),
+      Build.getExecutable(distributorCommand),
     );
   }
 
   Future<String?> get systemArch async {
     if (Platform.isWindows) {
       return Platform.environment["PROCESSOR_ARCHITECTURE"];
-    } else if (Platform.isLinux || Platform.isMacOS) {
+    } else if (Platform.isLinux) {
       final result = await Process.run('uname', ['-m']);
       return result.stdout.toString().trim();
     }
@@ -611,14 +538,28 @@ class BuildCommand extends Command {
   Future<void> run() async {
     final mode = target == Target.android ? Mode.lib : Mode.core;
     final String out = argResults?["out"] ?? (target.same ? "app" : "core");
-    final archName = argResults?["arch"];
-    final env = argResults?["env"] ?? "pre";
+    var archName = argResults?["arch"];
+    final env = argResults?["env"] ?? "stable";
+
+    if (archName == null && target != Target.android) {
+      final sysArch = await systemArch;
+      if (sysArch != null) {
+        final archMap = {
+          'x86_64': 'amd64',
+          'AMD64': 'amd64',
+          'arm64': 'arm64',
+          'aarch64': 'arm64',
+        };
+        archName = archMap[sysArch] ?? sysArch;
+      }
+    }
+
     final currentArches =
         arches.where((element) => element.name == archName).toList();
     final arch = currentArches.isEmpty ? null : currentArches.first;
 
     if (arch == null && target != Target.android) {
-      throw "Invalid arch parameter";
+      throw "Invalid arch parameter. Available: ${arches.map((e) => e.name).join(', ')}";
     }
 
     await Build.syncCoreVersionDartFile();
@@ -630,6 +571,17 @@ class BuildCommand extends Command {
       mode: mode,
       coreVersion: coreVersion,
     );
+    switch (target) {
+      case Target.windows:
+        final token = target != Target.android
+            ? await Build.calcSha256(corePaths.first)
+            : null;
+        await Build.buildHelper(target, token!, arch: arch);
+        break;
+      case Target.linux:
+      case Target.android:
+        break;
+    }
 
     if (out != "app") {
       return;
@@ -640,12 +592,12 @@ class BuildCommand extends Command {
         final token = target != Target.android
             ? await Build.calcSha256(corePaths.first)
             : null;
-        Build.buildHelper(target, token!, arch: arch);
-        _buildDistributor(
+        await Build.buildHelper(target, token!, arch: arch);
+        await _buildDistributor(
           target: target,
           targets: "exe,zip",
           args:
-              " --description $archName --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
+              " --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
         );
         return;
@@ -661,19 +613,17 @@ class BuildCommand extends Command {
         ].join(",");
         final defaultTarget = targetMap[arch];
         await _getLinuxDependencies(arch!);
-        _buildDistributor(
+        await _buildDistributor(
           target: target,
           targets: targets,
           args:
-              " --description $archName --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
+              " --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
         );
         return;
       case Target.android:
-        // Build all architectures: armeabi-v7a, arm64-v8a, x86_64
-        final allTargets = "android-arm,android-arm64,android-x64";
+        const allTargets = "android-arm,android-arm64,android-x64";
 
-        // Build split APKs (one per architecture)
         await _buildDistributor(
           target: target,
           targets: "apk",
@@ -682,7 +632,6 @@ class BuildCommand extends Command {
           env: env,
         );
 
-        // Build universal APK (all architectures in one file)
         await _buildDistributor(
           target: target,
           targets: "apk",
@@ -692,23 +641,15 @@ class BuildCommand extends Command {
         );
 
         return;
-      case Target.macos:
-        await _getMacosDependencies();
-        await _buildMacosApp(
-          arch: arch!,
-          env: env,
-          coreVersion: coreVersion,
-        );
-        return;
     }
   }
 }
 
-main(args) async {
-  final runner = CommandRunner("setup", "build Application");
-  runner.addCommand(BuildCommand(target: Target.android));
-  runner.addCommand(BuildCommand(target: Target.linux));
-  runner.addCommand(BuildCommand(target: Target.windows));
-  runner.addCommand(BuildCommand(target: Target.macos));
-  runner.run(args);
+Future<void> main(args) async {
+  CommandRunner("setup", "build Application")
+    ..addCommand(BuildCommand(target: Target.android))
+    ..addCommand(BuildCommand(target: Target.linux))
+    ..addCommand(BuildCommand(target: Target.windows))
+    // ignore: unawaited_futures
+    ..run(args);
 }

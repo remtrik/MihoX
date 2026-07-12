@@ -14,9 +14,15 @@ import (
 
 var messagePort int64 = -1
 
+var dartApiInitialized bool
+
 //export initNativeApiBridge
 func initNativeApiBridge(api unsafe.Pointer) {
+	if dartApiInitialized {
+		return
+	}
 	bridge.InitDartApi(api)
+	dartApiInitialized = true
 }
 
 //export attachMessagePort

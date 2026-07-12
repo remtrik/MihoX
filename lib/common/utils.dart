@@ -1,16 +1,30 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lpinyin/lpinyin.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
 
 class Utils {
+  String decodeBase64(String value) {
+    try {
+      return utf8
+          .decode(
+            base64.decode(base64.normalize(value)),
+          )
+          .trim();
+    } catch (_) {
+      // not a base64
+      return value.trim();
+    }
+  }
+
   Color? getDelayColor(int? delay) {
     if (delay == null) return null;
     if (delay < 0) return Colors.red;
@@ -66,56 +80,48 @@ class Utils {
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
 
-  String getTimeDifference(DateTime dateTime) {
-    final currentDateTime = DateTime.now();
-    final difference = currentDateTime.difference(dateTime);
-    final inHours = difference.inHours;
-    final inMinutes = difference.inMinutes;
-    final inSeconds = difference.inSeconds;
+  String _formatHms(int hours, int minutes, int seconds) =>
+      "${getDateStringLast2(hours)}:${getDateStringLast2(minutes)}:${getDateStringLast2(seconds)}";
 
-    return "${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}";
+  String getTimeDifference(DateTime dateTime) {
+    final difference = DateTime.now().difference(dateTime);
+    return _formatHms(
+      difference.inHours,
+      difference.inMinutes,
+      difference.inSeconds,
+    );
   }
 
   String getTimeText(int? timeStamp) {
-    if (timeStamp == null) {
-      return '00:00:00';
-    }
-    final diff = timeStamp / 1000;
-    final totalSeconds = diff.floor();
+    if (timeStamp == null) return '00:00:00';
+
+    final totalSeconds = (timeStamp / 1000).floor();
 
     const maxSeconds = 31 * 86400 + 23 * 3600 + 59 * 60 + 59;
-    if (totalSeconds >= maxSeconds) {
-      return "Seriously?";
-    }
+    if (totalSeconds >= maxSeconds) return "Seriously?";
 
     final days = (totalSeconds / 86400).floor();
     final hours = ((totalSeconds % 86400) / 3600).floor();
     final minutes = ((totalSeconds % 3600) / 60).floor();
     final seconds = (totalSeconds % 60).floor();
+    final hms = _formatHms(hours, minutes, seconds);
 
-    if (days == 0) {
-      return "${getDateStringLast2(hours)}:${getDateStringLast2(minutes)}:${getDateStringLast2(seconds)}";
-    }
-
-    return "${days}d ${getDateStringLast2(hours)}:${getDateStringLast2(minutes)}:${getDateStringLast2(seconds)}";
+    return days == 0 ? hms : "${days}d $hms";
   }
 
   Locale? getLocaleForString(String? localString) {
     if (localString == null) return null;
-    final localSplit = localString.split("_");
-    if (localSplit.length == 1) {
-      return Locale(localSplit[0]);
-    }
-    if (localSplit.length == 2) {
-      return Locale(localSplit[0], localSplit[1]);
-    }
-    if (localSplit.length == 3) {
-      return Locale.fromSubtags(
-          languageCode: localSplit[0],
-          scriptCode: localSplit[1],
-          countryCode: localSplit[2]);
-    }
-    return null;
+    final parts = localString.split("_");
+    return switch (parts.length) {
+      1 => Locale(parts[0]),
+      2 => Locale(parts[0], parts[1]),
+      3 => Locale.fromSubtags(
+          languageCode: parts[0],
+          scriptCode: parts[1],
+          countryCode: parts[2],
+        ),
+      _ => null,
+    };
   }
 
   int sortByChar(String a, String b) {
@@ -141,29 +147,20 @@ class Utils {
   String getOverwriteLabel(String label) {
     final reg = RegExp(r'\((\d+)\)$');
     final matches = reg.allMatches(label);
-    if (matches.isNotEmpty) {
-      final match = matches.last;
-      final number = int.parse(match[1] ?? '0') + 1;
-      return label.replaceFirst(reg, '($number)', label.length - 3 - 1);
-    } else {
-      return "$label(1)";
-    }
+    if (matches.isEmpty) return "$label(1)";
+
+    final match = matches.last;
+    final number = int.parse(match[1] ?? '0') + 1;
+    return label.replaceFirst(reg, '($number)', label.length - 3 - 1);
   }
 
   String getTrayIconPath({
     required Brightness brightness,
     bool isRunning = false,
   }) {
-    if (Platform.isMacOS) {
-      // macOS always uses white icon for menu bar
-      return "assets/images/icon_white.png";
-    }
-    
     // When running - use colored icon
-    if (isRunning) {
-      return "assets/images/icon.ico";
-    }
-    
+    if (isRunning) return "assets/images/icon.ico";
+
     // When stopped - use stop icons based on theme
     return switch (brightness) {
       Brightness.dark => "assets/images/icon_stop_white.ico",
@@ -172,51 +169,38 @@ class Utils {
   }
 
   int compareVersions(String version1, String version2) {
-    final v1 = version1.split('+')[0].split('.');
-    final v2 = version2.split('+')[0].split('.');
-    final major1 = int.parse(v1[0]);
-    final major2 = int.parse(v2[0]);
-    if (major1 != major2) {
-      return major1.compareTo(major2);
+    List<int> parts(String v) => v.split('+')[0].split('.').map(int.parse).toList();
+    int build(String v) => v.contains('+') ? int.parse(v.split('+')[1]) : 0;
+
+    final v1 = parts(version1);
+    final v2 = parts(version2);
+    for (var i = 0; i < 3; i++) {
+      final a = i < v1.length ? v1[i] : 0;
+      final b = i < v2.length ? v2[i] : 0;
+      if (a != b) return a.compareTo(b);
     }
-    final minor1 = v1.length > 1 ? int.parse(v1[1]) : 0;
-    final minor2 = v2.length > 1 ? int.parse(v2[1]) : 0;
-    if (minor1 != minor2) {
-      return minor1.compareTo(minor2);
-    }
-    final patch1 = v1.length > 2 ? int.parse(v1[2]) : 0;
-    final patch2 = v2.length > 2 ? int.parse(v2[2]) : 0;
-    if (patch1 != patch2) {
-      return patch1.compareTo(patch2);
-    }
-    final build1 = version1.contains('+') ? int.parse(version1.split('+')[1]) : 0;
-    final build2 = version2.contains('+') ? int.parse(version2.split('+')[1]) : 0;
-    return build1.compareTo(build2);
+    return build(version1).compareTo(build(version2));
   }
 
   String getPinyin(String value) => value.isNotEmpty
-        ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
-        : "";
+      ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
+      : "";
 
   String? getFileNameForDisposition(String? disposition) {
     if (disposition == null) return null;
-    final parseValue = HeaderValue.parse(disposition);
-    final parameters = parseValue.parameters;
-    final fileNamePointKey = parameters.keys
-        .firstWhere((key) => key == "filename*", orElse: () => "");
-    if (fileNamePointKey.isNotEmpty) {
-      final res = parameters[fileNamePointKey]?.split("''") ?? [];
-      if (res.length >= 2) {
-        return Uri.decodeComponent(res[1]);
-      }
+    final parameters = HeaderValue.parse(disposition).parameters;
+
+    final encoded = parameters["filename*"];
+    if (encoded != null) {
+      final parts = encoded.split("''");
+      if (parts.length >= 2) return Uri.decodeComponent(parts[1]);
     }
-    final fileNameKey = parameters.keys
-        .firstWhere((key) => key == "filename", orElse: () => "");
-    if (fileNameKey.isEmpty) return null;
-    return parameters[fileNameKey];
+
+    return parameters["filename"];
   }
 
-  FlutterView getScreen() => WidgetsBinding.instance.platformDispatcher.views.first;
+  FlutterView getScreen() =>
+      WidgetsBinding.instance.platformDispatcher.views.first;
 
   List<String> parseReleaseBody(String? body) {
     if (body == null) return [];
@@ -288,18 +272,9 @@ class Utils {
 
   List<Color> getMaterialColorShades(Color color) {
     final swatch = _createPrimarySwatch(color);
-    return <Color>[
-      if (swatch[50] != null) swatch[50]!,
-      if (swatch[100] != null) swatch[100]!,
-      if (swatch[200] != null) swatch[200]!,
-      if (swatch[300] != null) swatch[300]!,
-      if (swatch[400] != null) swatch[400]!,
-      if (swatch[500] != null) swatch[500]!,
-      if (swatch[600] != null) swatch[600]!,
-      if (swatch[700] != null) swatch[700]!,
-      if (swatch[800] != null) swatch[800]!,
-      if (swatch[850] != null) swatch[850]!,
-      if (swatch[900] != null) swatch[900]!,
+    return [
+      for (final strength in _indexPrimary)
+        if (swatch[strength] != null) swatch[strength]!,
     ];
   }
 
@@ -307,86 +282,32 @@ class Utils {
 
   String get logFile => "${appName}_${DateTime.now().show}.log";
 
+  int _prioritize(bool a, bool b) => a == b ? 0 : (a ? -1 : 1);
+
   Future<String?> getLocalIpAddress() async {
-    final interfaces = await NetworkInterface.list(
-      includeLoopback: false,
-    )
+    final interfaces = await NetworkInterface.list(includeLoopback: false)
       ..sort((a, b) {
-        if (a.isWifi && !b.isWifi) return -1;
-        if (!a.isWifi && b.isWifi) return 1;
-        if (a.includesIPv4 && !b.includesIPv4) return -1;
-        if (!a.includesIPv4 && b.includesIPv4) return 1;
-        return 0;
+        final wifi = _prioritize(a.isWifi, b.isWifi);
+        return wifi != 0 ? wifi : _prioritize(a.includesIPv4, b.includesIPv4);
       });
+
     for (final interface in interfaces) {
       final addresses = interface.addresses;
-      if (addresses.isEmpty) {
-        continue;
-      }
-      addresses.sort((a, b) {
-        if (a.isIPv4 && !b.isIPv4) return -1;
-        if (!a.isIPv4 && b.isIPv4) return 1;
-        return 0;
-      });
+      if (addresses.isEmpty) continue;
+      addresses.sort((a, b) => _prioritize(a.isIPv4, b.isIPv4));
       return addresses.first.address;
     }
     return "";
   }
 
   SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
-    final control = Platform.isMacOS ? false : true;
+    const control = true;
     return SingleActivator(
       trigger,
       control: control,
       meta: !control,
     );
   }
-
-  // dynamic convertYamlNode(dynamic node) {
-  //   if (node is YamlMap) {
-  //     final map = <String, dynamic>{};
-  //     YamlNode? mergeKeyNode;
-  //     for (final entry in node.nodes.entries) {
-  //       if (entry.key is YamlScalar &&
-  //           (entry.key as YamlScalar).value == '<<') {
-  //         mergeKeyNode = entry.value;
-  //         break;
-  //       }
-  //     }
-  //     if (mergeKeyNode != null) {
-  //       final mergeValue = mergeKeyNode.value;
-  //       if (mergeValue is YamlMap) {
-  //         map.addAll(convertYamlNode(mergeValue) as Map<String, dynamic>);
-  //       } else if (mergeValue is YamlList) {
-  //         for (final node in mergeValue.nodes) {
-  //           if (node.value is YamlMap) {
-  //             map.addAll(convertYamlNode(node.value) as Map<String, dynamic>);
-  //           }
-  //         }
-  //       }
-  //     }
-  //
-  //     node.nodes.forEach((key, value) {
-  //       String stringKey;
-  //       if (key is YamlScalar) {
-  //         stringKey = key.value.toString();
-  //       } else {
-  //         stringKey = key.toString();
-  //       }
-  //       map[stringKey] = convertYamlNode(value.value);
-  //     });
-  //     return map;
-  //   } else if (node is YamlList) {
-  //     final list = <dynamic>[];
-  //     for (final item in node.nodes) {
-  //       list.add(convertYamlNode(item.value));
-  //     }
-  //     return list;
-  //   } else if (node is YamlScalar) {
-  //     return node.value;
-  //   }
-  //   return node;
-  // }
 
   FutureOr<T> handleWatch<T>(FutureOr<T> Function() function) async {
     if (kDebugMode) {

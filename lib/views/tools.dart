@@ -1,19 +1,18 @@
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/views/about.dart';
-import 'package:flclashx/views/access.dart';
-import 'package:flclashx/views/application_setting.dart';
-import 'package:flclashx/views/config/config.dart';
-import 'package:flclashx/views/hotkey.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/l10n/l10n.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/views/about.dart';
+import 'package:mihox/views/access.dart';
+import 'package:mihox/views/application_setting.dart';
+import 'package:mihox/views/config/config.dart';
+import 'package:mihox/views/hotkey.dart';
+import 'package:mihox/widgets/widgets.dart';
 import 'package:path/path.dart' show dirname, join;
 
 import 'backup_and_recovery.dart';
@@ -28,53 +27,54 @@ class ToolsView extends ConsumerStatefulWidget {
 }
 
 class _ToolboxViewState extends ConsumerState<ToolsView> {
-  ListItem<dynamic> _buildNavigationMenuItem(NavigationItem navigationItem) => ListItem.open(
-      leading: navigationItem.icon,
-      title: Text(Intl.message(navigationItem.label.name)),
-      subtitle: navigationItem.description != null
-          ? Text(Intl.message(navigationItem.description!))
-          : null,
-      delegate: OpenDelegate(
-        title: Intl.message(navigationItem.label.name),
-        widget: navigationItem.view,
-      ),
-    );
+  ListItem<dynamic> _buildNavigationMenuItem(NavigationItem navigationItem) =>
+      ListItem.open(
+        leading: navigationItem.icon,
+        title: Text(Intl.message(navigationItem.label.name)),
+        subtitle: navigationItem.description != null
+            ? Text(Intl.message(navigationItem.description!))
+            : null,
+        delegate: OpenDelegate(
+          title: Intl.message(navigationItem.label.name),
+          widget: navigationItem.view,
+        ),
+      );
 
   Widget _buildNavigationMenu(List<NavigationItem> navigationItems) => Column(
-      children: [
-        for (final navigationItem in navigationItems) ...[
-          _buildNavigationMenuItem(navigationItem),
-          navigationItems.last != navigationItem
-              ? const Divider(
-                  height: 0,
-                )
-              : Container(),
-        ]
-      ],
-    );
+        children: [
+          for (final navigationItem in navigationItems) ...[
+            _buildNavigationMenuItem(navigationItem),
+            navigationItems.last != navigationItem
+                ? const Divider(
+                    height: 0,
+                  )
+                : Container(),
+          ]
+        ],
+      );
 
-  List<Widget> _getOtherList(BuildContext context, bool enableDeveloperMode) => generateSection(
-      title: AppLocalizations.of(context).other,
-      items: [
-        const _DisclaimerItem(),
-        if (enableDeveloperMode) const _DeveloperItem(),
-        const _InfoItem(),
-      ],
-    );
+  List<Widget> _getOtherList(BuildContext context, bool enableDeveloperMode) =>
+      generateSection(
+        title: AppLocalizations.of(context).other,
+        items: [
+          if (enableDeveloperMode) const _DeveloperItem(),
+          const _InfoItem(),
+        ],
+      );
 
   List<Widget> _getSettingList(BuildContext context) => generateSection(
-      title: AppLocalizations.of(context).settings,
-      items: [
-        const _LocaleItem(),
-        const _ThemeItem(),
-        const _BackupItem(),
-        if (system.isDesktop) const _HotkeyItem(),
-        if (Platform.isWindows) const _LoopbackItem(),
-        if (Platform.isAndroid) const _AccessItem(),
-        const _ConfigItem(),
-        const _SettingItem(),
-      ],
-    );
+        title: AppLocalizations.of(context).settings,
+        items: [
+          const _LocaleItem(),
+          const _ThemeItem(),
+          const _BackupItem(),
+          if (system.isDesktop) const _HotkeyItem(),
+          if (Platform.isWindows) const _LoopbackItem(),
+          if (Platform.isAndroid) const _AccessItem(),
+          const _ConfigItem(),
+          const _SettingItem(),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -268,26 +268,6 @@ class _SettingItem extends StatelessWidget {
         title: appLocale.application,
         widget: const ApplicationSettingView(),
       ),
-    );
-  }
-}
-
-class _DisclaimerItem extends StatelessWidget {
-  const _DisclaimerItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem(
-      leading: const Icon(Icons.gavel),
-      title: Text(appLocale.disclaimer),
-      onTap: () async {
-        final isDisclaimerAccepted =
-            await globalState.appController.showDisclaimer();
-        if (!isDisclaimerAccepted) {
-          globalState.appController.handleExit();
-        }
-      },
     );
   }
 }

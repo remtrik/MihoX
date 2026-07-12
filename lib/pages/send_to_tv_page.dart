@@ -1,12 +1,12 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:flclashx/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SendToTvPage extends ConsumerStatefulWidget {
-
   const SendToTvPage({
     super.key,
     required this.profileUrl,
@@ -32,7 +32,7 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
 
     try {
       final data = jsonDecode(rawValue);
-      if (data['type'] == 'flclashx_tv_sync') {
+      if (data['type'] == 'mihox_tv_sync') {
         final ip = data['ip'];
         final port = data['port'];
         final tvUrl = 'http://$ip:$port/add-profile';
@@ -50,7 +50,7 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
     } catch (e) {
       _showResultDialog(
           appLocalizations.errorTitle, appLocalizations.invalidQrMessage);
-      print('Error sending to TV: $e');
+      commonPrint.log('Error sending to TV: $e');
     }
   }
 
@@ -75,12 +75,12 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: Text(appLocalizations.sendToTvTitle)),
-      body: MobileScanner(
-        controller: _scannerController,
-        onDetect: _handleQrCode,
-      ),
-    );
+        appBar: AppBar(title: Text(appLocalizations.sendToTvTitle)),
+        body: MobileScanner(
+          controller: _scannerController,
+          onDetect: _handleQrCode,
+        ),
+      );
 
   @override
   void dispose() {

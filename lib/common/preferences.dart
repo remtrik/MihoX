@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flclashx/models/models.dart';
+import 'package:mihox/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constant.dart';
 
 class Preferences {
-
   factory Preferences() {
     _instance ??= Preferences._internal();
     return _instance!;
@@ -24,12 +23,12 @@ class Preferences {
   Future<bool> get isInit async =>
       await sharedPreferencesCompleter.future != null;
 
-  Future<ClashConfig?> getClashConfig() async {
+  Future<MihomoConfig?> getMihomoConfig() async {
     final preferences = await sharedPreferencesCompleter.future;
-    final clashConfigString = preferences?.getString(clashConfigKey);
-    if (clashConfigString == null) return null;
-    final clashConfigMap = json.decode(clashConfigString);
-    return ClashConfig.fromJson(clashConfigMap);
+    final mihomoConfigString = preferences?.getString(mihomoConfigKey);
+    if (mihomoConfigString == null) return null;
+    final mihomoConfigMap = json.decode(mihomoConfigString);
+    return MihomoConfig.fromJson(mihomoConfigMap);
   }
 
   Future<Config?> getConfig() async {
@@ -49,14 +48,14 @@ class Preferences {
         false;
   }
 
-  Future<void> clearClashConfig() async {
+  Future<void> clearMihomoConfig() async {
     final preferences = await sharedPreferencesCompleter.future;
-    preferences?.remove(clashConfigKey);
+    await preferences?.remove(mihomoConfigKey);
   }
 
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
-    sharedPreferencesIns?.clear();
+    await sharedPreferencesIns?.clear();
   }
 }
 

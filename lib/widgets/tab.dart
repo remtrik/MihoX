@@ -154,8 +154,7 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
       (_startedOnSelectedSegment ?? false) && !_startedOnDisabledSegment;
 
   T segmentForXPosition(double dx) {
-    final currentContext =
-        segmentedControlRenderWidgetKey.currentContext!;
+    final currentContext = segmentedControlRenderWidgetKey.currentContext!;
     final renderBox =
         currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
 
@@ -180,10 +179,9 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
     final size = renderBox.size;
     final offCenter =
         details.localPosition - Offset(size.width / 2, size.height / 2);
-    final l2 =
-        math.pow(math.max(0.0, offCenter.dx.abs() - size.width / 2), 2) +
-                math.pow(math.max(0.0, offCenter.dy.abs() - size.height / 2), 2)
-            as double;
+    final l2 = math.pow(math.max(0.0, offCenter.dx.abs() - size.width / 2), 2) +
+            math.pow(math.max(0.0, offCenter.dy.abs() - size.height / 2), 2)
+        as double;
     return l2 > _kTouchYDistanceThreshold;
   }
 
@@ -382,14 +380,14 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
         child: AnimatedBuilder(
           animation: thumbScaleAnimation,
           builder: (context, child) => _CommonTabBarRenderWidget<T>(
-              proportionalWidth: widget.proportionalWidth,
-              key: segmentedControlRenderWidgetKey,
-              highlightedIndex: highlightedIndex,
-              thumbColor: widget.thumbColor,
-              thumbScale: thumbScaleAnimation.value,
-              state: this,
-              children: children,
-            ),
+            proportionalWidth: widget.proportionalWidth,
+            key: segmentedControlRenderWidgetKey,
+            highlightedIndex: highlightedIndex,
+            thumbColor: widget.thumbColor,
+            thumbScale: thumbScaleAnimation.value,
+            state: this,
+            children: children,
+          ),
         ),
       ),
     );
@@ -563,9 +561,9 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-      animation: separatorOpacityController,
-      child: const SizedBox(width: _kSeparatorWidth),
-      builder: (context, child) => Padding(
+        animation: separatorOpacityController,
+        child: const SizedBox(width: _kSeparatorWidth),
+        builder: (context, child) => Padding(
           padding: _kSeparatorInset,
           child: DecoratedBox(
             decoration: const BoxDecoration(
@@ -574,7 +572,7 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
             child: child,
           ),
         ),
-    );
+      );
 }
 
 class _CommonTabBarRenderWidget<T extends Object>
@@ -596,13 +594,14 @@ class _CommonTabBarRenderWidget<T extends Object>
   final _CommonTabBarState<T> state;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSegmentedControl<T>(
-      highlightedIndex: highlightedIndex,
-      thumbColor: thumbColor,
-      thumbScale: thumbScale,
-      proportionalWidth: proportionalWidth,
-      state: state,
-    );
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderSegmentedControl<T>(
+        highlightedIndex: highlightedIndex,
+        thumbColor: thumbColor,
+        thumbScale: thumbScale,
+        proportionalWidth: proportionalWidth,
+        state: state,
+      );
 
   @override
   void updateRenderObject(
@@ -798,7 +797,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) => defaultComputeDistanceToHighestActualBaseline(baseline);
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      defaultComputeDistanceToHighestActualBaseline(baseline);
 
   @override
   void setupParentData(RenderBox child) {
@@ -820,8 +820,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
   double _getMaxChildWidth(BoxConstraints constraints) {
     final childCount = this.childCount ~/ 2 + 1;
-    var childWidth =
-        (constraints.minWidth - totalSeparatorWidth) / childCount;
+    var childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     var child = firstChild;
     while (child != null) {
       childWidth = math.max(
@@ -877,8 +876,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   double? computeDryBaseline(
       covariant BoxConstraints constraints, TextBaseline baseline) {
     final segmentWidths = _getChildWidths(constraints);
-    final childHeight =
-        _getMaxChildHeight(constraints, constraints.maxWidth);
+    final childHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
 
     var index = 0;
     var baselineOffset = BaselineOffset.noBaseline;
@@ -899,7 +897,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) => _computeOverallSize(constraints);
+  Size computeDryLayout(BoxConstraints constraints) =>
+      _computeOverallSize(constraints);
 
   @override
   void performLayout() {
@@ -1048,18 +1047,8 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   }
 
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
-    // const List<BoxShadow> thumbShadow = <BoxShadow>[
-    //   BoxShadow(color: Color(0x1F000000), offset: Offset(0, 3), blurRadius: 8),
-    //   BoxShadow(color: Color(0x0A000000), offset: Offset(0, 3), blurRadius: 1),
-    // ];
-
     final thumbRRect =
         RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
-
-    // for (final BoxShadow shadow in thumbShadow) {
-    //   context.canvas
-    //       .drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
-    // }
 
     context.canvas.drawRRect(
         thumbRRect.inflate(0.5), Paint()..color = const Color(0x0A000000));

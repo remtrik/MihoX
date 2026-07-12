@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 class CommonView extends StatefulWidget {
-
   const CommonView({
     super.key,
     required this.actions,

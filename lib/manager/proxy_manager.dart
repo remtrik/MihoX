@@ -1,11 +1,10 @@
-import 'package:flclashx/common/proxy.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/proxy.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/state.dart';
 
 class ProxyManager extends ConsumerStatefulWidget {
-
   const ProxyManager({super.key, required this.child});
   final Widget child;
 
@@ -19,9 +18,9 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
     final systemProxy = proxyState.systemProxy;
     final port = proxyState.port;
     if (isStart && systemProxy) {
-      proxy?.startProxy(port, proxyState.bassDomain);
+      await proxy?.startProxy(port, proxyState.bassDomain);
     } else {
-      proxy?.stopProxy();
+      await proxy?.stopProxy();
     }
   }
 

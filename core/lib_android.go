@@ -12,13 +12,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/process"
-	"github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/dns"
-	"github.com/metacubex/mihomo/listener/sing_tun"
-	"github.com/metacubex/mihomo/log"
-	"golang.org/x/sync/semaphore"
 	"net"
 	"strconv"
 	"strings"
@@ -26,6 +19,14 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/process"
+	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/dns"
+	"github.com/metacubex/mihomo/listener/sing_tun"
+	"github.com/metacubex/mihomo/log"
+	"golang.org/x/sync/semaphore"
 )
 
 type TunHandler struct {
@@ -36,22 +37,30 @@ type TunHandler struct {
 }
 
 func (t *TunHandler) close() {
-	_ = t.limit.Acquire(context.TODO(), 4)
+	// Acquire and release semaphore safely
+	if err := t.limit.Acquire(context.Background(), 4); err != nil {
+		log.Warnf("Failed to acquire semaphore: %v", err)
+	}
 	defer t.limit.Release(4)
 	removeTunHook()
 	if t.listener != nil {
-		_ = t.listener.Close()
+		if err := t.listener.Close(); err != nil {
+			log.Warnf("Failed to close TUN listener: %v", err)
+		}
+		t.listener = nil
 	}
 
 	if t.callback != nil {
 		releaseObject(t.callback)
+		t.callback = nil
 	}
-	t.callback = nil
-	t.listener = nil
 }
 
 func (t *TunHandler) handleProtect(fd int) {
-	_ = t.limit.Acquire(context.Background(), 1)
+	if err := t.limit.Acquire(context.Background(), 1); err != nil {
+		log.Warnf("Failed to acquire semaphore: %v", err)
+		return
+	}
 	defer t.limit.Release(1)
 
 	if t.listener == nil {
@@ -62,7 +71,10 @@ func (t *TunHandler) handleProtect(fd int) {
 }
 
 func (t *TunHandler) handleResolveProcess(source, target net.Addr) string {
-	_ = t.limit.Acquire(context.Background(), 1)
+	if err := t.limit.Acquire(context.Background(), 1); err != nil {
+		log.Warnf("Failed to acquire semaphore: %v", err)
+		return ""
+	}
 	defer t.limit.Release(1)
 
 	if t.listener == nil {
@@ -83,10 +95,10 @@ func (t *TunHandler) handleResolveProcess(source, target net.Addr) string {
 }
 
 var (
-	tunLock    sync.Mutex
-	runTime    *time.Time
-	errBlocked = errors.New("blocked")
-	tunHandler *TunHandler
+	tunLock       sync.RWMutex
+	runTime       *time.Time
+	errBlocked    = errors.New("blocked")
+	tunHandler    *TunHandler
 )
 
 func handleStopTun() {
@@ -99,9 +111,11 @@ func handleStopTun() {
 }
 
 func handleStartTun(fd int, callback unsafe.Pointer) {
-	handleStopTun()
 	tunLock.Lock()
 	defer tunLock.Unlock()
+
+	handleStopTun()
+
 	now := time.Now()
 	runTime = &now
 	if fd != 0 {
@@ -151,30 +165,31 @@ func removeTunHook() {
 }
 
 func handleGetAndroidVpnOptions() string {
-	tunLock.Lock()
-	defer tunLock.Unlock()
+	tunLock.RLock()
+	defer tunLock.RUnlock()
+
 	mixedPort := currentConfig.General.MixedPort
 	// With the HTTP/SOCKS inbound disabled there is no proxy endpoint to
 	// advertise via VpnService.setHttpProxy — force it off so Android doesn't
 	// end up with a ProxyInfo pointing at 127.0.0.1:0.
 	systemProxy := state.CurrentState.VpnProps.SystemProxy && mixedPort != 0
 	options := state.AndroidVpnOptions{
-		Enable:           state.CurrentState.VpnProps.Enable,
-		Port:             mixedPort,
-		Ipv4Address:      state.DefaultIpv4Address,
-		Ipv6Address:      state.GetIpv6Address(),
-		AccessControl:    state.CurrentState.VpnProps.AccessControl,
-		SystemProxy:      systemProxy,
-		AllowBypass:      state.CurrentState.VpnProps.AllowBypass,
-		RouteAddress:     currentConfig.General.Tun.RouteAddress,
-		BypassDomain:     state.CurrentState.BypassDomain,
+		Enable:          state.CurrentState.VpnProps.Enable,
+		Port:            mixedPort,
+		Ipv4Address:     state.DefaultIpv4Address,
+		Ipv6Address:     state.GetIpv6Address(),
+		AccessControl:   state.CurrentState.VpnProps.AccessControl,
+		SystemProxy:     systemProxy,
+		AllowBypass:     state.CurrentState.VpnProps.AllowBypass,
+		RouteAddress:    currentConfig.General.Tun.RouteAddress,
+		BypassDomain:    state.CurrentState.BypassDomain,
 		DnsServerAddress: state.GetDnsServerAddress(),
-		IncludePackage:   currentConfig.General.Tun.IncludePackage,
-		ExcludePackage:   currentConfig.General.Tun.ExcludePackage,
+		IncludePackage:  currentConfig.General.Tun.IncludePackage,
+		ExcludePackage:  currentConfig.General.Tun.ExcludePackage,
 	}
 	data, err := json.Marshal(options)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Errorf("Failed to marshal Android VpnOptions: %v", err)
 		return ""
 	}
 	return string(data)
@@ -222,8 +237,8 @@ func quickStart(initParamsChar *C.char, paramsChar *C.char, stateParamsChar *C.c
 	bytes := []byte(C.GoString(paramsChar))
 	stateParams := C.GoString(stateParamsChar)
 	go func() {
-		res := handleInitClash(paramsString)
-		if res == false {
+		res := handleInitMihomo(paramsString)
+		if !res {
 			bridge.SendToPort(i, "init error")
 		}
 		handleSetState(stateParams)

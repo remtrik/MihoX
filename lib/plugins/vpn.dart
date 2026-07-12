@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:mihox/mihomo/mihomo.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/state.dart';
 
 abstract mixin class VpnListener {
   void onDnsChanged(String dns) {}
 }
 
 class Vpn {
-
   factory Vpn() {
     _instance ??= Vpn._internal();
     return _instance!;
@@ -23,7 +22,7 @@ class Vpn {
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case "gc":
-          clashCore.requestGc();
+          mihomoCore.requestGc();
         case "getStartForegroundParams":
           if (handleGetStartForegroundParams != null) {
             return await handleGetStartForegroundParams!();
@@ -31,7 +30,7 @@ class Vpn {
           // Default handler for UI mode - get current proxy name from core
           return _getDefaultForegroundParams();
         case "status":
-          return clashLibHandler?.getRunTime() != null;
+          return mihomoLibHandler?.getRunTime() != null;
         default:
           for (final listener in _listeners) {
             switch (call.method) {
@@ -46,19 +45,19 @@ class Vpn {
   static Vpn? _instance;
   late MethodChannel methodChannel;
   FutureOr<String> Function()? handleGetStartForegroundParams;
-  
+
   /// Cached server name for foreground notification (updated via updateServerName)
   String _cachedServerName = "";
-  
+
   /// Cached profile info for foreground notification
-  String _cachedProfileName = "FlClashX";
+  String _cachedProfileName = "MihoX";
   String _cachedServiceName = "";
-  
+
   /// Update cached server name (called from UI when proxy changes)
-  void updateServerName(String serverName) {
-    _cachedServerName = serverName;
+  set serverName(String value) {
+    _cachedServerName = value;
   }
-  
+
   /// Update cached profile info (called when profile changes or on init)
   void updateProfileInfo({
     required String profileName,
@@ -67,16 +66,16 @@ class Vpn {
     _cachedProfileName = profileName;
     _cachedServiceName = serviceName;
   }
-  
+
   /// Get cached server name
   String get cachedServerName => _cachedServerName;
-  
+
   /// Get cached profile name
   String get cachedProfileName => _cachedProfileName;
-  
+
   /// Get cached service name
   String get cachedServiceName => _cachedServiceName;
-  
+
   /// Decode base64 string if needed
   String? _decodeBase64IfNeeded(String? value) {
     if (value == null || value.isEmpty) return value;
@@ -91,45 +90,41 @@ class Vpn {
   /// Default foreground params when running in UI mode
   String _getDefaultForegroundParams() {
     try {
-      final traffic = clashCore.getTraffic();
+      final traffic = mihomoCore.getTraffic();
       final profile = globalState.config.currentProfile;
-      final profileName = profile?.label ?? profile?.id ?? "FlClashX";
-      
+      final profileName = profile?.label ?? profile?.id ?? "MihoX";
+
       // Resolve current proxy name using appController (always up-to-date via Riverpod)
       String? proxyName;
       try {
         final serverInfoGroupName = _decodeBase64IfNeeded(
-          profile?.providerHeaders['flclashx-serverinfo'],
+          profile?.providerHeaders['mihox-serverinfo'],
         );
         if (serverInfoGroupName != null && serverInfoGroupName.isNotEmpty) {
-          proxyName = globalState.appController.getSelectedProxyName(serverInfoGroupName);
+          proxyName = globalState.appController
+              .getSelectedProxyName(serverInfoGroupName);
         }
       } catch (_) {}
 
       // Build title
       final serverDisplay = (proxyName ?? "").trim();
-      final title = serverDisplay.isNotEmpty ? "$profileName / $serverDisplay" : profileName;
+      final title = serverDisplay.isNotEmpty
+          ? "$profileName / $serverDisplay"
+          : profileName;
 
-      // Service name for subtext from header flclashx-servicename
-      String serviceName = "";
+      // Service name for subtext from header mihox-servicename
+      var serviceName = "";
       try {
-        String? svc = profile?.providerHeaders['flclashx-servicename'];
+        final svc = profile?.providerHeaders['mihox-servicename'];
         if (svc != null && svc.isNotEmpty) {
           serviceName = _decodeBase64IfNeeded(svc)?.trim() ?? "";
         }
       } catch (_) {}
-      
-      return json.encode({
-        "title": title,
-        "server": serviceName,
-        "content": "$traffic"
-      });
+
+      return json.encode(
+          {"title": title, "server": serviceName, "content": "$traffic"});
     } catch (e) {
-      return json.encode({
-        "title": "FlClashX",
-        "server": "",
-        "content": ""
-      });
+      return json.encode({"title": "MihoX", "server": "", "content": ""});
     }
   }
 
@@ -139,9 +134,10 @@ class Vpn {
   /// Dart [AndroidVpnOptions] model doesn't know about (e.g. includePackage /
   /// excludePackage injected from profile `tun` config) still make it through
   /// to the Kotlin VpnService unchanged.
-  Future<bool?> start(String optionsJson) async => methodChannel.invokeMethod<bool>("start", {
-      'data': optionsJson,
-    });
+  Future<bool?> start(String optionsJson) async =>
+      methodChannel.invokeMethod<bool>("start", {
+        'data': optionsJson,
+      });
 
   Future<bool?> stop() async => methodChannel.invokeMethod<bool>("stop");
 
@@ -151,12 +147,13 @@ class Vpn {
     required String message,
     required String actionLabel,
     required String actionUrl,
-  }) async => methodChannel.invokeMethod<bool>("showSubscriptionNotification", {
-    'title': title,
-    'message': message,
-    'actionLabel': actionLabel,
-    'actionUrl': actionUrl,
-  });
+  }) async =>
+      methodChannel.invokeMethod<bool>("showSubscriptionNotification", {
+        'title': title,
+        'message': message,
+        'actionLabel': actionLabel,
+        'actionUrl': actionUrl,
+      });
 
   void addListener(VpnListener listener) {
     _listeners.add(listener);

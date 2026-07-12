@@ -8,7 +8,6 @@ import 'constant.dart';
 import 'system.dart';
 
 class AutoLaunch {
-
   factory AutoLaunch() {
     _instance ??= AutoLaunch._internal();
     return _instance!;
@@ -28,15 +27,15 @@ class AutoLaunch {
 
   Future<bool> disable() async => launchAtStartup.disable();
 
-  Future<void> updateStatus(bool isAutoLaunch) async {
+  Future<void> updateStatus({required bool isAutoLaunch}) async {
     if (kDebugMode) {
       return;
     }
     if (await isEnable == isAutoLaunch) return;
     if (isAutoLaunch == true) {
-      enable();
+      await enable();
     } else {
-      disable();
+      await disable();
     }
   }
 }

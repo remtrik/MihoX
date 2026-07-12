@@ -1,332 +1,210 @@
 <div>
 
-[**English**](README_EN.md)
+[**Russian**](README_RU.md)
 
 </div>
 
-## FlClashX
+## MihoX
 
-[![Downloads](https://img.shields.io/github/downloads/pluralplay/FlClashX/total?style=flat-square&logo=github)](https://github.com/pluralplay/FlClashX/releases/)
-[![Last Version](https://img.shields.io/github/release/pluralplay/FlClashX/all.svg?style=flat-square)](https://github.com/pluralplay/FlClashX/releases/)
-[![License](https://img.shields.io/github/license/pluralplay/FlClashX?style=flat-square)](LICENSE)
+A fork of FlClashX built on Mihomo, simple and easy to use, open source and ad-free.
 
-[![Channel](https://img.shields.io/badge/Telegram-Chat-blue?style=flat-square&logo=telegram)](https://t.me/FlClashX)
+## Features
 
-Форк многоплатформенного прокси-клиента FlClash на основе ClashMeta, простого и удобного в использовании, с открытым исходным кодом и без рекламы.
+### 🛠️ Better default settings
+- process search mode on
+- TUN mode on, system proxy mode off
+- proxy list display mode set to 'list'
+- changed camera behavior when adding a subscription via QR
 
-Десктопный вид:
+### 📱 Android High Refresh Rate Support
+- Added support for high refresh rate displays (90Hz+) on Android devices for smoother animations and scrolling
 
-<p style="text-align: center;">
-    <img alt="desktop" src="snapshots/desktop.gif">
-</p>
+### 🗑️ Clear Application Data
+- Added "Clear Data" button in Application Settings that removes all profiles from the profiles folder. Useful for troubleshooting or resetting the application
 
-Мобильный вид:
+### ✈️ Transmit HWID to the panel 
+- Works only with <a href="https://github.com/remnawave/panel">Remnawave</a>
 
-<p style="text-align: center;">
-    <img alt="mobile" src="snapshots/mobile.gif">
-</p>
+### 💻 Added a new "Announcements" widget
+- It transmits announcements from the panel to the widget
+- Works only with <a href="https://github.com/remnawave/panel">Remnawave</a>
 
-## Добавленный функционал
+### 📺 Optimized controls for Android TV
+- Added a "Paste" button to the menu for adding a subscription via a link
+- Added a profile selection button
+- Added the ability to transfer a profile from the mobile app via a QR code
 
-🛠️ Исправлены стандартные настройки: режим поиска процессов вкл, режим tun вкл, режим системного прокси выкл, режим отображения списка прокси list, изменена работа камеры при добавлении подписки через QR.
+### 🪪 Redesigned the profile card:
+- Uses a traffic volume indicator with color change (not displayed if traffic is unlimited)
+- Displays subscription expiration date (if the year is 2099, it displays "Your subscription is permanent")
+- Added a new "Support" button in the profile, which pulls the supportUrl from the panel
+- The autoupdateinterval parameter for the profile is now correctly transmitted from the panel
+- Added "Meta-Info" widget. Transmits subscription parameters to the widget: remaining traffic, subscription expiration date, profile name, and prominently displays days remaining until subscription expires (3 days before expiration)
+- Added "serviceInfo" widget. Displays your service name. You can additionally pass the `mihox-servicelogo` header for a custom logo (supports svg/png links), and clicking opens the support link (supportURL)
+- Added "changeServerButton" widget. Clicking redirects to the proxy page
 
-📱 **Поддержка 120Гц дисплеев на Android:** Добавлена поддержка высокочастотных дисплеев (120Гц) на устройствах Android для более плавных анимаций и прокрутки.
-
-🗑️ **Очистка данных приложения:** Добавлена кнопка "Очистить данные" в настройках приложения, которая удаляет все профили из папки profiles. Полезно для устранения неполадок или сброса приложения.
-
-🇷🇺 Добавлен русский язык в установщик и переработана локаль в приложении
-
-✈️ Передача HWID в панель (Работает только с <a href="https://github.com/remnawave/panel">Remnawave</a>)
-
-💻 Добавлен новый виджет "Анонсы". Передаёт анонсы из панели в виджет. (Работает только с <a href="https://github.com/remnawave/panel">Remnawave</a>)
-
-📺 Оптимизация управления на Android TV
-
-- добавлена кнопка "Вставить" для меню добавления подписки по ссылке
-- добавлена кнопка выбора профиля
-- добавлена передача профиля с мобильного приложения через QR-код
-
-💻 macOS - приложение в нативной строке состояния (status bar) вместо оконного интерфейса.
-
-🪪 Переработана карточка профиля на странице профиля и виджет на главной:
-
-- Используется индикатор объёма трафика с изменением цвета (не отображается, если трафик неограничен).
-- Отображается дата окончания подписки (если год — 2099, выводится «Ваша подписка вечная»).
-- Добавлена новая кнопка «Поддержка» в профиле, которая подтягивает supportUrl с панели.
-- Параметр autoupdateinterval для профиля теперь корректно передаётся с панели.
-- Добавлен виджет "MetaInfo". Передаёт параметры с подписки на виджет. Сколько трафика осталось, когда заканчивается подписка, имя профиля, и крупно отображает сколько дней до окончании подписки осталось (за 3 дня до окончания).
-- Добавлен виджет "serviceInfo". Передаёт название вашего сервиса. Можно передать дополнительно хедер `flclashx-servicelogo` для кастомного лого (поддерживается ссылка svg/png), дополнительно по клику открыватеся ссылка на поддержку (supportURL)
-- Добавлен виджет "changeServerButton". По клику перенаправляет на страницу прокси.
-
-### Добавлен парсинг кастомных хедеров со страницы подписки:
-
+### 🌐 Added parsing of custom headers from the subscription page
 <details>
-<summary><strong>flclashx-widgets</strong></summary>
+<summary><strong>mihox-widgets</strong></summary>
+Arranges widgets in the order received from the subscription.
 
-Выстраивает виджеты в порядке, полученным с подписки
+  |        Value         | Name widget                                                 |
+  | :------------------: | ----------------------------------------------------------- |
+  |      `announce`      | Announce Badge                                              |
+  |    `networkSpeed`    | Network speed                                               |
+  |   `outboundModeV2`   | Proxy mode (new type)                                       |
+  |    `outboundMode`    | Proxy mode (old type)                                       |
+  |    `trafficUsage`    | Traffic usage                                               |
+  |  `networkDetection`  | Determining location and IP                                 |
+  |     `tunButton`      | TUN button (Desktop only)                                   |
+  |     `vpnButton`      | VPN button (Android only)                                   |
+  | `systemProxyButton`  | System Proxy Button (Desktop only)                          |
+  |     `intranetIp`     | Local IP-Address                                            |
+  |     `memoryInfo`     | Memory usage                                                |
+  |      `metainfo`      | Profile information                                         |
+  | `changeServerButton` | Change server button                                        |
+  |    `serviceInfo`     | Service information (only with header mihox-servicename) |
 
-|       Значение       | Виджет                                                      |
-| :------------------: | ----------------------------------------------------------- |
-|      `announce`      | Анонсы                                                      |
-|    `networkSpeed`    | Скорость сети                                               |
-|   `outboundModeV2`   | Режим работы прокси (новый вид)                             |
-|    `outboundMode`    | Режим работы прокси (старый вид)                            |
-|    `trafficUsage`    | Использование трафика                                       |
-|  `networkDetection`  | Определение локации и IP                                    |
-|     `tunButton`      | Кнопка TUN (только Desktop)                                 |
-|     `vpnButton`      | Кнопка VPN (только Android)                                 |
-| `systemProxyButton`  | Кнопка системного прокси (только Desktop)                   |
-|     `intranetIp`     | Локальный IP-адрес                                          |
-|     `memoryInfo`     | Использование памяти                                        |
-|      `metainfo`      | Информация о подписке                                       |
-| `changeServerButton` | Кнопка смены сервера                                        |
-|    `serviceInfo`     | Информация о сервисе (работает только с header flclashx-servicename) |
-
-Использование:
+Usage:
 
 ```bash
-flclashx-widgets: announce,metainfo,outboundModeV2,networkDetection
+    mihox-widgets: announce,metainfo,outboundModeV2,networkDetection
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-view</strong></summary>
+<summary><strong>mihox-view</strong></summary>
+Configures the appearance of the proxy page obtained from the subscription.
 
-Настраивает вид страницы прокси, полученным с подписки
+|  Value   | Description                   | Possible values                   |
+| :------: | ----------------------------- | --------------------------------- |
+|  `type`  | Display mode                  | `list`,`tab`                      |
+|  `sort`  | Sorting type                  | `none`,`delay`,`name`             |
+| `layout` | Layout                        | `loose`,`standard`,`tight`        |
+|  `icon`  | Icon style (for list display) | `none`,`icon`          |
+|  `card`  | Card size                     | `expand`,`shrink`,`min`,`oneline` |
 
-| Значение | Описание                            | Возможные значения                |
-| :------: | ----------------------------------- | --------------------------------- |
-|  `type`  | Режим отображения                   | `list`,`tab`                      |
-|  `sort`  | Тип сортировки                      | `none`,`delay`,`name`             |
-| `layout` | Макет                               | `loose`,`standard`,`tight`        |
-|  `icon`  | Стиль иконок (для list-отображения) | `none`,`icon`          |
-|  `card`  | Размер карточки                     | `expand`,`shrink`,`min`,`oneline` |
-
-Использование:
+Usage:
 
 ```bash
-flclashx-view: type:list; sort:delay; layout:tight; icon:icon; card:shrink
+    mihox-view: type:list; sort:delay; layout:tight; icon:icon; card:shrink
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-custom</strong></summary>
+<summary><strong>mihox-custom</strong></summary>
+Controls the application of styles for Dashboard and ProxyView.
 
-Управляет состоянием применения стилей для Dashboard и ProxyView
+|  Value   | Description                                                  |
+| :------: | ------------------------------------------------------------ |
+|  `add`   | Styles are applied only when the subscription is first added |
+| `update` | Styles are applied every time the subscription is updated    |
 
-| Значение | Описание                                                |
-| :------: | ------------------------------------------------------- |
-|  `add`   | Стиль страницы прокси и виджеты применяются только при первом добавлении подписки |
-| `update` | Стиль страницы прокси и виджеты применяются каждый раз при обновлении подписки    |
-
-Использование:
+Usage:
 
 ```bash
-flclashx-custom: update
+    mihox-custom: update
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-denywidgets</strong></summary>
+<summary><strong>mihox-denywidgets</strong></summary>
+When set to true, editing the Dashboard page is disabled. Accepts true/false.
 
-При true — запрещает редактировать страницу Dashboard. Имеет значение true/false.
-
-Использование:
+Usage:
 
 ```bash
-flclashx-denywidgets: true
+    mihox-denywidgets: true
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-servicename</strong></summary>
+<summary><strong>mihox-servicename</strong></summary>
+Your service name displayed in the ServiceInfo widget.
 
-Название вашего сервиса, отображаемое в виджете ServiceInfo.
-
-Использование:
+Usage:
 
 ```bash
-flclashx-servicename: FlClashX
+    mihox-servicename: MihoX
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-servicelogo</strong></summary>
+<summary><strong>mihox-servicelogo</strong></summary>
+Your logo used in the ServiceInfo widget (works only with active mihox-servicename header). Supports png/svg.
 
-Ваш логотип, используемый в виджете ServiceInfo (работает только с активным хедером flclashx-servicename). Поддерживает png/svg.
-
-Использование:
+Usage:
 
 ```bash
-flclashx-servicelogo: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/remnawave.svg
+    mihox-servicelogo: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/remnawave.svg
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-serverinfo</strong></summary>
+<summary><strong>mihox-serverinfo</strong></summary>
+Proxy group name to display in the ChangeServerButton widget. The widget shows the active server from the specified group with country flag, ping, and a quick switch button.
 
-Название прокси-группы для отображения в виджете ChangeServerButton. Виджет показывает активный сервер из указанной группы с флагом страны, пингом и кнопкой для быстрого переключения. Если не передаётся — работает фолбек на «Изменить сервер»
+**Displayed elements:**
+  - Country flag (automatically extracted from serverDescription or proxy name)
+  - Active server name
+  - Current ping with color indication (green < 600ms, orange >= 600ms, red - timeout)
+  - Quick navigation button to proxy page
 
-**Отображаемые элементы:**
-- Флаг страны (автоматически извлекается из имени прокси, если отсутствует — фолбек иконка)
-- Название активного сервера
-- Текущий пинг с цветовой индикацией (зелёный < 600ms, оранжевый >= 600ms, красный — timeout)
-- Кнопка быстрого перехода на страницу прокси
-
-Использование:
+Usage:
 
 ```bash
-flclashx-serverinfo: Proxy
+    mihox-serverinfo: Proxy
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-background</strong></summary>
+<summary><strong>mihox-background</strong></summary>
+Sets a custom background image for the application. Provide a direct link to an image.
 
-Устанавливает пользовательское фоновое изображение для приложения. Укажите прямую ссылку на изображение.
+**Image Recommendations:**
+  - Format: PNG, JPG, or WebP
+  - Resolution: 1920x1080 or higher for desktop, 1080x1920 for mobile
+  - File size: Keep under 2MB for better performance
+  - Content: Use images with subtle patterns or gradients; avoid too bright or busy images
+  - Contrast: Ensure good readability of text over the background
 
-**Рекомендации для изображения:**
-- Формат: PNG, JPG или WebP
-- Разрешение: 1920x1080 или выше для десктопа, 1080x1920 для мобильных устройств
-- Размер файла: Желательно до 2МБ для лучшей производительности
-- Содержание: Используйте изображения с тонкими узорами или градиентами; избегайте слишком ярких или загруженных изображений
-- Контраст: Обеспечьте хорошую читаемость текста на фоне
-
-Использование:
+Usage:
 
 ```bash
-flclashx-background: https://example.com/background.jpg
+    mihox-background: https://example.com/background.jpg
 ```
 </details>
 
 <details>
-<summary><strong>flclashx-settings</strong></summary>
+<summary><strong>mihox-settings</strong></summary>
+Manage application settings via header (with client-side override option). By default, all parameters are **disabled**. If you pass a parameter, it will be **enabled**. If you don't pass it - it stays **disabled**.
 
-Управление настройками приложения через хедер (с возможностью переопределения со стороны клиента). По умолчанию все параметры выключены. Если вы передаёте параметр, то он будет включён. Если не передаёте — останется выключенным.
+|   Parameter   | Description                                      | Default      |
+| :-----------: | ------------------------------------------------ | :----------: |
+|  `minimize`   | Minimize application on exit instead of closing  | ❌ Disabled  |
+|   `autorun`   | Launch application on system startup             | ❌ Disabled  |
+| `shadowstart` | Launch application minimized to tray             | ❌ Disabled  |
+|  `autostart`  | Automatically start proxy on application launch  | ❌ Disabled  |
+| `autoupdate`  | Automatically check for application updates      | ❌ Disabled  |
 
-|   Параметр    | Описание                                                 | По умолчанию |
-| :-----------: | -------------------------------------------------------- | :----------: |
-|  `minimize`   | Сворачивать приложение при выходе вместо закрытия        | ❌ Выкл      |
-|   `autorun`   | Запускать приложение при старте системы                  | ❌ Выкл      |
-| `shadowstart` | Запускать приложение свернутым в трей                    | ❌ Выкл      |
-|  `autostart`  | Автоматически запускать прокси при запуске приложения    | ❌ Выкл      |
-| `autoupdate`  | Автоматически проверять обновления приложения            | ❌ Выкл      |
+**Client-side override:** Users can enable "Override provider settings" in Application Settings to apply their local configuration instead of subscription settings.
 
-Переопределение на стороне клиента: Пользователи могут включить «Переопределить настройки провайдера» в настройках приложения, чтобы применять свою локальную конфигурацию вместо настроек из подписки.
-
-Использование:
+Usage:
 
 ```bash
-flclashx-settings: minimize, autorun, shadowstart, autostart, autoupdate
+    mihox-settings: minimize, autorun, shadowstart, autostart, autoupdate
 ```
 </details>
 
-<details>
-<summary><strong>flclashx-globalmode</strong></summary>
+## Configuration Settings Override
 
-Данный хедер при FALSE позволяет скрыть все настройки режима прокси из клиента (трей, страница прокси, виджеты смены режима)
+By default, the following configuration parameters received from the subscription are **not overridden** by the client:
 
-Использование:
-```bash
-flclashx-globalmode: false
-```
-</details>
+- `allow-lan` - Allow LAN connections
+- `ipv6` - Enable IPv6 support
+- `find-process-mode` - Process search mode
+- `tun-stack` - TUN mode network stack
+- `mixed-port` - Mixed port for HTTP/SOCKS proxy
 
-<details>
-<summary><strong>flclashx-hex</strong></summary>
-
-Данный хедер позволяет настроить тему в приложении, возможность передать основной цвет, вариант, и выбрать "Чисто черный режим" параметром `pureBlack`
-
-Варианты:
-|   Вариант    | Название|
-| :-----------: | ------ |
-|  `tonalSpot`   | Тональный акцент|
-|   `fidelity`   | Точная передача |
-| `monochrome` | Монохром |
-|  `neutral`  | Нейтральные |
-| `vibrant`  | Яркие |
-| `expressive`  | Экспрессивные |
-| `content`  | Контентная тема |
-| `rainbow`  | Радужные |
-| `fruitSalad`  | Фруктовый микс |
-
-Использование:
-```bash
-flclashx-hex: FF5733
-flclashx-hex: FF5733:vibrant
-flclashx-hex: FF5733:vibrant:pureblack
-```
-Так-же можно параметры использовать по отдельности:
-```bash
-flclashx-hex: FF5733
-flclashx-hex: vibrant
-flclashx-hex: pureblack
-```
-HEX-коды стандартных тем:
-|   HEX    | ЦВЕТ|
-| :-----------: | ------ |
-|  `795548`   | Brown (Коричневый)|
-|   `03A9F4`   | Light Blue (Светло-голубой) - по умолчанию |
-| `FFFF00` | Yellow (Желтый) |
-|  `BBC9CC`  | Light Blue Grey (Светло-серо-голубой) |
-| `ABD397`  | Light Green (Светло-зеленый) |
-| `D8C0C3`  | Light Pink (Светло-розовый) |
-| `665390`  | Deep Purple (Темно-фиолетовый) |
-</details>
-
-<details>
-<summary><strong>flclashx-androidsecure</strong></summary>
-
-Данный хедер позволяет принудительно включить Mixed-port:0 только на Андроид-девайсах, при активном 7890 (например) в конфиге.
-
-Использование:
-```bash
-flclashx-androidsecure: true
-```
-</details>
-
-### Переопределение настроек конфигурации
-По умолчанию следующие параметры конфигурации, полученные от подписки, **не переопределяются** клиентом:
-
-- `allow-lan` - Разрешить подключения из локальной сети
-- `ipv6` - Включить поддержку IPv6
-- `find-process-mode` - Режим поиска процессов
-- `tun-stack` - Сетевой стек режима TUN
-- `mixed-port` - Смешанный порт для HTTP/SOCKS прокси
-
-**Переопределение на стороне клиента:** Пользователи могут включить "Переопределить настройки провайдера" или "Переопределить сетевые настройки" в настройках приложения, чтобы применять свою локальную конфигурацию вместо настроек из подписки. Это полезно, когда нужны кастомные сетевые настройки.
-
-## Использование
-
-### Linux
-
-⚠️ Перед использованием убедитесь, что установлены следующие зависимости:
-
-```bash
- sudo apt-get install libayatana-appindicator3-dev
- sudo apt-get install libkeybinder-3.0-dev
-```
-
-### Android
-
-Поддерживаются следующие действия:
-
-```bash
- com.follow.clashx.action.START
-
- com.follow.clashx.action.STOP
-
- com.follow.clashx.action.CHANGE
-```
-
-## Скачать
-
-<a href="https://github.com/pluralplay/FlClashX/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
-
-## Star
-
-<p style="text-align: center;">
-Самый простой способ поддержать разработчиков — нажать на звездочку (⭐) в верхней части страницы.<br>
-Если хотите поддержать копеечкой, то можно <a href="https://t.me/tribute/app?startapp=dtyh">сделать это тут.</a></p>
-
-**TON USDT:** `UQDSfrJ_k1BdsknhdR_zj4T3Is3OdMylD8PnDJ9mxO35i-TE`
+### Client-side override
+- Users can enable "Override provider settings" or "Override network settings" in Application Settings to apply their local configuration instead of subscription settings. Useful when you need custom network settings.

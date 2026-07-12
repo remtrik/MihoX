@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
+import 'package:mihox/common/common.dart';
 
 class SingleInstanceLock {
-
   factory SingleInstanceLock() {
     _instance ??= SingleInstanceLock._internal();
     return _instance!;

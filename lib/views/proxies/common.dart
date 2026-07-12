@@ -1,8 +1,8 @@
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/mihomo.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/state.dart';
 
 double get listHeaderHeight {
   final measure = globalState.measure;
@@ -39,7 +39,7 @@ Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
       ),
     )
     ..setDelay(
-      await clashCore.getDelay(
+      await mihomoCore.getDelay(
         url,
         state.proxyName,
       ),
@@ -68,7 +68,7 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
         ),
       )
       ..setDelay(
-        await clashCore.getDelay(
+        await mihomoCore.getDelay(
           url,
           name,
         ),

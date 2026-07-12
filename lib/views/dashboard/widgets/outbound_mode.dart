@@ -1,11 +1,11 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/providers/config.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/providers/config.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class OutboundMode extends StatelessWidget {
   const OutboundMode({super.key});
@@ -18,7 +18,7 @@ class OutboundMode extends StatelessWidget {
       child: Consumer(
         builder: (_, ref, __) {
           final mode = ref.watch(
-            patchClashConfigProvider.select(
+            patchMihomoConfigProvider.select(
               (state) => state.mode,
             ),
           );
@@ -86,10 +86,10 @@ class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
   Color _getTextColor(BuildContext context, Mode mode) => switch (mode) {
-      Mode.rule => context.colorScheme.onSecondaryContainer,
-      Mode.global => context.colorScheme.onPrimaryContainer,
-      Mode.direct => context.colorScheme.onTertiaryContainer,
-    };
+        Mode.rule => context.colorScheme.onSecondaryContainer,
+        Mode.global => context.colorScheme.onPrimaryContainer,
+        Mode.direct => context.colorScheme.onTertiaryContainer,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ class OutboundModeV2 extends StatelessWidget {
         child: Consumer(
           builder: (_, ref, __) {
             final mode = ref.watch(
-              patchClashConfigProvider.select(
+              patchMihomoConfigProvider.select(
                 (state) => state.mode,
               ),
             );

@@ -114,22 +114,7 @@ final currentProfileIdProvider =
 );
 
 typedef _$CurrentProfileId = AutoDisposeNotifier<String?>;
-String _$appDAVSettingHash() => r'1b9ea2d3a5d836a930ba8579425fa74707921c1c';
 
-/// See also [AppDAVSetting].
-@ProviderFor(AppDAVSetting)
-final appDAVSettingProvider =
-    AutoDisposeNotifierProvider<AppDAVSetting, DAV?>.internal(
-  AppDAVSetting.new,
-  name: r'appDAVSettingProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appDAVSettingHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$AppDAVSetting = AutoDisposeNotifier<DAV?>;
 String _$overrideDnsHash() => r'fa005b753247745d5fbeb5f3a78c3bd904da3c74';
 
 /// See also [OverrideDns].
@@ -193,21 +178,21 @@ final scriptStateProvider =
 );
 
 typedef _$ScriptState = AutoDisposeNotifier<ScriptProps>;
-String _$patchClashConfigHash() => r'91df66ba3c9871dbc9739d02e4fece40fc69d45b';
+String _$patchMihomoConfigHash() => r'91df66ba3c9871dbc9739d02e4fece40fc69d45b';
 
-/// See also [PatchClashConfig].
-@ProviderFor(PatchClashConfig)
-final patchClashConfigProvider =
-    AutoDisposeNotifierProvider<PatchClashConfig, ClashConfig>.internal(
-  PatchClashConfig.new,
-  name: r'patchClashConfigProvider',
+/// See also [PatchMihomoConfig].
+@ProviderFor(PatchMihomoConfig)
+final patchMihomoConfigProvider =
+    AutoDisposeNotifierProvider<PatchMihomoConfig, MihomoConfig>.internal(
+  PatchMihomoConfig.new,
+  name: r'patchMihomoConfigProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$patchClashConfigHash,
+      : _$patchMihomoConfigHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$PatchClashConfig = AutoDisposeNotifier<ClashConfig>;
+typedef _$PatchMihomoConfig = AutoDisposeNotifier<MihomoConfig>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

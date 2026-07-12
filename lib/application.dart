@@ -2,25 +2,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/manager/hotkey_manager.dart';
-import 'package:flclashx/manager/manager.dart';
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/l10n/l10n.dart';
+import 'package:mihox/manager/hotkey_manager.dart';
+import 'package:mihox/manager/manager.dart';
+import 'package:mihox/mihomo/mihomo.dart';
+import 'package:mihox/plugins/app.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
 
 import 'controller.dart';
 import 'pages/pages.dart';
 
 class Application extends ConsumerStatefulWidget {
-  const Application({
-    super.key,
-  });
+  const Application({super.key});
 
   @override
   ConsumerState<Application> createState() => ApplicationState();
@@ -35,7 +33,6 @@ class ApplicationState extends ConsumerState<Application> {
       TargetPlatform.android: CommonPageTransitionsBuilder(),
       TargetPlatform.windows: CommonPageTransitionsBuilder(),
       TargetPlatform.linux: CommonPageTransitionsBuilder(),
-      TargetPlatform.macOS: CommonPageTransitionsBuilder(),
     },
   );
 
@@ -63,7 +60,7 @@ class ApplicationState extends ConsumerState<Application> {
       }
       await globalState.appController.init();
       globalState.appController.initLink();
-      app?.initShortcuts();
+      await app?.initShortcuts();
     });
   }
 
@@ -88,28 +85,22 @@ class ApplicationState extends ConsumerState<Application> {
       return WindowManager(
         child: TrayManager(
           child: HotKeyManager(
-            child: ProxyManager(
-              child: child,
-            ),
+            child: ProxyManager(child: child),
           ),
         ),
       );
     }
-    return AndroidManager(
-      child: TileManager(
-        child: child,
-      ),
-    );
+    return AndroidManager(child: TileManager(child: child));
   }
 
   Widget _buildState(Widget child) => AppStateManager(
-        child: ClashManager(
+        child: MihomoManager(
           child: ConnectivityManager(
             onConnectivityChanged: (results) async {
               if (!results.contains(ConnectivityResult.vpn)) {
-                clashCore.closeConnections();
+                mihomoCore.closeConnections();
               }
-              globalState.appController.updateLocalIp();
+              await globalState.appController.updateLocalIp();
               globalState.appController.addCheckIpNumDebounce();
             },
             child: child,
@@ -119,19 +110,13 @@ class ApplicationState extends ConsumerState<Application> {
 
   Widget _buildPlatformApp(Widget child) {
     if (system.isDesktop) {
-      return WindowHeaderContainer(
-        child: child,
-      );
+      return WindowHeaderContainer(child: child);
     }
-    return VpnManager(
-      child: child,
-    );
+    return VpnManager(child: child);
   }
 
   Widget _buildApp(Widget child) => MessageManager(
-        child: ThemeManager(
-          child: child,
-        ),
+        child: ThemeManager(child: child),
       );
 
   @override
@@ -161,18 +146,6 @@ class ApplicationState extends ConsumerState<Application> {
                     ),
                   );
 
-                  if (Platform.isMacOS) {
-                    return FittedBox(
-                      fit: BoxFit.contain,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: 500,
-                        height: 800,
-                        child: app,
-                      ),
-                    );
-                  }
-
                   return app;
                 },
                 scrollBehavior: BaseScrollBehavior(),
@@ -196,7 +169,7 @@ class ApplicationState extends ConsumerState<Application> {
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.dark,
                     primaryColor: themeProps.primaryColor,
-                  ).toPureBlack(themeProps.pureBlack),
+                  ).toPureBlack(isPureBlack: themeProps.pureBlack),
                   // Reduce animation duration for snappier feel
                   visualDensity: VisualDensity.adaptivePlatformDensity,
                 ),
@@ -213,7 +186,7 @@ class ApplicationState extends ConsumerState<Application> {
     linkManager.destroy();
     _autoUpdateGroupTaskTimer?.cancel();
     _autoUpdateProfilesTaskTimer?.cancel();
-    await clashCore.destroy();
+    await mihomoCore.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();
     super.dispose();

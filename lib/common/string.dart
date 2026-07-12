@@ -16,8 +16,8 @@ extension StringExtension on String {
   }
 
   int compareToLower(String other) => toLowerCase().compareTo(
-      other.toLowerCase(),
-    );
+        other.toLowerCase(),
+      );
 
   List<int> get encodeUtf16LeWithBom {
     final byteData = ByteData(length * 2);

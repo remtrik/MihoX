@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/plugins/app.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class AccessView extends ConsumerStatefulWidget {
   const AccessView({super.key});
@@ -45,22 +45,22 @@ class _AccessViewState extends ConsumerState<AccessView> {
   }
 
   Widget _buildSearchButton() => IconButton(
-      tooltip: appLocalizations.search,
-      onPressed: () {
-        showSearch(
-          context: context,
-          delegate: AccessControlSearchDelegate(
-            acceptList: acceptList,
-            rejectList: rejectList,
-          ),
-        ).then(
-          (_) => setState(
-            _updateInitList,
-          ),
-        );
-      },
-      icon: const Icon(Icons.search),
-    );
+        tooltip: appLocalizations.search,
+        onPressed: () {
+          showSearch(
+            context: context,
+            delegate: AccessControlSearchDelegate(
+              acceptList: acceptList,
+              rejectList: rejectList,
+            ),
+          ).then(
+            (_) => setState(
+              _updateInitList,
+            ),
+          );
+        },
+        icon: const Icon(Icons.search),
+      );
 
   Widget _buildSelectedAllButton({
     required bool isSelectedAll,
@@ -119,9 +119,8 @@ class _AccessViewState extends ConsumerState<AccessView> {
     final acceptList = packageNames
         .where((item) => !selectedPackageNames.contains(item))
         .toList();
-    final rejectList = packageNames
-        .where(selectedPackageNames.contains)
-        .toList();
+    final rejectList =
+        packageNames.where(selectedPackageNames.contains).toList();
     ref.read(vpnSettingProvider.notifier).updateState(
           (state) => state.copyWith.accessControl(
             acceptList: acceptList,
@@ -131,24 +130,24 @@ class _AccessViewState extends ConsumerState<AccessView> {
   }
 
   Widget _buildSettingButton() => IconButton(
-      onPressed: () async {
-        final res = await showSheet<int>(
-          context: context,
-          props: const SheetProps(
-            isScrollControlled: true,
-          ),
-          builder: (_, type) => AdaptiveSheetScaffold(
+        onPressed: () async {
+          final res = await showSheet<int>(
+            context: context,
+            props: const SheetProps(
+              isScrollControlled: true,
+            ),
+            builder: (_, type) => AdaptiveSheetScaffold(
               type: type,
               body: const AccessControlPanel(),
               title: appLocalizations.proxiesSetting,
             ),
-        );
-        if (res == 1) {
-          _intelligentSelected();
-        }
-      },
-      icon: const Icon(Icons.tune),
-    );
+          );
+          if (res == 1) {
+            await _intelligentSelected();
+          }
+        },
+        icon: const Icon(Icons.tune),
+      );
 
   void _handleSelected(List<String> valueList, Package package, bool? value) {
     if (value == true) {
@@ -156,15 +155,15 @@ class _AccessViewState extends ConsumerState<AccessView> {
     } else {
       valueList.remove(package.packageName);
     }
-    ref.read(vpnSettingProvider.notifier).updateState((state) => switch (
-          state.accessControl.mode == AccessControlMode.acceptSelected) {
-        true => state.copyWith.accessControl(
-            acceptList: valueList,
-          ),
-        false => state.copyWith.accessControl(
-            rejectList: valueList,
-          ),
-      });
+    ref.read(vpnSettingProvider.notifier).updateState((state) =>
+        switch (state.accessControl.mode == AccessControlMode.acceptSelected) {
+          true => state.copyWith.accessControl(
+              acceptList: valueList,
+            ),
+          false => state.copyWith.accessControl(
+              rejectList: valueList,
+            ),
+        });
   }
 
   @override
@@ -347,7 +346,6 @@ class _AccessViewState extends ConsumerState<AccessView> {
 }
 
 class PackageListItem extends StatelessWidget {
-
   const PackageListItem({
     super.key,
     required this.package,
@@ -362,53 +360,52 @@ class PackageListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FadeScaleEnterBox(
-      child: ActivateBox(
-        active: isActive,
-        child: ListItem.checkbox(
-          leading: SizedBox(
-            width: 48,
-            height: 48,
-            child: FutureBuilder<ImageProvider?>(
-              future: app?.getPackageIcon(package.packageName),
-              builder: (_, snapshot) {
-                if (!snapshot.hasData && snapshot.data == null) {
-                  return Container();
-                } else {
-                  return Image(
-                    image: snapshot.data!,
-                    gaplessPlayback: true,
-                    width: 48,
-                    height: 48,
-                  );
-                }
-              },
+        child: ActivateBox(
+          active: isActive,
+          child: ListItem.checkbox(
+            leading: SizedBox(
+              width: 48,
+              height: 48,
+              child: FutureBuilder<ImageProvider?>(
+                future: app?.getPackageIcon(package.packageName),
+                builder: (_, snapshot) {
+                  if (!snapshot.hasData && snapshot.data == null) {
+                    return Container();
+                  } else {
+                    return Image(
+                      image: snapshot.data!,
+                      gaplessPlayback: true,
+                      width: 48,
+                      height: 48,
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-          title: Text(
-            package.label,
-            style: const TextStyle(
-              overflow: TextOverflow.ellipsis,
+            title: Text(
+              package.label,
+              style: const TextStyle(
+                overflow: TextOverflow.ellipsis,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
-          ),
-          subtitle: Text(
-            package.packageName,
-            style: const TextStyle(
-              overflow: TextOverflow.ellipsis,
+            subtitle: Text(
+              package.packageName,
+              style: const TextStyle(
+                overflow: TextOverflow.ellipsis,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
-          ),
-          delegate: CheckboxDelegate(
-            value: value,
-            onChanged: onChanged,
+            delegate: CheckboxDelegate(
+              value: value,
+              onChanged: onChanged,
+            ),
           ),
         ),
-      ),
-    );
+      );
 }
 
 class AccessControlSearchDelegate extends SearchDelegate {
-
   AccessControlSearchDelegate({
     required this.acceptList,
     required this.rejectList,
@@ -418,28 +415,28 @@ class AccessControlSearchDelegate extends SearchDelegate {
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
-      IconButton(
-        onPressed: () {
-          if (query.isEmpty) {
-            close(context, null);
-            return;
-          }
-          query = '';
-        },
-        icon: const Icon(Icons.clear),
-      ),
-      const SizedBox(
-        width: 8,
-      )
-    ];
+        IconButton(
+          onPressed: () {
+            if (query.isEmpty) {
+              close(context, null);
+              return;
+            }
+            query = '';
+          },
+          icon: const Icon(Icons.clear),
+        ),
+        const SizedBox(
+          width: 8,
+        )
+      ];
 
   @override
   Widget? buildLeading(BuildContext context) => IconButton(
-      onPressed: () {
-        close(context, null);
-      },
-      icon: const Icon(Icons.arrow_back),
-    );
+        onPressed: () {
+          close(context, null);
+        },
+        icon: const Icon(Icons.arrow_back),
+      );
 
   void _handleSelected(
       WidgetRef ref, List<String> valueList, Package package, bool? value) {
@@ -448,15 +445,15 @@ class AccessControlSearchDelegate extends SearchDelegate {
     } else {
       valueList.remove(package.packageName);
     }
-    ref.read(vpnSettingProvider.notifier).updateState((state) => switch (
-          state.accessControl.mode == AccessControlMode.acceptSelected) {
-        true => state.copyWith.accessControl(
-            acceptList: valueList,
-          ),
-        false => state.copyWith.accessControl(
-            rejectList: valueList,
-          ),
-      });
+    ref.read(vpnSettingProvider.notifier).updateState((state) =>
+        switch (state.accessControl.mode == AccessControlMode.acceptSelected) {
+          true => state.copyWith.accessControl(
+              acceptList: valueList,
+            ),
+          false => state.copyWith.accessControl(
+              rejectList: valueList,
+            ),
+        });
   }
 
   Widget _packageList() {
@@ -532,150 +529,154 @@ class AccessControlPanel extends ConsumerStatefulWidget {
 }
 
 class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
-  IconData _getIconWithAccessControlMode(AccessControlMode mode) => switch (mode) {
-      AccessControlMode.acceptSelected => Icons.adjust_outlined,
-      AccessControlMode.rejectSelected => Icons.block_outlined,
-    };
+  IconData _getIconWithAccessControlMode(AccessControlMode mode) =>
+      switch (mode) {
+        AccessControlMode.acceptSelected => Icons.adjust_outlined,
+        AccessControlMode.rejectSelected => Icons.block_outlined,
+      };
 
-  String _getTextWithAccessControlMode(AccessControlMode mode) => switch (mode) {
-      AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
-      AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
-    };
+  String _getTextWithAccessControlMode(AccessControlMode mode) =>
+      switch (mode) {
+        AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
+        AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
+      };
 
   String _getTextWithAccessSortType(AccessSortType type) => switch (type) {
-      AccessSortType.none => appLocalizations.defaultText,
-      AccessSortType.name => appLocalizations.name,
-      AccessSortType.time => appLocalizations.time,
-    };
+        AccessSortType.none => appLocalizations.defaultText,
+        AccessSortType.name => appLocalizations.name,
+        AccessSortType.time => appLocalizations.time,
+      };
 
   IconData _getIconWithProxiesSortType(AccessSortType type) => switch (type) {
-      AccessSortType.none => Icons.sort,
-      AccessSortType.name => Icons.sort_by_alpha,
-      AccessSortType.time => Icons.timeline,
-    };
+        AccessSortType.none => Icons.sort,
+        AccessSortType.name => Icons.sort_by_alpha,
+        AccessSortType.time => Icons.timeline,
+      };
 
   List<Widget> _buildModeSetting() => generateSection(
-      title: appLocalizations.mode,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, __) {
-              final accessControlMode = ref.watch(
-                vpnSettingProvider.select((state) => state.accessControl.mode),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  for (final item in AccessControlMode.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessControlMode(item),
-                        iconData: _getIconWithAccessControlMode(item),
-                      ),
-                      isSelected: accessControlMode == item,
-                      onPressed: () {
-                        ref.read(vpnSettingProvider.notifier).updateState(
-                              (state) => state.copyWith.accessControl(
-                                mode: item,
-                              ),
-                            );
-                      },
-                    )
-                ],
-              );
-            },
-          ),
-        )
-      ],
-    );
+        title: appLocalizations.mode,
+        items: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            child: Consumer(
+              builder: (_, ref, __) {
+                final accessControlMode = ref.watch(
+                  vpnSettingProvider
+                      .select((state) => state.accessControl.mode),
+                );
+                return Wrap(
+                  spacing: 16,
+                  children: [
+                    for (final item in AccessControlMode.values)
+                      SettingInfoCard(
+                        Info(
+                          label: _getTextWithAccessControlMode(item),
+                          iconData: _getIconWithAccessControlMode(item),
+                        ),
+                        isSelected: accessControlMode == item,
+                        onPressed: () {
+                          ref.read(vpnSettingProvider.notifier).updateState(
+                                (state) => state.copyWith.accessControl(
+                                  mode: item,
+                                ),
+                              );
+                        },
+                      )
+                  ],
+                );
+              },
+            ),
+          )
+        ],
+      );
 
   List<Widget> _buildSortSetting() => generateSection(
-      title: appLocalizations.sort,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, __) {
-              final accessSortType = ref.watch(
-                vpnSettingProvider.select((state) => state.accessControl.sort),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  for (final item in AccessSortType.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessSortType(item),
-                        iconData: _getIconWithProxiesSortType(item),
+        title: appLocalizations.sort,
+        items: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            child: Consumer(
+              builder: (_, ref, __) {
+                final accessSortType = ref.watch(
+                  vpnSettingProvider
+                      .select((state) => state.accessControl.sort),
+                );
+                return Wrap(
+                  spacing: 16,
+                  children: [
+                    for (final item in AccessSortType.values)
+                      SettingInfoCard(
+                        Info(
+                          label: _getTextWithAccessSortType(item),
+                          iconData: _getIconWithProxiesSortType(item),
+                        ),
+                        isSelected: accessSortType == item,
+                        onPressed: () {
+                          ref.read(vpnSettingProvider.notifier).updateState(
+                                (state) => state.copyWith.accessControl(
+                                  sort: item,
+                                ),
+                              );
+                        },
                       ),
-                      isSelected: accessSortType == item,
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      );
+
+  List<Widget> _buildSourceSetting() => generateSection(
+        title: appLocalizations.source,
+        items: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            child: Consumer(
+              builder: (_, ref, __) {
+                final vm2 = ref.watch(
+                  vpnSettingProvider.select(
+                    (state) => VM2(
+                      a: state.accessControl.isFilterSystemApp,
+                      b: state.accessControl.isFilterNonInternetApp,
+                    ),
+                  ),
+                );
+                return Wrap(
+                  spacing: 16,
+                  children: [
+                    SettingTextCard(
+                      appLocalizations.systemApp,
+                      isSelected: vm2.a == false,
                       onPressed: () {
                         ref.read(vpnSettingProvider.notifier).updateState(
                               (state) => state.copyWith.accessControl(
-                                sort: item,
+                                isFilterSystemApp: !vm2.a,
                               ),
                             );
                       },
                     ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-
-  List<Widget> _buildSourceSetting() => generateSection(
-      title: appLocalizations.source,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, __) {
-              final vm2 = ref.watch(
-                vpnSettingProvider.select(
-                  (state) => VM2(
-                    a: state.accessControl.isFilterSystemApp,
-                    b: state.accessControl.isFilterNonInternetApp,
-                  ),
-                ),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  SettingTextCard(
-                    appLocalizations.systemApp,
-                    isSelected: vm2.a == false,
-                    onPressed: () {
-                      ref.read(vpnSettingProvider.notifier).updateState(
-                            (state) => state.copyWith.accessControl(
-                              isFilterSystemApp: !vm2.a,
-                            ),
-                          );
-                    },
-                  ),
-                  SettingTextCard(
-                    appLocalizations.noNetworkApp,
-                    isSelected: vm2.b == false,
-                    onPressed: () {
-                      ref.read(vpnSettingProvider.notifier).updateState(
-                            (state) => state.copyWith.accessControl(
-                              isFilterNonInternetApp: !vm2.b,
-                            ),
-                          );
-                    },
-                  )
-                ],
-              );
-            },
-          ),
-        )
-      ],
-    );
+                    SettingTextCard(
+                      appLocalizations.noNetworkApp,
+                      isSelected: vm2.b == false,
+                      onPressed: () {
+                        ref.read(vpnSettingProvider.notifier).updateState(
+                              (state) => state.copyWith.accessControl(
+                                isFilterNonInternetApp: !vm2.b,
+                              ),
+                            );
+                      },
+                    )
+                  ],
+                );
+              },
+            ),
+          )
+        ],
+      );
 
   Future<void> _copyToClipboard() async {
     await globalState.safeRun(() {
@@ -710,53 +711,53 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
   }
 
   List<Widget> _buildActionSetting() => generateSection(
-      title: appLocalizations.action,
-      items: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
-          child: Wrap(
-            runSpacing: 16,
-            spacing: 16,
-            children: [
-              CommonChip(
-                avatar: const Icon(Icons.auto_awesome),
-                label: appLocalizations.intelligentSelected,
-                onPressed: () {
-                  Navigator.of(context).pop(1);
-                },
-              ),
-              CommonChip(
-                avatar: const Icon(Icons.paste),
-                label: appLocalizations.clipboardImport,
-                onPressed: _pasteToClipboard,
-              ),
-              CommonChip(
-                avatar: const Icon(Icons.content_copy),
-                label: appLocalizations.clipboardExport,
-                onPressed: _copyToClipboard,
-              )
-            ],
-          ),
-        )
-      ],
-    );
+        title: appLocalizations.action,
+        items: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: Wrap(
+              runSpacing: 16,
+              spacing: 16,
+              children: [
+                CommonChip(
+                  avatar: const Icon(Icons.auto_awesome),
+                  label: appLocalizations.intelligentSelected,
+                  onPressed: () {
+                    Navigator.of(context).pop(1);
+                  },
+                ),
+                CommonChip(
+                  avatar: const Icon(Icons.paste),
+                  label: appLocalizations.clipboardImport,
+                  onPressed: _pasteToClipboard,
+                ),
+                CommonChip(
+                  avatar: const Icon(Icons.content_copy),
+                  label: appLocalizations.clipboardExport,
+                  onPressed: _copyToClipboard,
+                )
+              ],
+            ),
+          )
+        ],
+      );
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ..._buildModeSetting(),
-            ..._buildSortSetting(),
-            ..._buildSourceSetting(),
-            ..._buildActionSetting(),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ..._buildModeSetting(),
+              ..._buildSortSetting(),
+              ..._buildSourceSetting(),
+              ..._buildActionSetting(),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }

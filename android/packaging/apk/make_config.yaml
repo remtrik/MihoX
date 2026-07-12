@@ -1,5 +1,5 @@
 # Android APK packaging configuration
-# This config is used by flutter_distributor to package APK files
+# This config is used by fastforge to package APK files
 
 # Package format
 format: apk

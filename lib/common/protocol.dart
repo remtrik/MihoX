@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:win32_registry/win32_registry.dart';
 
 class Protocol {
-
   factory Protocol() {
     _instance ??= Protocol._internal();
     return _instance!;
@@ -23,9 +22,10 @@ class Protocol {
       '',
       '"${Platform.resolvedExecutable}" "%1"',
     );
-    final regKey = Registry.currentUser.createKey(protocolRegKey);
-    regKey.createValue(protocolRegValue);
-    regKey.createKey(protocolCmdRegKey).createValue(protocolCmdRegValue);
+    Registry.currentUser.createKey(protocolRegKey)
+      ..createValue(protocolRegValue)
+      ..createKey(protocolCmdRegKey)
+      ..createValue(protocolCmdRegValue);
   }
 }
 

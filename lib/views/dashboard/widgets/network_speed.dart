@@ -1,9 +1,9 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/app.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/app.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class NetworkSpeed extends StatefulWidget {
   const NetworkSpeed({super.key});
@@ -13,35 +13,21 @@ class NetworkSpeed extends StatefulWidget {
 }
 
 class _NetworkSpeedState extends State<NetworkSpeed> {
-  List<Point> initPoints = const [Point(0, 0), Point(1, 0)];
+  static const initPoints = [Point(0, 0), Point(1, 0)];
 
-  List<Point> _getPoints(List<Traffic> traffics) {
-    final trafficPoints = traffics
-        .toList()
-        .asMap()
-        .map(
-          (index, e) => MapEntry(
-            index,
-            Point(
-              (index + initPoints.length).toDouble(),
-              e.speed.toDouble(),
-            ),
+  List<Point> _getPoints(List<Traffic> traffics) => [
+        ...initPoints,
+        for (var i = 0; i < traffics.length; i++)
+          Point(
+            (i + initPoints.length).toDouble(),
+            traffics[i].speed.toDouble(),
           ),
-        )
-        .values
-        .toList();
-
-    return [...initPoints, ...trafficPoints];
-  }
-
-  Traffic _getLastTraffic(List<Traffic> traffics) {
-    if (traffics.isEmpty) return Traffic();
-    return traffics.last;
-  }
+      ];
 
   @override
   Widget build(BuildContext context) {
-    final color = context.colorScheme.onSurfaceVariant.opacity80;
+    final colorScheme = context.colorScheme;
+    final color = colorScheme.onSurfaceVariant.opacity80;
     return SizedBox(
       height: getWidgetHeight(2),
       child: CommonCard(
@@ -52,7 +38,11 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
         ),
         child: Consumer(
           builder: (_, ref, __) {
-            final traffics = ref.watch(trafficsProvider).list;
+            final traffics = ref.watch(
+              trafficsProvider.select((state) => state.list),
+            );
+            final lastTraffic =
+                traffics.isEmpty ? Traffic() : traffics.last;
             return Stack(
               children: [
                 Positioned.fill(
@@ -62,10 +52,12 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                       left: 0,
                       right: 0,
                     ),
-                    child: LineChart(
-                      gradient: true,
-                      color: Theme.of(context).colorScheme.primary,
-                      points: _getPoints(traffics),
+                    child: RepaintBoundary(
+                      child: LineChart(
+                        gradient: true,
+                        color: colorScheme.primary,
+                        points: _getPoints(traffics),
+                      ),
                     ),
                   ),
                 ),
@@ -78,7 +70,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                       -20,
                     ),
                     child: Text(
-                      "${_getLastTraffic(traffics).up}↑   ${_getLastTraffic(traffics).down}↓",
+                      "${lastTraffic.up}↑   ${lastTraffic.down}↓",
                       style: context.textTheme.bodySmall?.copyWith(
                         color: color,
                       ),

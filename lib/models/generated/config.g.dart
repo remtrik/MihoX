@@ -23,7 +23,6 @@ _$AppSettingPropsImpl _$$AppSettingPropsImplFromJson(
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
       showLabel: json['showLabel'] as bool? ?? false,
-      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? false,
       hidden: json['hidden'] as bool? ?? false,
       developerMode: json['developerMode'] as bool? ?? false,
@@ -53,13 +52,12 @@ Map<String, dynamic> _$$AppSettingPropsImplToJson(
       'isAnimateToPage': instance.isAnimateToPage,
       'autoCheckUpdate': instance.autoCheckUpdate,
       'showLabel': instance.showLabel,
-      'disclaimerAccepted': instance.disclaimerAccepted,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
       'developerMode': instance.developerMode,
       'overrideProviderSettings': instance.overrideProviderSettings,
       'overrideNetworkSettings': instance.overrideNetworkSettings,
-      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy]!,
+      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy],
     };
 
 const _$RecoveryStrategyEnumMap = {
@@ -106,10 +104,10 @@ _$AccessControlImpl _$$AccessControlImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$AccessControlImplToJson(_$AccessControlImpl instance) =>
     <String, dynamic>{
       'enable': instance.enable,
-      'mode': _$AccessControlModeEnumMap[instance.mode]!,
+      'mode': _$AccessControlModeEnumMap[instance.mode],
       'acceptList': instance.acceptList,
       'rejectList': instance.rejectList,
-      'sort': _$AccessSortTypeEnumMap[instance.sort]!,
+      'sort': _$AccessSortTypeEnumMap[instance.sort],
       'isFilterSystemApp': instance.isFilterSystemApp,
       'isFilterNonInternetApp': instance.isFilterNonInternetApp,
     };
@@ -178,7 +176,7 @@ Map<String, dynamic> _$$NetworkPropsImplToJson(_$NetworkPropsImpl instance) =>
     <String, dynamic>{
       'systemProxy': instance.systemProxy,
       'bypassDomain': instance.bypassDomain,
-      'routeMode': _$RouteModeEnumMap[instance.routeMode]!,
+      'routeMode': _$RouteModeEnumMap[instance.routeMode],
       'autoSetSystemDns': instance.autoSetSystemDns,
     };
 
@@ -210,11 +208,11 @@ _$ProxiesStyleImpl _$$ProxiesStyleImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$ProxiesStyleImplToJson(_$ProxiesStyleImpl instance) =>
     <String, dynamic>{
-      'type': _$ProxiesTypeEnumMap[instance.type]!,
-      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType]!,
-      'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
-      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
-      'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
+      'type': _$ProxiesTypeEnumMap[instance.type],
+      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType],
+      'layout': _$ProxiesLayoutEnumMap[instance.layout],
+      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle],
+      'cardType': _$ProxyCardTypeEnumMap[instance.cardType],
       'iconMap': instance.iconMap,
     };
 
@@ -281,8 +279,8 @@ Map<String, dynamic> _$$ThemePropsImplToJson(_$ThemePropsImpl instance) =>
     <String, dynamic>{
       'primaryColor': instance.primaryColor,
       'primaryColors': instance.primaryColors,
-      'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
-      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
+      'themeMode': _$ThemeModeEnumMap[instance.themeMode],
+      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant],
       'pureBlack': instance.pureBlack,
       'textScale': instance.textScale,
     };
@@ -335,9 +333,6 @@ _$ConfigImpl _$$ConfigImplFromJson(Map<String, dynamic> json) => _$ConfigImpl(
           const [],
       currentProfileId: json['currentProfileId'] as String?,
       overrideDns: json['overrideDns'] as bool? ?? false,
-      dav: json['dav'] == null
-          ? null
-          : DAV.fromJson(json['dav'] as Map<String, dynamic>),
       networkProps: json['networkProps'] == null
           ? defaultNetworkProps
           : NetworkProps.fromJson(
@@ -354,10 +349,10 @@ _$ConfigImpl _$$ConfigImplFromJson(Map<String, dynamic> json) => _$ConfigImpl(
       windowProps: json['windowProps'] == null
           ? defaultWindowProps
           : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
-      patchClashConfig: json['patchClashConfig'] == null
-          ? defaultClashConfig
-          : ClashConfig.fromJson(
-              json['patchClashConfig'] as Map<String, dynamic>),
+      patchMihomoConfig: json['patchMihomoConfig'] == null
+          ? defaultMihomoConfig
+          : MihomoConfig.fromJson(
+              json['patchMihomoConfig'] as Map<String, dynamic>),
       scriptProps: json['scriptProps'] == null
           ? const ScriptProps()
           : ScriptProps.fromJson(json['scriptProps'] as Map<String, dynamic>),
@@ -370,12 +365,11 @@ Map<String, dynamic> _$$ConfigImplToJson(_$ConfigImpl instance) =>
       'hotKeyActions': instance.hotKeyActions,
       'currentProfileId': instance.currentProfileId,
       'overrideDns': instance.overrideDns,
-      'dav': instance.dav,
       'networkProps': instance.networkProps,
       'vpnProps': instance.vpnProps,
       'themeProps': instance.themeProps,
       'proxiesStyle': instance.proxiesStyle,
       'windowProps': instance.windowProps,
-      'patchClashConfig': instance.patchClashConfig,
+      'patchMihomoConfig': instance.patchMihomoConfig,
       'scriptProps': instance.scriptProps,
     };

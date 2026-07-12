@@ -9,11 +9,12 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/mmdb"
@@ -29,16 +30,25 @@ import (
 )
 
 var (
-	isInit              = false
-	externalProviders   = map[string]cp.Provider{}
-	logSubscriber       observable.Subscription[log.Event]
-	healthCheckStopCh   chan struct{}
-	healthCheckSeen     = map[string]string{}
-	requestStopCh       chan struct{}
-	requestSeen         = map[string]bool{}
+	isInit            = false
+	externalProviders = map[string]cp.Provider{}
+	logSubscriber     observable.Subscription[log.Event]
+	healthCheckStopCh chan struct{}
+	healthCheckChMu   sync.Mutex
+	healthCheckMu     sync.Mutex
+	healthCheckSeen   = map[string]string{}
+	requestStopCh     chan struct{}
+	requestChMu       sync.Mutex
+	requestMu         sync.Mutex
+	requestSeen       = map[string]bool{}
 )
 
-func handleInitClash(paramsString string) bool {
+// While the UI is backgrounded, keep proxy providers warm at this slow cadence
+// (instead of minHealthCheckInterval) so url-test/fallback groups don't go stale,
+// without spamming pings/UI updates.
+const backgroundHealthCheckInterval = 5 * time.Minute
+
+func handleInitMihomo(paramsString string) bool {
 	var params = InitParams{}
 	err := json.Unmarshal([]byte(paramsString), &params)
 	if err != nil {
@@ -145,7 +155,9 @@ func stopHealthCheckForwarder() {
 }
 
 func resetHealthCheckForwarderState() {
+	healthCheckMu.Lock()
 	healthCheckSeen = map[string]string{}
+	healthCheckMu.Unlock()
 }
 
 func forwardHealthCheckDelays() {
@@ -329,7 +341,6 @@ func handleChangeProxy(data string, fn func(string string)) {
 		}
 
 		fn("")
-		return
 	}()
 }
 
@@ -626,6 +637,50 @@ func handleGetConfig(path string) (*config.RawConfig, error) {
 		return nil, err
 	}
 	return prof, nil
+}
+
+func handleHealthCheck(groupName string, fn func(value string)) {
+	go func() {
+		proxies := tunnel.Proxies()
+		expectedStatus, _ := utils.NewUnsignedRanges[uint16]("")
+		defaultUrl := currentTestURL
+
+		for name, proxy := range proxies {
+			if groupName != "" && name != groupName {
+				continue
+			}
+			group, ok := proxy.Adapter().(outboundgroup.ProxyGroup)
+			if !ok {
+				continue
+			}
+			testUrl := ""
+			for _, p := range group.Providers() {
+				if u := p.HealthCheckURL(); u != "" {
+					testUrl = u
+					break
+				}
+			}
+			if testUrl == "" {
+				testUrl = defaultUrl
+			}
+			log.Infoln("[HealthCheck] testing group: %s url: %s", name, testUrl)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			dm, err := group.URLTest(ctx, testUrl, expectedStatus)
+			cancel()
+			if err != nil {
+				log.Warnln("[HealthCheck] group %s error: %v", name, err)
+				continue
+			}
+			for proxyName, delay := range dm {
+				sendMessage(Message{
+					Type: DelayMessage,
+					Data: &Delay{Name: proxyName, Value: int32(delay)},
+				})
+			}
+			log.Infoln("[HealthCheck] group %s done, %d results", name, len(dm))
+		}
+		fn("")
+	}()
 }
 
 func handleCrash() {

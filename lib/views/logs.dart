@@ -1,9 +1,9 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
 
 import '../models/models.dart';
 import '../widgets/widgets.dart';
@@ -38,31 +38,32 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
     _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
       logs: _logs,
     );
-    ref.listenManual(
-      isCurrentPageProvider(
-        PageLabel.logs,
-        handler: (pageLabel, viewMode) =>
-            pageLabel == PageLabel.tools && viewMode == ViewMode.mobile,
-      ),
-      (prev, next) {
-        if (prev != next && next == true) {
-          initPageState();
-        }
-      },
-      fireImmediately: true,
-    );
-    ref.listenManual(
-      logsProvider.select((state) => state.list),
-      (prev, next) {
-        if (prev != next) {
-          final isEquality = logListEquality.equals(prev, next);
-          if (!isEquality) {
-            _logs = next;
-            updateLogsThrottler();
+    ref
+      ..listenManual(
+        isCurrentPageProvider(
+          PageLabel.logs,
+          handler: (pageLabel, viewMode) =>
+              pageLabel == PageLabel.tools && viewMode == ViewMode.mobile,
+        ),
+        (prev, next) {
+          if (prev != next && next == true) {
+            initPageState();
           }
-        }
-      },
-    );
+        },
+        fireImmediately: true,
+      )
+      ..listenManual(
+        logsProvider.select((state) => state.list),
+        (prev, next) {
+          if (prev != next) {
+            final isEquality = logListEquality.equals(prev, next);
+            if (!isEquality) {
+              _logs = next;
+              updateLogsThrottler();
+            }
+          }
+        },
+      );
   }
 
   @override
@@ -102,7 +103,7 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
       title: appLocalizations.exportLogs,
     );
     if (res != true) return;
-    globalState.showMessage(
+    await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.exportSuccess),
     );

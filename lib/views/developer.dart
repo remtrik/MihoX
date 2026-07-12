@@ -1,77 +1,78 @@
-import 'package:flclashx/clash/core.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/common.dart';
-import 'package:flclashx/providers/config.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/core.dart';
+import 'package:mihox/models/common.dart';
+import 'package:mihox/providers/config.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 import '../providers/app.dart';
 
 class DeveloperView extends ConsumerWidget {
   const DeveloperView({super.key});
 
-  Widget _getDeveloperList(BuildContext context, WidgetRef ref) => generateSectionV2(
-      title: appLocalizations.options,
-      items: [
-        ListItem(
-          title: Text(appLocalizations.messageTest),
-          onTap: () {
-            context.showNotifier(
-              appLocalizations.messageTestTip,
-            );
-          },
-        ),
-        ListItem(
-          title: Text(appLocalizations.logsTest),
-          onTap: () {
-            for (var i = 0; i < 1000; i++) {
-              ref.read(requestsProvider.notifier).addRequest(Connection(
-                    id: utils.id,
-                    start: DateTime.now(),
-                    metadata: Metadata(
-                      uid: i * i,
-                      network: utils.generateRandomString(
-                        maxLength: 1000,
-                        minLength: 20,
-                      ),
-                      sourceIP: '',
-                      sourcePort: '',
-                      destinationIP: '',
-                      destinationPort: '',
-                      host: '',
-                      process: '',
-                      remoteDestination: "",
-                    ),
-                    chains: ["chains"],
-                  ));
-              globalState.appController.addLog(
-                Log.app(
-                  utils.generateRandomString(
-                    maxLength: 200,
-                    minLength: 20,
-                  ),
-                ),
+  Widget _getDeveloperList(BuildContext context, WidgetRef ref) =>
+      generateSectionV2(
+        title: appLocalizations.options,
+        items: [
+          ListItem(
+            title: Text(appLocalizations.messageTest),
+            onTap: () {
+              context.showNotifier(
+                appLocalizations.messageTestTip,
               );
-            }
-          },
-        ),
-        ListItem(
-          title: Text(appLocalizations.crashTest),
-          onTap: () {
-            clashCore.clashInterface.crash();
-          },
-        ),
-        ListItem(
-          title: Text(appLocalizations.clearData),
-          onTap: () async {
-            await globalState.appController.handleClear();
-          },
-        )
-      ],
-    );
+            },
+          ),
+          ListItem(
+            title: Text(appLocalizations.logsTest),
+            onTap: () {
+              for (var i = 0; i < 1000; i++) {
+                ref.read(requestsProvider.notifier).addRequest(Connection(
+                      id: utils.id,
+                      start: DateTime.now(),
+                      metadata: Metadata(
+                        uid: i * i,
+                        network: utils.generateRandomString(
+                          maxLength: 1000,
+                          minLength: 20,
+                        ),
+                        sourceIP: '',
+                        sourcePort: '',
+                        destinationIP: '',
+                        destinationPort: '',
+                        host: '',
+                        process: '',
+                        remoteDestination: "",
+                      ),
+                      chains: ["chains"],
+                    ));
+                globalState.appController.addLog(
+                  Log.app(
+                    utils.generateRandomString(
+                      maxLength: 200,
+                      minLength: 20,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+          ListItem(
+            title: Text(appLocalizations.crashTest),
+            onTap: () {
+              mihomoCore.mihomoInterface.crash();
+            },
+          ),
+          ListItem(
+            title: Text(appLocalizations.clearData),
+            onTap: () async {
+              await globalState.appController.handleClear();
+            },
+          )
+        ],
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

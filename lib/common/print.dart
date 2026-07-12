@@ -1,10 +1,9 @@
-import 'package:flclashx/common/file_logger.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mihox/common/file_logger.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/state.dart';
 
 class CommonPrint {
-
   factory CommonPrint() {
     _instance ??= CommonPrint._internal();
     return _instance!;
@@ -14,12 +13,12 @@ class CommonPrint {
   static CommonPrint? _instance;
 
   void log(String? text) {
-    final payload = "[FlClashX] $text";
+    final payload = "[MihoX] $text";
     debugPrint(payload);
-    
+
     // Write to file log
     fileLogger.log(payload);
-    
+
     if (!globalState.isInit) {
       return;
     }

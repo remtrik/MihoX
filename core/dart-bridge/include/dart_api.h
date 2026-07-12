@@ -25,10 +25,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#if defined(__Fuchsia__)
-#include <zircon/types.h>
-#endif
-
 #ifdef __cplusplus
 #define DART_EXTERN_C extern "C"
 #else
@@ -997,14 +993,6 @@ typedef struct {
    */
   Dart_UnregisterKernelBlobCallback unregister_kernel_blob;
 
-#if defined(__Fuchsia__)
-  /**
-   * The resource needed to use zx_vmo_replace_as_executable. Can be
-   * ZX_HANDLE_INVALID if the process has ambient-replace-as-executable or if
-   * executable memory is not needed (e.g., this is an AOT runtime).
-   */
-  zx_handle_t vmex_resource;
-#endif
 } Dart_InitializeParams;
 
 /**
@@ -3956,18 +3944,6 @@ typedef void (*Dart_StreamingCloseCallback)(void* callback_data);
 
 DART_EXPORT Dart_Handle Dart_LoadingUnitLibraryUris(intptr_t loading_unit_id);
 
-// On Darwin systems, 'dlsym' adds an '_' to the beginning of the symbol name.
-// Use the '...CSymbol' definitions for resolving through 'dlsym'. The actual
-// symbol names in the objects are given by the '...AsmSymbol' definitions.
-#if defined(__APPLE__)
-#define kSnapshotBuildIdCSymbol "kDartSnapshotBuildId"
-#define kVmSnapshotDataCSymbol "kDartVmSnapshotData"
-#define kVmSnapshotInstructionsCSymbol "kDartVmSnapshotInstructions"
-#define kVmSnapshotBssCSymbol "kDartVmSnapshotBss"
-#define kIsolateSnapshotDataCSymbol "kDartIsolateSnapshotData"
-#define kIsolateSnapshotInstructionsCSymbol "kDartIsolateSnapshotInstructions"
-#define kIsolateSnapshotBssCSymbol "kDartIsolateSnapshotBss"
-#else
 #define kSnapshotBuildIdCSymbol "_kDartSnapshotBuildId"
 #define kVmSnapshotDataCSymbol "_kDartVmSnapshotData"
 #define kVmSnapshotInstructionsCSymbol "_kDartVmSnapshotInstructions"
@@ -3975,7 +3951,6 @@ DART_EXPORT Dart_Handle Dart_LoadingUnitLibraryUris(intptr_t loading_unit_id);
 #define kIsolateSnapshotDataCSymbol "_kDartIsolateSnapshotData"
 #define kIsolateSnapshotInstructionsCSymbol "_kDartIsolateSnapshotInstructions"
 #define kIsolateSnapshotBssCSymbol "_kDartIsolateSnapshotBss"
-#endif
 
 #define kSnapshotBuildIdAsmSymbol "_kDartSnapshotBuildId"
 #define kVmSnapshotDataAsmSymbol "_kDartVmSnapshotData"

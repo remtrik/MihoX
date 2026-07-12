@@ -3793,52 +3793,52 @@ abstract class _ProxyState implements ProxyState {
 }
 
 /// @nodoc
-mixin _$ClashConfigState {
+mixin _$MihomoConfigState {
   bool get overrideDns => throw _privateConstructorUsedError;
-  ClashConfig get clashConfig => throw _privateConstructorUsedError;
+  MihomoConfig get mihomoConfig => throw _privateConstructorUsedError;
   OverrideData get overrideData => throw _privateConstructorUsedError;
   RouteMode get routeMode => throw _privateConstructorUsedError;
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $ClashConfigStateCopyWith<ClashConfigState> get copyWith =>
+  $MihomoConfigStateCopyWith<MihomoConfigState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ClashConfigStateCopyWith<$Res> {
-  factory $ClashConfigStateCopyWith(
-          ClashConfigState value, $Res Function(ClashConfigState) then) =
-      _$ClashConfigStateCopyWithImpl<$Res, ClashConfigState>;
+abstract class $MihomoConfigStateCopyWith<$Res> {
+  factory $MihomoConfigStateCopyWith(
+          MihomoConfigState value, $Res Function(MihomoConfigState) then) =
+      _$MihomoConfigStateCopyWithImpl<$Res, MihomoConfigState>;
   @useResult
   $Res call(
       {bool overrideDns,
-      ClashConfig clashConfig,
+      MihomoConfig mihomoConfig,
       OverrideData overrideData,
       RouteMode routeMode});
 
-  $ClashConfigCopyWith<$Res> get clashConfig;
+  $MihomoConfigCopyWith<$Res> get mihomoConfig;
   $OverrideDataCopyWith<$Res> get overrideData;
 }
 
 /// @nodoc
-class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
-    implements $ClashConfigStateCopyWith<$Res> {
-  _$ClashConfigStateCopyWithImpl(this._value, this._then);
+class _$MihomoConfigStateCopyWithImpl<$Res, $Val extends MihomoConfigState>
+    implements $MihomoConfigStateCopyWith<$Res> {
+  _$MihomoConfigStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? overrideDns = null,
-    Object? clashConfig = null,
+    Object? mihomoConfig = null,
     Object? overrideData = null,
     Object? routeMode = null,
   }) {
@@ -3847,10 +3847,10 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
               as bool,
-      clashConfig: null == clashConfig
-          ? _value.clashConfig
-          : clashConfig // ignore: cast_nullable_to_non_nullable
-              as ClashConfig,
+      mihomoConfig: null == mihomoConfig
+          ? _value.mihomoConfig
+          : mihomoConfig // ignore: cast_nullable_to_non_nullable
+              as MihomoConfig,
       overrideData: null == overrideData
           ? _value.overrideData
           : overrideData // ignore: cast_nullable_to_non_nullable
@@ -3862,17 +3862,17 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
     ) as $Val);
   }
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $ClashConfigCopyWith<$Res> get clashConfig {
-    return $ClashConfigCopyWith<$Res>(_value.clashConfig, (value) {
-      return _then(_value.copyWith(clashConfig: value) as $Val);
+  $MihomoConfigCopyWith<$Res> get mihomoConfig {
+    return $MihomoConfigCopyWith<$Res>(_value.mihomoConfig, (value) {
+      return _then(_value.copyWith(mihomoConfig: value) as $Val);
     });
   }
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -3884,52 +3884,52 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
 }
 
 /// @nodoc
-abstract class _$$ClashConfigStateImplCopyWith<$Res>
-    implements $ClashConfigStateCopyWith<$Res> {
-  factory _$$ClashConfigStateImplCopyWith(_$ClashConfigStateImpl value,
-          $Res Function(_$ClashConfigStateImpl) then) =
-      __$$ClashConfigStateImplCopyWithImpl<$Res>;
+abstract class _$$MihomoConfigStateImplCopyWith<$Res>
+    implements $MihomoConfigStateCopyWith<$Res> {
+  factory _$$MihomoConfigStateImplCopyWith(_$MihomoConfigStateImpl value,
+          $Res Function(_$MihomoConfigStateImpl) then) =
+      __$$MihomoConfigStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
       {bool overrideDns,
-      ClashConfig clashConfig,
+      MihomoConfig mihomoConfig,
       OverrideData overrideData,
       RouteMode routeMode});
 
   @override
-  $ClashConfigCopyWith<$Res> get clashConfig;
+  $MihomoConfigCopyWith<$Res> get mihomoConfig;
   @override
   $OverrideDataCopyWith<$Res> get overrideData;
 }
 
 /// @nodoc
-class __$$ClashConfigStateImplCopyWithImpl<$Res>
-    extends _$ClashConfigStateCopyWithImpl<$Res, _$ClashConfigStateImpl>
-    implements _$$ClashConfigStateImplCopyWith<$Res> {
-  __$$ClashConfigStateImplCopyWithImpl(_$ClashConfigStateImpl _value,
-      $Res Function(_$ClashConfigStateImpl) _then)
+class __$$MihomoConfigStateImplCopyWithImpl<$Res>
+    extends _$MihomoConfigStateCopyWithImpl<$Res, _$MihomoConfigStateImpl>
+    implements _$$MihomoConfigStateImplCopyWith<$Res> {
+  __$$MihomoConfigStateImplCopyWithImpl(_$MihomoConfigStateImpl _value,
+      $Res Function(_$MihomoConfigStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? overrideDns = null,
-    Object? clashConfig = null,
+    Object? mihomoConfig = null,
     Object? overrideData = null,
     Object? routeMode = null,
   }) {
-    return _then(_$ClashConfigStateImpl(
+    return _then(_$MihomoConfigStateImpl(
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
               as bool,
-      clashConfig: null == clashConfig
-          ? _value.clashConfig
-          : clashConfig // ignore: cast_nullable_to_non_nullable
-              as ClashConfig,
+      mihomoConfig: null == mihomoConfig
+          ? _value.mihomoConfig
+          : mihomoConfig // ignore: cast_nullable_to_non_nullable
+              as MihomoConfig,
       overrideData: null == overrideData
           ? _value.overrideData
           : overrideData // ignore: cast_nullable_to_non_nullable
@@ -3944,17 +3944,17 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ClashConfigStateImpl implements _ClashConfigState {
-  const _$ClashConfigStateImpl(
+class _$MihomoConfigStateImpl implements _MihomoConfigState {
+  const _$MihomoConfigStateImpl(
       {required this.overrideDns,
-      required this.clashConfig,
+      required this.mihomoConfig,
       required this.overrideData,
       required this.routeMode});
 
   @override
   final bool overrideDns;
   @override
-  final ClashConfig clashConfig;
+  final MihomoConfig mihomoConfig;
   @override
   final OverrideData overrideData;
   @override
@@ -3962,18 +3962,18 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
 
   @override
   String toString() {
-    return 'ClashConfigState(overrideDns: $overrideDns, clashConfig: $clashConfig, overrideData: $overrideData, routeMode: $routeMode)';
+    return 'MihomoConfigState(overrideDns: $overrideDns, mihomoConfig: $mihomoConfig, overrideData: $overrideData, routeMode: $routeMode)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ClashConfigStateImpl &&
+            other is _$MihomoConfigStateImpl &&
             (identical(other.overrideDns, overrideDns) ||
                 other.overrideDns == overrideDns) &&
-            (identical(other.clashConfig, clashConfig) ||
-                other.clashConfig == clashConfig) &&
+            (identical(other.mihomoConfig, mihomoConfig) ||
+                other.mihomoConfig == mihomoConfig) &&
             (identical(other.overrideData, overrideData) ||
                 other.overrideData == overrideData) &&
             (identical(other.routeMode, routeMode) ||
@@ -3982,39 +3982,39 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, overrideDns, clashConfig, overrideData, routeMode);
+      runtimeType, overrideDns, mihomoConfig, overrideData, routeMode);
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ClashConfigStateImplCopyWith<_$ClashConfigStateImpl> get copyWith =>
-      __$$ClashConfigStateImplCopyWithImpl<_$ClashConfigStateImpl>(
+  _$$MihomoConfigStateImplCopyWith<_$MihomoConfigStateImpl> get copyWith =>
+      __$$MihomoConfigStateImplCopyWithImpl<_$MihomoConfigStateImpl>(
           this, _$identity);
 }
 
-abstract class _ClashConfigState implements ClashConfigState {
-  const factory _ClashConfigState(
+abstract class _MihomoConfigState implements MihomoConfigState {
+  const factory _MihomoConfigState(
       {required final bool overrideDns,
-      required final ClashConfig clashConfig,
+      required final MihomoConfig mihomoConfig,
       required final OverrideData overrideData,
-      required final RouteMode routeMode}) = _$ClashConfigStateImpl;
+      required final RouteMode routeMode}) = _$MihomoConfigStateImpl;
 
   @override
   bool get overrideDns;
   @override
-  ClashConfig get clashConfig;
+  MihomoConfig get mihomoConfig;
   @override
   OverrideData get overrideData;
   @override
   RouteMode get routeMode;
 
-  /// Create a copy of ClashConfigState
+  /// Create a copy of MihomoConfigState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ClashConfigStateImplCopyWith<_$ClashConfigStateImpl> get copyWith =>
+  _$$MihomoConfigStateImplCopyWith<_$MihomoConfigStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -4490,7 +4490,7 @@ abstract class _VpnState implements VpnState {
 
 /// @nodoc
 mixin _$ProfileOverrideStateModel {
-  ClashConfigSnippet? get snippet => throw _privateConstructorUsedError;
+  MihomoConfigSnippet? get snippet => throw _privateConstructorUsedError;
   Set<String> get selectedRules => throw _privateConstructorUsedError;
   OverrideData? get overrideData => throw _privateConstructorUsedError;
 
@@ -4508,11 +4508,11 @@ abstract class $ProfileOverrideStateModelCopyWith<$Res> {
       _$ProfileOverrideStateModelCopyWithImpl<$Res, ProfileOverrideStateModel>;
   @useResult
   $Res call(
-      {ClashConfigSnippet? snippet,
+      {MihomoConfigSnippet? snippet,
       Set<String> selectedRules,
       OverrideData? overrideData});
 
-  $ClashConfigSnippetCopyWith<$Res>? get snippet;
+  $MihomoConfigSnippetCopyWith<$Res>? get snippet;
   $OverrideDataCopyWith<$Res>? get overrideData;
 }
 
@@ -4540,7 +4540,7 @@ class _$ProfileOverrideStateModelCopyWithImpl<$Res,
       snippet: freezed == snippet
           ? _value.snippet
           : snippet // ignore: cast_nullable_to_non_nullable
-              as ClashConfigSnippet?,
+              as MihomoConfigSnippet?,
       selectedRules: null == selectedRules
           ? _value.selectedRules
           : selectedRules // ignore: cast_nullable_to_non_nullable
@@ -4556,12 +4556,12 @@ class _$ProfileOverrideStateModelCopyWithImpl<$Res,
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $ClashConfigSnippetCopyWith<$Res>? get snippet {
+  $MihomoConfigSnippetCopyWith<$Res>? get snippet {
     if (_value.snippet == null) {
       return null;
     }
 
-    return $ClashConfigSnippetCopyWith<$Res>(_value.snippet!, (value) {
+    return $MihomoConfigSnippetCopyWith<$Res>(_value.snippet!, (value) {
       return _then(_value.copyWith(snippet: value) as $Val);
     });
   }
@@ -4591,12 +4591,12 @@ abstract class _$$ProfileOverrideStateModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {ClashConfigSnippet? snippet,
+      {MihomoConfigSnippet? snippet,
       Set<String> selectedRules,
       OverrideData? overrideData});
 
   @override
-  $ClashConfigSnippetCopyWith<$Res>? get snippet;
+  $MihomoConfigSnippetCopyWith<$Res>? get snippet;
   @override
   $OverrideDataCopyWith<$Res>? get overrideData;
 }
@@ -4624,7 +4624,7 @@ class __$$ProfileOverrideStateModelImplCopyWithImpl<$Res>
       snippet: freezed == snippet
           ? _value.snippet
           : snippet // ignore: cast_nullable_to_non_nullable
-              as ClashConfigSnippet?,
+              as MihomoConfigSnippet?,
       selectedRules: null == selectedRules
           ? _value._selectedRules
           : selectedRules // ignore: cast_nullable_to_non_nullable
@@ -4647,7 +4647,7 @@ class _$ProfileOverrideStateModelImpl implements _ProfileOverrideStateModel {
       : _selectedRules = selectedRules;
 
   @override
-  final ClashConfigSnippet? snippet;
+  final MihomoConfigSnippet? snippet;
   final Set<String> _selectedRules;
   @override
   Set<String> get selectedRules {
@@ -4692,12 +4692,12 @@ class _$ProfileOverrideStateModelImpl implements _ProfileOverrideStateModel {
 
 abstract class _ProfileOverrideStateModel implements ProfileOverrideStateModel {
   const factory _ProfileOverrideStateModel(
-      {final ClashConfigSnippet? snippet,
+      {final MihomoConfigSnippet? snippet,
       required final Set<String> selectedRules,
       final OverrideData? overrideData}) = _$ProfileOverrideStateModelImpl;
 
   @override
-  ClashConfigSnippet? get snippet;
+  MihomoConfigSnippet? get snippet;
   @override
   Set<String> get selectedRules;
   @override

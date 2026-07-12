@@ -103,7 +103,7 @@ _$OverrideRuleImpl _$$OverrideRuleImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$OverrideRuleImplToJson(_$OverrideRuleImpl instance) =>
     <String, dynamic>{
-      'type': _$OverrideRuleTypeEnumMap[instance.type]!,
+      'type': _$OverrideRuleTypeEnumMap[instance.type],
       'overrideRules': instance.overrideRules,
       'addedRules': instance.addedRules,
     };

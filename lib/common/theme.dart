@@ -1,8 +1,7 @@
-import 'package:flclashx/common/common.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
 
 class CommonTheme {
-
   CommonTheme.of(
     this.context,
     this.textScaleFactor,

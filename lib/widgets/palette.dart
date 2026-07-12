@@ -128,15 +128,12 @@ class _PaletteState extends State<Palette> {
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder(
-      valueListenable: widget.controller,
-      builder: (_, __, ___) => GestureDetector(
+        valueListenable: widget.controller,
+        builder: (_, __, ___) => GestureDetector(
           dragStartBehavior: DragStartBehavior.down,
-          onVerticalDragDown: (details) =>
-              onStart(details.globalPosition),
-          onVerticalDragUpdate: (details) =>
-              onUpdate(details.globalPosition),
-          onHorizontalDragUpdate: (details) =>
-              onUpdate(details.globalPosition),
+          onVerticalDragDown: (details) => onStart(details.globalPosition),
+          onVerticalDragUpdate: (details) => onUpdate(details.globalPosition),
+          onHorizontalDragUpdate: (details) => onUpdate(details.globalPosition),
           onVerticalDragEnd: (details) => onEnd(),
           onHorizontalDragEnd: (details) => onEnd(),
           onTapUp: (details) => onEnd(),
@@ -189,7 +186,7 @@ class _PaletteState extends State<Palette> {
             ),
           ),
         ),
-    );
+      );
 }
 
 class _ShadePainter extends CustomPainter {
@@ -262,12 +259,13 @@ class _ShadePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ShadePainter oldDelegate) => oldDelegate.thickness != thickness ||
-        oldDelegate.padding != padding ||
-        oldDelegate.trackBorderRadius != trackBorderRadius ||
-        oldDelegate.colorHue != colorHue ||
-        oldDelegate.colorSaturation != colorSaturation ||
-        oldDelegate.colorValue != colorValue;
+  bool shouldRepaint(_ShadePainter oldDelegate) =>
+      oldDelegate.thickness != thickness ||
+      oldDelegate.padding != padding ||
+      oldDelegate.trackBorderRadius != trackBorderRadius ||
+      oldDelegate.colorHue != colorHue ||
+      oldDelegate.colorSaturation != colorSaturation ||
+      oldDelegate.colorValue != colorValue;
 }
 
 class _TrackPainter extends CustomPainter {
@@ -312,7 +310,8 @@ class _TrackPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TrackPainter oldDelegate) => oldDelegate.thickness != thickness || oldDelegate.ticks != ticks;
+  bool shouldRepaint(_TrackPainter oldDelegate) =>
+      oldDelegate.thickness != thickness || oldDelegate.ticks != ticks;
 }
 
 class _ShadeThumbPainter extends CustomPainter {
@@ -339,8 +338,7 @@ class _ShadeThumbPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = trackRadius(size, thickness);
-    final effectiveSquareRadius =
-        squareRadius(radius, thickness, padding);
+    final effectiveSquareRadius = squareRadius(radius, thickness, padding);
 
     final paintBlack = Paint()
       ..color = Colors.black
@@ -356,15 +354,17 @@ class _ShadeThumbPainter extends CustomPainter {
     final paletteY =
         _Computer.valueToVector(colorValue, effectiveSquareRadius, center.dy);
     final paletteVector = Offset(paletteX, paletteY);
-    canvas.drawCircle(paletteVector, 12, paintBlack);
-    canvas.drawCircle(paletteVector, 12, paintWhite);
+    canvas
+      ..drawCircle(paletteVector, 12, paintBlack)
+      ..drawCircle(paletteVector, 12, paintWhite);
   }
 
   @override
-  bool shouldRepaint(_ShadeThumbPainter oldDelegate) => oldDelegate.thickness != thickness ||
-        oldDelegate.colorSaturation != colorSaturation ||
-        oldDelegate.colorValue != colorValue ||
-        oldDelegate.padding != padding;
+  bool shouldRepaint(_ShadeThumbPainter oldDelegate) =>
+      oldDelegate.thickness != thickness ||
+      oldDelegate.colorSaturation != colorSaturation ||
+      oldDelegate.colorValue != colorValue ||
+      oldDelegate.padding != padding;
 }
 
 class _TrackThumbPainter extends CustomPainter {
@@ -396,13 +396,14 @@ class _TrackThumbPainter extends CustomPainter {
       radius,
       center,
     );
-    canvas.drawCircle(track, thickness / 2 + 4, paintBlack);
-    canvas.drawCircle(track, thickness / 2 + 4, paintWhite);
+    canvas
+      ..drawCircle(track, thickness / 2 + 4, paintBlack)
+      ..drawCircle(track, thickness / 2 + 4, paintWhite);
   }
 
   @override
-  bool shouldRepaint(_TrackThumbPainter oldDelegate) => oldDelegate.thickness != thickness ||
-        oldDelegate.colorHue != colorHue;
+  bool shouldRepaint(_TrackThumbPainter oldDelegate) =>
+      oldDelegate.thickness != thickness || oldDelegate.colorHue != colorHue;
 }
 
 class _Computer {

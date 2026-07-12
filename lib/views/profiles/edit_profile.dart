@@ -2,17 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/pages/editor.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/mihomo.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/pages/editor.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class EditProfileView extends StatefulWidget {
-
   const EditProfileView({
     super.key,
     required this.context,
@@ -83,7 +82,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     } else if (!hasUpdate) {
       appController.setProfileAndAutoApply(profile);
     } else {
-      globalState.homeScaffoldKey.currentState?.loadingRun(
+      await globalState.homeScaffoldKey.currentState?.loadingRun(
         () async {
           await Future.delayed(
             commonDuration,
@@ -108,10 +107,10 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   Future<FileInfo?> _getFileInfo(path) async {
     final file = File(path);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return null;
     }
-    final lastModified = await file.lastModified();
+    final lastModified = file.lastModifiedSync();
     final size = await file.length();
     return FileInfo(
       size: size,
@@ -122,13 +121,13 @@ class _EditProfileViewState extends State<EditProfileView> {
   Future<void> _handleSaveEdit(BuildContext context, String data) async {
     final message = await globalState.safeRun<String>(
       () async {
-        final message = await clashCore.validateConfig(data);
+        final message = await mihomoCore.validateConfig(data);
         return message;
       },
       silence: false,
     );
     if (message?.isNotEmpty == true) {
-      globalState.showMessage(
+      await globalState.showMessage(
         title: appLocalizations.tip,
         message: TextSpan(text: message),
       );
@@ -143,7 +142,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     if (rawText == null) {
       final profilePath = await appPath.getProfilePath(widget.profile.id);
       final file = File(profilePath);
-      if (await file.exists()) {
+      if (file.existsSync()) {
         rawText = await file.readAsString();
       }
     }
@@ -166,7 +165,7 @@ class _EditProfileViewState extends State<EditProfileView> {
           ),
         );
         if (res == true && context.mounted) {
-          _handleSaveEdit(context, content);
+          await _handleSaveEdit(context, content);
         } else {
           return true;
         }
@@ -204,7 +203,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       message: TextSpan(text: appLocalizations.fileIsUpdate),
     );
     if (res == true) {
-      _handleConfirm();
+      await _handleConfirm();
     } else {
       if (mounted) {
         Navigator.of(context).pop();
@@ -289,44 +288,44 @@ class _EditProfileViewState extends State<EditProfileView> {
       ValueListenableBuilder<FileInfo?>(
         valueListenable: fileInfoNotifier,
         builder: (_, fileInfo, __) => FadeThroughBox(
-            child: fileInfo == null
-                ? Container()
-                : ListItem(
-                    title: Text(
-                      appLocalizations.profile,
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Text(
-                          fileInfo.desc,
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Wrap(
-                          runSpacing: 6,
-                          spacing: 12,
-                          children: [
-                            CommonChip(
-                              avatar: const Icon(Icons.edit),
-                              label: appLocalizations.edit,
-                              onPressed: _editProfileFile,
-                            ),
-                            CommonChip(
-                              avatar: const Icon(Icons.upload),
-                              label: appLocalizations.upload,
-                              onPressed: _uploadProfileFile,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+          child: fileInfo == null
+              ? Container()
+              : ListItem(
+                  title: Text(
+                    appLocalizations.profile,
                   ),
-          ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        fileInfo.desc,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Wrap(
+                        runSpacing: 6,
+                        spacing: 12,
+                        children: [
+                          CommonChip(
+                            avatar: const Icon(Icons.edit),
+                            label: appLocalizations.edit,
+                            onPressed: _editProfileFile,
+                          ),
+                          CommonChip(
+                            avatar: const Icon(Icons.upload),
+                            label: appLocalizations.upload,
+                            onPressed: _uploadProfileFile,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+        ),
       ),
     ];
     return CommonPopScope(
@@ -358,8 +357,8 @@ class _EditProfileViewState extends State<EditProfileView> {
               ),
               itemBuilder: (_, index) => items[index],
               separatorBuilder: (_, __) => const SizedBox(
-                  height: 24,
-                ),
+                height: 24,
+              ),
               itemCount: items.length,
             ),
           ),

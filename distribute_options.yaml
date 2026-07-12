@@ -1,2 +1,50 @@
-app_name: 'FlClashX'
+app_name: 'MihoX'
 output: 'dist/'
+releases:
+  - name: stable
+    jobs:
+      # Build android
+      - name: release-stable-android
+        package:
+          platform: android
+          target: apk
+          build_args:
+            target-platform: android-arm,android-arm64
+            obfuscate: true
+            split-debug-info: debug-symbols
+            split-per-abi: true
+
+      # Build windows exe
+      - name: release-stable-windows-exe
+        package:
+          platform: windows
+          target: exe
+
+      # Build windows zip
+      - name: release-stable-windows-zip
+        package:
+          platform: windows
+          target: zip
+
+      # Build linux appimage
+      - name: release-stable-linux-appimage
+        package:
+          platform: linux
+          target: appimage
+  - name: stable-windows
+    jobs:
+      - name: release-stable-windows-exe-separate
+        package:
+          platform: windows
+          target: exe
+  - name: stable-android
+    jobs:
+      - name: release-stable-android-separate
+        package:
+          platform: android
+          target: apk
+          build_args:
+            target-platform: android-arm,android-arm64
+            obfuscate: true
+            split-debug-info: debug-symbols
+            split-per-abi: true

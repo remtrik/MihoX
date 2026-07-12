@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flclashx/clash/core.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/utils/device_info_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/core.dart';
+import 'package:mihox/utils/device_info_service.dart';
 
-import 'clash_config.dart';
+import 'mihomo_config.dart';
 
 part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
@@ -71,12 +71,13 @@ class Profile with _$Profile {
   factory Profile.normal({
     String? label,
     String url = '',
-  }) => Profile(
-      label: label,
-      url: url,
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      autoUpdateDuration: defaultUpdateDuration,
-    );
+  }) =>
+      Profile(
+        label: label,
+        url: url,
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        autoUpdateDuration: defaultUpdateDuration,
+      );
 }
 
 @freezed
@@ -141,7 +142,7 @@ extension ProfileExtension on Profile {
   Future<void> checkAndUpdate() async {
     final isExists = await check();
     if (!isExists) {
-      if (url.isNotEmpty && realAutoUpdate) {
+      if (url.isNotEmpty) {
         await update();
       }
     }
@@ -149,25 +150,39 @@ extension ProfileExtension on Profile {
 
   Future<bool> check() async {
     final profilePath = await appPath.getProfilePath(id);
-    return File(profilePath).exists();
+    return File(profilePath).existsSync();
   }
 
   Future<File> getFile() async {
     final path = await appPath.getProfilePath(id);
     final file = File(path);
-    final isExists = await file.exists();
+    final isExists = file.existsSync();
     if (!isExists) {
-      await file.create(recursive: true);
+      file.createSync(recursive: true);
     }
     return file;
   }
 
   Future<int> get profileLastModified async {
     final file = await getFile();
-    return (await file.lastModified()).microsecondsSinceEpoch;
+    return (file.lastModifiedSync()).microsecondsSinceEpoch;
   }
 
   Future<Profile> update({bool shouldSendHeaders = true}) async {
+    final uri = Uri.tryParse(url);
+
+    if (uri == null) {
+      throw Exception("Invalid URL");
+    }
+
+    switch (uri.scheme.toLowerCase()) {
+      case 'http':
+      case 'https':
+        break;
+      default:
+        throw Exception("Raw ${uri.scheme}:// links are not yet supported");
+    }
+
     final headers = <String, dynamic>{};
 
     if (shouldSendHeaders) {
@@ -187,34 +202,43 @@ extension ProfileExtension on Profile {
 
     final disposition = response.headers.value("content-disposition");
     final userinfo = response.headers.value('subscription-userinfo');
-    
+
     final responseData = response.data;
     if (responseData == null) {
       throw Exception("Failed to get profile data from response.");
     }
 
     final providerHeaders = <String, String>{};
-    
+
     final headersToCollect = [
       'announce',
-      'support-url', 
+      'support-url',
       'profile-update-interval',
       'x-hwid-limit',
     ];
-    
+
     for (final headerName in headersToCollect) {
       final value = response.headers.value(headerName);
       if (value != null && value.isNotEmpty) {
         providerHeaders[headerName] = value;
       }
     }
-    
-    response.headers.forEach((name, values) {
-      if (name.toLowerCase().startsWith('flclashx-') && values.isNotEmpty) {
-        providerHeaders[name.toLowerCase()] = values.first;
+
+    for (final entry in response.headers.map.entries) {
+      var name = entry.key.toLowerCase();
+      final values = entry.value;
+
+      if (values.isEmpty) continue;
+
+      if (name.startsWith('flclashx-')) {
+        name = 'mihox-${name.substring('flclashx-'.length)}';
       }
-    });
-    
+
+      if (name.startsWith('mihox-')) {
+        providerHeaders[name] = values.first;
+      }
+    }
+
     Duration? durationFromHeader;
     final updateIntervalHeader = providerHeaders['profile-update-interval'];
     if (updateIntervalHeader != null) {
@@ -223,7 +247,7 @@ extension ProfileExtension on Profile {
         durationFromHeader = Duration(hours: hours);
       }
     }
-    
+
     return copyWith(
       label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
@@ -233,7 +257,7 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
-    final message = await clashCore.validateConfig(utf8.decode(bytes));
+    final message = await mihomoCore.validateConfig(utf8.decode(bytes));
     if (message.isNotEmpty) {
       throw message;
     }
@@ -243,7 +267,7 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFileWithString(String value) async {
-    final message = await clashCore.validateConfig(value);
+    final message = await mihomoCore.validateConfig(value);
     if (message.isNotEmpty) {
       throw message;
     }

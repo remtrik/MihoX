@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:uni_platform/uni_platform.dart';
 
@@ -82,25 +80,21 @@ final Map<PhysicalKeyboardKey, String> _knownKeyLabels =
   PhysicalKeyboardKey.controlLeft: "CTRL",
   PhysicalKeyboardKey.shiftLeft: 'SHIFT',
   PhysicalKeyboardKey.altLeft: "ALT",
-  PhysicalKeyboardKey.metaLeft: Platform.isMacOS ? '⌘' : 'WIN',
+  PhysicalKeyboardKey.metaLeft: "WIN",
   PhysicalKeyboardKey.controlRight: "CTRL",
   PhysicalKeyboardKey.shiftRight: 'SHIFT',
   PhysicalKeyboardKey.altRight: "ALT",
-  PhysicalKeyboardKey.metaRight: Platform.isMacOS ? '⌘' : 'WIN',
+  PhysicalKeyboardKey.metaRight: "WIN",
   PhysicalKeyboardKey.fn: 'FN',
 };
 
 extension KeyboardKeyExt on KeyboardKey {
   String get label {
-    PhysicalKeyboardKey? physicalKey;
-    if (this is LogicalKeyboardKey) {
-      physicalKey = (this as LogicalKeyboardKey).physicalKey;
-    } else if (this is PhysicalKeyboardKey) {
-      physicalKey = this as PhysicalKeyboardKey;
-    }
+    final physicalKey = switch (this) {
+      final LogicalKeyboardKey k => k.physicalKey,
+      final PhysicalKeyboardKey k => k,
+      _ => null,
+    };
     return _knownKeyLabels[physicalKey] ?? physicalKey?.debugName ?? 'Unknown';
   }
 }
-
-
-

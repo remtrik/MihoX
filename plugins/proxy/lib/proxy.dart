@@ -15,7 +15,6 @@ class Proxy extends ProxyPlatform {
     List<String> bypassDomain = const [],
   ]) async {
     return switch (Platform.operatingSystem) {
-      "macos" => await _startProxyWithMacos(port, bypassDomain),
       "linux" => await _startProxyWithLinux(port, bypassDomain),
       "windows" => await ProxyPlatform.instance.startProxy(port, bypassDomain),
       String() => false,
@@ -25,7 +24,6 @@ class Proxy extends ProxyPlatform {
   @override
   Future<bool?> stopProxy() async {
     return switch (Platform.operatingSystem) {
-      "macos" => await _stopProxyWithMacos(),
       "linux" => await _stopProxyWithLinux(),
       "windows" => await ProxyPlatform.instance.stopProxy(),
       String() => false,
@@ -174,91 +172,5 @@ class Proxy extends ProxyPlatform {
     } catch (_) {
       return false;
     }
-  }
-
-  Future<bool> _startProxyWithMacos(int port, List<String> bypassDomain) async {
-    try {
-      final devices = await _getNetworkDeviceListWithMacos();
-      for (final dev in devices) {
-        await Future.wait([
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setwebproxystate", dev, "on"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setwebproxy", dev, url, "$port"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsecurewebproxystate", dev, "on"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsecurewebproxy", dev, url, "$port"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsocksfirewallproxystate", dev, "on"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsocksfirewallproxy", dev, url, "$port"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            [
-              "-setproxybypassdomains",
-              dev,
-              bypassDomain.join(","),
-            ],
-          ),
-        ]);
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> _stopProxyWithMacos() async {
-    try {
-      final devices = await _getNetworkDeviceListWithMacos();
-      for (final dev in devices) {
-        await Future.wait([
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setautoproxystate", dev, "off"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setwebproxystate", dev, "off"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsecurewebproxystate", dev, "off"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setsocksfirewallproxystate", dev, "off"],
-          ),
-          Process.run(
-            "/usr/sbin/networksetup",
-            ["-setproxybypassdomains", dev, ""],
-          ),
-        ]);
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<List<String>> _getNetworkDeviceListWithMacos() async {
-    final res = await Process.run(
-        "/usr/sbin/networksetup", ["-listallnetworkservices"]);
-    final lines = res.stdout.toString().split("\n");
-    lines.removeWhere((element) => element.contains("*"));
-    return lines;
   }
 }

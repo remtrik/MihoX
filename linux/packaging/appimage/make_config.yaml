@@ -1,14 +1,14 @@
-display_name: FlClashX
+display_name: MihoX
 
 icon: ./assets/images/icon.png
 
 keywords:
-  - FlClashX
-  - Clash
-  - ClashMeta
+  - MihoX
+  - Mihomo
+  - MihomoMeta
   - Proxy
 
-generic_name: FlClashX
+generic_name: MihoX
 
 categories:
   - Network

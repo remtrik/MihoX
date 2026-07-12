@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flclashx/common/path.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/path.dart';
 import 'package:path/path.dart';
 
 class FileLogger {
@@ -28,7 +28,7 @@ class FileLogger {
   /// Check if Flutter bindings are initialized
   bool _checkBindingInitialized() {
     if (_isBindingInitialized) return true;
-    
+
     try {
       // Try to access WidgetsBinding - this will throw if not initialized
       WidgetsBinding.instance;
@@ -43,20 +43,19 @@ class FileLogger {
     final homeDir = await appPath.homeDirPath;
     final logsDir = join(homeDir, 'logs');
     final dir = Directory(logsDir);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
     }
     return logsDir;
   }
 
   String _getTodayDate() => DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  String _getLogFileName(String date, {int index = 0}) {
-    if (index == 0) {
-      return 'FlClashX_$date.log';
-    }
-    return 'FlClashX_$date\_$index.log';
-  }
+  String _getLogFileName(String date, {int index = 0}) =>
+      index == 0 ? 'MihoX_$date.log' : 'MihoX_${date}_$index.log';
+
+  Future<bool> _isUsable(File file) async =>
+      !file.existsSync() || await file.length() < maxFileSizeBytes;
 
   Future<void> _rotateLogs() async {
     try {
@@ -76,9 +75,8 @@ class FileLogger {
 
       // Remove old files if we exceed max count
       while (files.length > maxLogFiles) {
-        final oldestFile = files.removeAt(0);
         try {
-          await oldestFile.delete();
+          files.removeAt(0).deleteSync();
         } catch (_) {}
       }
     } catch (e) {
@@ -98,48 +96,32 @@ class FileLogger {
     }
 
     // Find appropriate log file for today
-    int index = 0;
-    File logFile;
-
+    var index = 0;
     while (true) {
-      final fileName = _getLogFileName(today, index: index);
-      final filePath = join(logsDir, fileName);
-      logFile = File(filePath);
-
-      // If file doesn't exist or is small enough, use it
-      if (!await logFile.exists()) {
+      final filePath = join(logsDir, _getLogFileName(today, index: index));
+      final logFile = File(filePath);
+      if (await _isUsable(logFile)) {
         _currentLogFilePath = filePath;
-        break;
+        return logFile;
       }
-
-      final fileSize = await logFile.length();
-      if (fileSize < maxFileSizeBytes) {
-        _currentLogFilePath = filePath;
-        break;
-      }
-
-      // File is too large, try next index
       index++;
     }
+  }
 
-    return logFile;
+  Future<void> _openSinkForCurrentFile() async {
+    final logFile = await _getCurrentLogFile();
+    _currentSink = logFile.openWrite(mode: FileMode.append);
   }
 
   Future<void> _ensureSink() async {
     if (_currentSink == null || _currentLogFilePath == null) {
-      final logFile = await _getCurrentLogFile();
-      _currentSink = logFile.openWrite(mode: FileMode.append);
-    } else {
-      // Check if current file is too large
-      final currentFile = File(_currentLogFilePath!);
-      if (await currentFile.exists()) {
-        final fileSize = await currentFile.length();
-        if (fileSize >= maxFileSizeBytes) {
-          await _closeSink();
-          final logFile = await _getCurrentLogFile();
-          _currentSink = logFile.openWrite(mode: FileMode.append);
-        }
-      }
+      await _openSinkForCurrentFile();
+      return;
+    }
+    final currentFile = File(_currentLogFilePath!);
+    if (!await _isUsable(currentFile)) {
+      await _closeSink();
+      await _openSinkForCurrentFile();
     }
   }
 
@@ -154,16 +136,12 @@ class FileLogger {
   }
 
   Future<void> _processQueue() async {
-    if (_isWriting || _writeQueue.isEmpty) {
-      return;
-    }
+    if (_isWriting || _writeQueue.isEmpty) return;
 
     // Don't try to write to file if bindings aren't initialized yet
     // Messages stay in queue and will be written when bindings are ready
-    if (!_checkBindingInitialized()) {
-      return;
-    }
-
+    if (!_checkBindingInitialized()) return;
+    
     _isWriting = true;
 
     try {

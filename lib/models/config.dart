@@ -1,11 +1,13 @@
 // ignore_for_file: invalid_annotation_target
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
 
-import 'models.dart';
+import 'common.dart';
+import 'mihomo_config.dart';
+import 'profile.dart';
 
 part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
@@ -76,7 +78,6 @@ class AppSettingProps with _$AppSettingProps {
     @Default(true) bool isAnimateToPage,
     @Default(false) bool autoCheckUpdate,
     @Default(false) bool showLabel,
-    @Default(false) bool disclaimerAccepted,
     @Default(false) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
@@ -88,9 +89,8 @@ class AppSettingProps with _$AppSettingProps {
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
       _$AppSettingPropsFromJson(json);
 
-  factory AppSettingProps.safeFromJson(Map<String, Object?>? json) => json == null
-        ? defaultAppSettingProps
-        : AppSettingProps.fromJson(json);
+  factory AppSettingProps.safeFromJson(Map<String, Object?>? json) =>
+      json == null ? defaultAppSettingProps : AppSettingProps.fromJson(json);
 }
 
 @freezed
@@ -189,7 +189,7 @@ class ThemeProps with _$ThemeProps {
   const factory ThemeProps({
     int? primaryColor,
     @Default(defaultPrimaryColors) List<int> primaryColors,
-    @Default(ThemeMode.dark) ThemeMode themeMode,
+    @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
     @Default(TextScale()) TextScale textScale,
@@ -249,13 +249,12 @@ class Config with _$Config {
     @Default([]) List<HotKeyAction> hotKeyActions,
     String? currentProfileId,
     @Default(false) bool overrideDns,
-    DAV? dav,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyle) ProxiesStyle proxiesStyle,
     @Default(defaultWindowProps) WindowProps windowProps,
-    @Default(defaultClashConfig) ClashConfig patchClashConfig,
+    @Default(defaultMihomoConfig) MihomoConfig patchMihomoConfig,
     @Default(ScriptProps()) ScriptProps scriptProps,
   }) = _Config;
 
@@ -271,7 +270,7 @@ class Config with _$Config {
           (json["vpnProps"]! as Map)["accessControl"] = accessControlMap;
         }
       }
-      
+
       // Migration: Replace deprecated "standard" iconStyle with "icon"
       final proxiesStyle = json["proxiesStyle"];
       if (proxiesStyle is Map) {

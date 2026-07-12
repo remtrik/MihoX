@@ -4,9 +4,9 @@ plugins {
 }
 
 android {
-    namespace = "com.follow.clashx.core"
+    namespace = "org.remtrik.mihox.core"
     compileSdk = 36
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         minSdk = 23
@@ -35,15 +35,16 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
+
+kotlin {
+    jvmToolchain(21)
+}
+
 dependencies {
     implementation("androidx.annotation:annotation-jvm:1.9.1")
 }
@@ -52,7 +53,7 @@ val copyNativeLibs by tasks.register<Copy>("copyNativeLibs") {
     doFirst {
         delete("src/main/jniLibs")
     }
-    from("../../libclash/android")
+    from("../../libmihomo/android")
     into("src/main/jniLibs")
 
     doLast {

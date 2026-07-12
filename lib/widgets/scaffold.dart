@@ -1,20 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/fade_box.dart';
-import 'package:flclashx/widgets/pop_scope.dart';
-import 'package:flclashx/widgets/search_order_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/fade_box.dart';
+import 'package:mihox/widgets/pop_scope.dart';
+import 'package:mihox/widgets/search_order_marker.dart';
 
 import 'chip.dart';
 
 class CommonScaffold extends ConsumerStatefulWidget {
-
   const CommonScaffold({
     super.key,
     this.appBar,
@@ -163,7 +162,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       _loading.value = false;
       return res;
     } catch (e) {
-      globalState.showMessage(
+      await globalState.showMessage(
         title: title ?? appLocalizations.tip,
         message: TextSpan(
           text: e.toString(),
@@ -258,26 +257,26 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   }
 
   Widget _buildTitle(AppBarSearchState? startState) => _isSearch
-        ? TextField(
-            autofocus: true,
-            controller: _textController,
-            style: context.textTheme.titleLarge,
-            onChanged: (value) {
-              if (startState != null) {
-                startState.onSearch(value);
-              }
-            },
-            decoration: InputDecoration(
-              hintText: appLocalizations.search,
-            ),
-          )
-        : Text(
-            !_isEdit
-                ? widget.title!
-                : appLocalizations.selectedCountTitle(
-                    "${_appBarState.value.editState?.editCount ?? 0}",
-                  ),
-          );
+      ? TextField(
+          autofocus: true,
+          controller: _textController,
+          style: context.textTheme.titleLarge,
+          onChanged: (value) {
+            if (startState != null) {
+              startState.onSearch(value);
+            }
+          },
+          decoration: InputDecoration(
+            hintText: appLocalizations.search,
+          ),
+        )
+      : Text(
+          !_isEdit
+              ? widget.title!
+              : appLocalizations.selectedCountTitle(
+                  "${_appBarState.value.editState?.editCount ?? 0}",
+                ),
+        );
 
   List<Widget> _buildActions(
     AppBarSearchState? searchState,
@@ -325,7 +324,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       searchButton,
       ...actions,
     ]);
-  
   }
 
   Widget _buildAppBarWrap(Widget child) {
@@ -349,9 +347,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
+    final backgroundUrl =
+        widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
     final isTransparent = backgroundUrl != null;
-    
+
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: Theme(
@@ -381,28 +380,28 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
                   builder: (_, state, __) => _buildAppBarWrap(
-                      AppBar(
-                        backgroundColor: isTransparent ? Colors.transparent : null,
-                        elevation: isTransparent ? 0 : null,
-                        centerTitle: widget.centerTitle ?? false,
-                        automaticallyImplyLeading:
-                            widget.automaticallyImplyLeading,
-                        leading: _buildLeading(),
-                        title: _buildTitle(state.searchState),
-                        actions: _buildActions(
-                          state.searchState,
-                          state.actions.isNotEmpty
-                              ? state.actions
-                              : widget.actions ?? [],
-                        ),
+                    AppBar(
+                      backgroundColor:
+                          isTransparent ? Colors.transparent : null,
+                      elevation: isTransparent ? 0 : null,
+                      centerTitle: widget.centerTitle ?? false,
+                      automaticallyImplyLeading:
+                          widget.automaticallyImplyLeading,
+                      leading: _buildLeading(),
+                      title: _buildTitle(state.searchState),
+                      actions: _buildActions(
+                        state.searchState,
+                        state.actions.isNotEmpty
+                            ? state.actions
+                            : widget.actions ?? [],
                       ),
                     ),
+                  ),
                 ),
             ValueListenableBuilder(
               valueListenable: _loading,
-              builder: (_, value, __) => value == true
-                    ? const LinearProgressIndicator()
-                    : Container(),
+              builder: (_, value, __) =>
+                  value == true ? const LinearProgressIndicator() : Container(),
             ),
           ],
         ),
@@ -445,8 +444,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   @override
   Widget build(BuildContext context) {
     assert(widget.appBar != null || widget.title != null);
-    final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
-    
+    final backgroundUrl =
+        widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
+
     final body = SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,26 +490,27 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         ],
       ),
     );
-    
+
     final scaffold = Scaffold(
       appBar: _buildAppBar(),
       body: body,
       resizeToAvoidBottomInset: true,
-      backgroundColor: backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
+      backgroundColor:
+          backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
       floatingActionButton: widget.floatingActionButton ??
           ValueListenableBuilder<Widget?>(
             valueListenable: _floatingActionButton,
             builder: (_, value, __) => IntrinsicWidth(
-                child: IntrinsicHeight(
-                  child: FadeScaleBox(
-                    child: value ?? const SizedBox(),
-                  ),
+              child: IntrinsicHeight(
+                child: FadeScaleBox(
+                  child: value ?? const SizedBox(),
                 ),
               ),
+            ),
           ),
       bottomNavigationBar: widget.bottomNavigationBar,
     );
-    
+
     final scaffoldWithBackground = backgroundUrl != null
         ? Stack(
             children: [
@@ -519,7 +520,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             ],
           )
         : scaffold;
-    
+
     return _sideNavigationBar != null
         ? Row(
             mainAxisSize: MainAxisSize.min,
@@ -536,12 +537,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 }
 
 List<Widget> genActions(List<Widget> actions, {double? space}) => <Widget>[
-    ...actions.separated(
-      SizedBox(
-        width: space ?? 4,
+      ...actions.separated(
+        SizedBox(
+          width: space ?? 4,
+        ),
       ),
-    ),
-    const SizedBox(
-      width: 8,
-    )
-  ];
+      const SizedBox(
+        width: 8,
+      )
+    ];

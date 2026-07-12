@@ -34,7 +34,6 @@ mixin _$AppSettingProps {
   bool get isAnimateToPage => throw _privateConstructorUsedError;
   bool get autoCheckUpdate => throw _privateConstructorUsedError;
   bool get showLabel => throw _privateConstructorUsedError;
-  bool get disclaimerAccepted => throw _privateConstructorUsedError;
   bool get minimizeOnExit => throw _privateConstructorUsedError;
   bool get hidden => throw _privateConstructorUsedError;
   bool get developerMode => throw _privateConstructorUsedError;
@@ -72,7 +71,6 @@ abstract class $AppSettingPropsCopyWith<$Res> {
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
-      bool disclaimerAccepted,
       bool minimizeOnExit,
       bool hidden,
       bool developerMode,
@@ -108,7 +106,6 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
-    Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
     Object? developerMode = null,
@@ -165,10 +162,6 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
           ? _value.showLabel
           : showLabel // ignore: cast_nullable_to_non_nullable
               as bool,
-      disclaimerAccepted: null == disclaimerAccepted
-          ? _value.disclaimerAccepted
-          : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-              as bool,
       minimizeOnExit: null == minimizeOnExit
           ? _value.minimizeOnExit
           : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -219,7 +212,6 @@ abstract class _$$AppSettingPropsImplCopyWith<$Res>
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
-      bool disclaimerAccepted,
       bool minimizeOnExit,
       bool hidden,
       bool developerMode,
@@ -253,7 +245,6 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
-    Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
     Object? developerMode = null,
@@ -310,10 +301,6 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
           ? _value.showLabel
           : showLabel // ignore: cast_nullable_to_non_nullable
               as bool,
-      disclaimerAccepted: null == disclaimerAccepted
-          ? _value.disclaimerAccepted
-          : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-              as bool,
       minimizeOnExit: null == minimizeOnExit
           ? _value.minimizeOnExit
           : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -359,7 +346,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       this.isAnimateToPage = true,
       this.autoCheckUpdate = false,
       this.showLabel = false,
-      this.disclaimerAccepted = false,
       this.minimizeOnExit = false,
       this.hidden = false,
       this.developerMode = false,
@@ -415,9 +401,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
   final bool showLabel;
   @override
   @JsonKey()
-  final bool disclaimerAccepted;
-  @override
-  @JsonKey()
   final bool minimizeOnExit;
   @override
   @JsonKey()
@@ -437,7 +420,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
 
   @override
   String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, recoveryStrategy: $recoveryStrategy)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, recoveryStrategy: $recoveryStrategy)';
   }
 
   @override
@@ -466,8 +449,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
                 other.autoCheckUpdate == autoCheckUpdate) &&
             (identical(other.showLabel, showLabel) ||
                 other.showLabel == showLabel) &&
-            (identical(other.disclaimerAccepted, disclaimerAccepted) ||
-                other.disclaimerAccepted == disclaimerAccepted) &&
             (identical(other.minimizeOnExit, minimizeOnExit) ||
                 other.minimizeOnExit == minimizeOnExit) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
@@ -499,7 +480,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
         isAnimateToPage,
         autoCheckUpdate,
         showLabel,
-        disclaimerAccepted,
         minimizeOnExit,
         hidden,
         developerMode,
@@ -540,7 +520,6 @@ abstract class _AppSettingProps implements AppSettingProps {
       final bool isAnimateToPage,
       final bool autoCheckUpdate,
       final bool showLabel,
-      final bool disclaimerAccepted,
       final bool minimizeOnExit,
       final bool hidden,
       final bool developerMode,
@@ -576,8 +555,6 @@ abstract class _AppSettingProps implements AppSettingProps {
   bool get autoCheckUpdate;
   @override
   bool get showLabel;
-  @override
-  bool get disclaimerAccepted;
   @override
   bool get minimizeOnExit;
   @override
@@ -2519,14 +2496,13 @@ mixin _$Config {
   List<HotKeyAction> get hotKeyActions => throw _privateConstructorUsedError;
   String? get currentProfileId => throw _privateConstructorUsedError;
   bool get overrideDns => throw _privateConstructorUsedError;
-  DAV? get dav => throw _privateConstructorUsedError;
   NetworkProps get networkProps => throw _privateConstructorUsedError;
   VpnProps get vpnProps => throw _privateConstructorUsedError;
   @JsonKey(fromJson: ThemeProps.safeFromJson)
   ThemeProps get themeProps => throw _privateConstructorUsedError;
   ProxiesStyle get proxiesStyle => throw _privateConstructorUsedError;
   WindowProps get windowProps => throw _privateConstructorUsedError;
-  ClashConfig get patchClashConfig => throw _privateConstructorUsedError;
+  MihomoConfig get patchMihomoConfig => throw _privateConstructorUsedError;
   ScriptProps get scriptProps => throw _privateConstructorUsedError;
 
   /// Serializes this Config to a JSON map.
@@ -2550,23 +2526,21 @@ abstract class $ConfigCopyWith<$Res> {
       List<HotKeyAction> hotKeyActions,
       String? currentProfileId,
       bool overrideDns,
-      DAV? dav,
       NetworkProps networkProps,
       VpnProps vpnProps,
       @JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps,
       ProxiesStyle proxiesStyle,
       WindowProps windowProps,
-      ClashConfig patchClashConfig,
+      MihomoConfig patchMihomoConfig,
       ScriptProps scriptProps});
 
   $AppSettingPropsCopyWith<$Res> get appSetting;
-  $DAVCopyWith<$Res>? get dav;
   $NetworkPropsCopyWith<$Res> get networkProps;
   $VpnPropsCopyWith<$Res> get vpnProps;
   $ThemePropsCopyWith<$Res> get themeProps;
   $ProxiesStyleCopyWith<$Res> get proxiesStyle;
   $WindowPropsCopyWith<$Res> get windowProps;
-  $ClashConfigCopyWith<$Res> get patchClashConfig;
+  $MihomoConfigCopyWith<$Res> get patchMihomoConfig;
   $ScriptPropsCopyWith<$Res> get scriptProps;
 }
 
@@ -2590,13 +2564,12 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
     Object? hotKeyActions = null,
     Object? currentProfileId = freezed,
     Object? overrideDns = null,
-    Object? dav = freezed,
     Object? networkProps = null,
     Object? vpnProps = null,
     Object? themeProps = null,
     Object? proxiesStyle = null,
     Object? windowProps = null,
-    Object? patchClashConfig = null,
+    Object? patchMihomoConfig = null,
     Object? scriptProps = null,
   }) {
     return _then(_value.copyWith(
@@ -2620,10 +2593,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
               as bool,
-      dav: freezed == dav
-          ? _value.dav
-          : dav // ignore: cast_nullable_to_non_nullable
-              as DAV?,
       networkProps: null == networkProps
           ? _value.networkProps
           : networkProps // ignore: cast_nullable_to_non_nullable
@@ -2644,10 +2613,10 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
           ? _value.windowProps
           : windowProps // ignore: cast_nullable_to_non_nullable
               as WindowProps,
-      patchClashConfig: null == patchClashConfig
-          ? _value.patchClashConfig
-          : patchClashConfig // ignore: cast_nullable_to_non_nullable
-              as ClashConfig,
+      patchMihomoConfig: null == patchMihomoConfig
+          ? _value.patchMihomoConfig
+          : patchMihomoConfig // ignore: cast_nullable_to_non_nullable
+              as MihomoConfig,
       scriptProps: null == scriptProps
           ? _value.scriptProps
           : scriptProps // ignore: cast_nullable_to_non_nullable
@@ -2662,20 +2631,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
   $AppSettingPropsCopyWith<$Res> get appSetting {
     return $AppSettingPropsCopyWith<$Res>(_value.appSetting, (value) {
       return _then(_value.copyWith(appSetting: value) as $Val);
-    });
-  }
-
-  /// Create a copy of Config
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $DAVCopyWith<$Res>? get dav {
-    if (_value.dav == null) {
-      return null;
-    }
-
-    return $DAVCopyWith<$Res>(_value.dav!, (value) {
-      return _then(_value.copyWith(dav: value) as $Val);
     });
   }
 
@@ -2733,9 +2688,9 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $ClashConfigCopyWith<$Res> get patchClashConfig {
-    return $ClashConfigCopyWith<$Res>(_value.patchClashConfig, (value) {
-      return _then(_value.copyWith(patchClashConfig: value) as $Val);
+  $MihomoConfigCopyWith<$Res> get patchMihomoConfig {
+    return $MihomoConfigCopyWith<$Res>(_value.patchMihomoConfig, (value) {
+      return _then(_value.copyWith(patchMihomoConfig: value) as $Val);
     });
   }
 
@@ -2764,19 +2719,16 @@ abstract class _$$ConfigImplCopyWith<$Res> implements $ConfigCopyWith<$Res> {
       List<HotKeyAction> hotKeyActions,
       String? currentProfileId,
       bool overrideDns,
-      DAV? dav,
       NetworkProps networkProps,
       VpnProps vpnProps,
       @JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps,
       ProxiesStyle proxiesStyle,
       WindowProps windowProps,
-      ClashConfig patchClashConfig,
+      MihomoConfig patchMihomoConfig,
       ScriptProps scriptProps});
 
   @override
   $AppSettingPropsCopyWith<$Res> get appSetting;
-  @override
-  $DAVCopyWith<$Res>? get dav;
   @override
   $NetworkPropsCopyWith<$Res> get networkProps;
   @override
@@ -2788,7 +2740,7 @@ abstract class _$$ConfigImplCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   @override
   $WindowPropsCopyWith<$Res> get windowProps;
   @override
-  $ClashConfigCopyWith<$Res> get patchClashConfig;
+  $MihomoConfigCopyWith<$Res> get patchMihomoConfig;
   @override
   $ScriptPropsCopyWith<$Res> get scriptProps;
 }
@@ -2811,13 +2763,12 @@ class __$$ConfigImplCopyWithImpl<$Res>
     Object? hotKeyActions = null,
     Object? currentProfileId = freezed,
     Object? overrideDns = null,
-    Object? dav = freezed,
     Object? networkProps = null,
     Object? vpnProps = null,
     Object? themeProps = null,
     Object? proxiesStyle = null,
     Object? windowProps = null,
-    Object? patchClashConfig = null,
+    Object? patchMihomoConfig = null,
     Object? scriptProps = null,
   }) {
     return _then(_$ConfigImpl(
@@ -2841,10 +2792,6 @@ class __$$ConfigImplCopyWithImpl<$Res>
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
               as bool,
-      dav: freezed == dav
-          ? _value.dav
-          : dav // ignore: cast_nullable_to_non_nullable
-              as DAV?,
       networkProps: null == networkProps
           ? _value.networkProps
           : networkProps // ignore: cast_nullable_to_non_nullable
@@ -2865,10 +2812,10 @@ class __$$ConfigImplCopyWithImpl<$Res>
           ? _value.windowProps
           : windowProps // ignore: cast_nullable_to_non_nullable
               as WindowProps,
-      patchClashConfig: null == patchClashConfig
-          ? _value.patchClashConfig
-          : patchClashConfig // ignore: cast_nullable_to_non_nullable
-              as ClashConfig,
+      patchMihomoConfig: null == patchMihomoConfig
+          ? _value.patchMihomoConfig
+          : patchMihomoConfig // ignore: cast_nullable_to_non_nullable
+              as MihomoConfig,
       scriptProps: null == scriptProps
           ? _value.scriptProps
           : scriptProps // ignore: cast_nullable_to_non_nullable
@@ -2887,13 +2834,12 @@ class _$ConfigImpl implements _Config {
       final List<HotKeyAction> hotKeyActions = const [],
       this.currentProfileId,
       this.overrideDns = false,
-      this.dav,
       this.networkProps = defaultNetworkProps,
       this.vpnProps = defaultVpnProps,
       @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps,
       this.proxiesStyle = defaultProxiesStyle,
       this.windowProps = defaultWindowProps,
-      this.patchClashConfig = defaultClashConfig,
+      this.patchMihomoConfig = defaultMihomoConfig,
       this.scriptProps = const ScriptProps()})
       : _profiles = profiles,
         _hotKeyActions = hotKeyActions;
@@ -2928,8 +2874,6 @@ class _$ConfigImpl implements _Config {
   @JsonKey()
   final bool overrideDns;
   @override
-  final DAV? dav;
-  @override
   @JsonKey()
   final NetworkProps networkProps;
   @override
@@ -2946,14 +2890,14 @@ class _$ConfigImpl implements _Config {
   final WindowProps windowProps;
   @override
   @JsonKey()
-  final ClashConfig patchClashConfig;
+  final MihomoConfig patchMihomoConfig;
   @override
   @JsonKey()
   final ScriptProps scriptProps;
 
   @override
   String toString() {
-    return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps)';
+    return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchMihomoConfig: $patchMihomoConfig, scriptProps: $scriptProps)';
   }
 
   @override
@@ -2970,7 +2914,6 @@ class _$ConfigImpl implements _Config {
                 other.currentProfileId == currentProfileId) &&
             (identical(other.overrideDns, overrideDns) ||
                 other.overrideDns == overrideDns) &&
-            (identical(other.dav, dav) || other.dav == dav) &&
             (identical(other.networkProps, networkProps) ||
                 other.networkProps == networkProps) &&
             (identical(other.vpnProps, vpnProps) ||
@@ -2981,8 +2924,8 @@ class _$ConfigImpl implements _Config {
                 other.proxiesStyle == proxiesStyle) &&
             (identical(other.windowProps, windowProps) ||
                 other.windowProps == windowProps) &&
-            (identical(other.patchClashConfig, patchClashConfig) ||
-                other.patchClashConfig == patchClashConfig) &&
+            (identical(other.patchMihomoConfig, patchMihomoConfig) ||
+                other.patchMihomoConfig == patchMihomoConfig) &&
             (identical(other.scriptProps, scriptProps) ||
                 other.scriptProps == scriptProps));
   }
@@ -2996,13 +2939,12 @@ class _$ConfigImpl implements _Config {
       const DeepCollectionEquality().hash(_hotKeyActions),
       currentProfileId,
       overrideDns,
-      dav,
       networkProps,
       vpnProps,
       themeProps,
       proxiesStyle,
       windowProps,
-      patchClashConfig,
+      patchMihomoConfig,
       scriptProps);
 
   /// Create a copy of Config
@@ -3029,14 +2971,13 @@ abstract class _Config implements Config {
       final List<HotKeyAction> hotKeyActions,
       final String? currentProfileId,
       final bool overrideDns,
-      final DAV? dav,
       final NetworkProps networkProps,
       final VpnProps vpnProps,
       @JsonKey(fromJson: ThemeProps.safeFromJson)
       required final ThemeProps themeProps,
       final ProxiesStyle proxiesStyle,
       final WindowProps windowProps,
-      final ClashConfig patchClashConfig,
+      final MihomoConfig patchMihomoConfig,
       final ScriptProps scriptProps}) = _$ConfigImpl;
 
   factory _Config.fromJson(Map<String, dynamic> json) = _$ConfigImpl.fromJson;
@@ -3053,8 +2994,6 @@ abstract class _Config implements Config {
   @override
   bool get overrideDns;
   @override
-  DAV? get dav;
-  @override
   NetworkProps get networkProps;
   @override
   VpnProps get vpnProps;
@@ -3066,7 +3005,7 @@ abstract class _Config implements Config {
   @override
   WindowProps get windowProps;
   @override
-  ClashConfig get patchClashConfig;
+  MihomoConfig get patchMihomoConfig;
   @override
   ScriptProps get scriptProps;
 

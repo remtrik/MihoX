@@ -1,20 +1,19 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
 
-const appName = "FlClashX";
-const appHelperService = "FlClashHelperService";
-const coreName = "clashx.meta";
+const appName = "MihoX";
+const appHelperService = "MihoXHelperService";
+const coreName = "mihomo";
 const browserUa =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const packageName = "com.follow.clashx";
-final unixSocketPath = "/tmp/FlClashXSocket_${Random().nextInt(10000)}.sock";
+const packageName = "org.remtrik.mihox";
+final unixSocketPath = "/tmp/MihoXSocket_${Random().nextInt(10000)}.sock";
 const helperPort = 47890;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -32,20 +31,16 @@ const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);
 const defaultUpdateDuration = Duration(days: 1);
 const mmdbFileName = "geoip.metadb";
-const asnFileName = "ASN.mmdb";
+const asnFileName = "GeoLite2-ASN.mmdb";
 const geoIpFileName = "GeoIP.dat";
 const geoSiteFileName = "GeoSite.dat";
-final double kHeaderHeight = system.isDesktop
-    ? !Platform.isMacOS
-        ? 40
-        : 28
-    : 0;
+final double kHeaderHeight = system.isDesktop ? 40 : 0;
 const profilesDirectoryName = "profiles";
 const localhost = "127.0.0.1";
-const clashConfigKey = "clash_config";
+const mihomoConfigKey = "mihomo_config";
 const configKey = "config";
 const double dialogCommonWidth = 300;
-const repository = "pluralplay/FlClashX";
+const repository = "remtrik/MihoX";
 const defaultExternalController = "127.0.0.1:9090";
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
@@ -88,9 +83,9 @@ double getWidgetHeight(num lines) => max(lines * 84 + (lines - 1) * 16, 0).ap;
 
 const maxLength = 150;
 
-const mainIsolate = "FlClashXMainIsolate";
+const mainIsolate = "MihoXMainIsolate";
 
-const serviceIsolate = "FlClashXServiceIsolate";
+const serviceIsolate = "MihoXServiceIsolate";
 
 const defaultPrimaryColors = [
   0xFF795548,

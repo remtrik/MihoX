@@ -1,13 +1,12 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/providers/app.dart';
-import 'package:flclashx/providers/state.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/providers/app.dart';
+import 'package:mihox/providers/state.dart';
+import 'package:mihox/state.dart';
 
 class VpnManager extends ConsumerStatefulWidget {
-
   const VpnManager({
     super.key,
     required this.child,

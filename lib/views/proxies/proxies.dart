@@ -1,13 +1,14 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/views/proxies/list.dart';
-import 'package:flclashx/views/proxies/providers.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/core.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/views/proxies/list.dart';
+import 'package:mihox/views/proxies/providers.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 import 'common.dart';
 import 'setting.dart';
@@ -27,9 +28,13 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
 
   Future<void> _pingAllGroups() async {
     final groups = ref.read(currentGroupsStateProvider).value;
+    if (groups.isEmpty) {
+      await mihomoCore.healthCheck();
+      return;
+    }
     final allProxies = <Proxy>[];
     final seenNames = <String>{};
-    
+
     for (final group in groups) {
       for (final proxy in group.all) {
         if (!seenNames.contains(proxy.name)) {
@@ -38,7 +43,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
         }
       }
     }
-    
+
     if (allProxies.isNotEmpty) {
       await delayTest(allProxies, null);
     }
@@ -80,8 +85,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
                   (state) => state.value.map((e) => e.name).toList(),
                 ),
               );
-              final allExpanded = groupNames.isNotEmpty &&
-                  groupNames.every(unfoldSet.contains);
+              final allExpanded =
+                  groupNames.isNotEmpty && groupNames.every(unfoldSet.contains);
               return IconButton(
                 onPressed: () {
                   if (allExpanded) {
@@ -100,15 +105,15 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
         ],
         CommonPopupBox(
           targetBuilder: (open) => IconButton(
-              onPressed: () {
-                open(
-                  offset: const Offset(0, 20),
-                );
-              },
-              icon: const Icon(
-                Icons.more_vert,
-              ),
+            onPressed: () {
+              open(
+                offset: const Offset(0, 20),
+              );
+            },
+            icon: const Icon(
+              Icons.more_vert,
             ),
+          ),
           popup: CommonPopupMenu(
             items: [
               PopupMenuItemData(
@@ -121,10 +126,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
                       isScrollControlled: true,
                     ),
                     builder: (_, type) => AdaptiveSheetScaffold(
-                        type: type,
-                        body: const ProxiesSetting(),
-                        title: appLocalizations.settings,
-                      ),
+                      type: type,
+                      body: const ProxiesSetting(),
+                      title: appLocalizations.settings,
+                    ),
                   );
                 },
               ),
@@ -254,7 +259,7 @@ class _ModeSelectorAction extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(
-      patchClashConfigProvider.select((state) => state.mode),
+      patchMihomoConfigProvider.select((state) => state.mode),
     );
 
     return CommonPopupBox(

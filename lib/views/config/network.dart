@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/config.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/providers/config.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class OverrideNetworkSettingsItemNetwork extends ConsumerWidget {
   const OverrideNetworkSettingsItemNetwork({super.key});
@@ -38,7 +38,10 @@ class OverrideNetworkSettingsItemNetwork extends ConsumerWidget {
         if (!overrideNetworkSettings)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.5),
             child: Row(
               children: [
                 Icon(
@@ -94,8 +97,8 @@ class TUNItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enable =
-        ref.watch(patchClashConfigProvider.select((state) => state.tun.enable));
+    final enable = ref
+        .watch(patchMihomoConfigProvider.select((state) => state.tun.enable));
 
     return ListItem.switchItem(
       title: Text(appLocalizations.tun),
@@ -103,7 +106,7 @@ class TUNItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: enable,
         onChanged: (value) async {
-          ref.read(patchClashConfigProvider.notifier).updateState(
+          ref.read(patchMihomoConfigProvider.notifier).updateState(
                 (state) => state.copyWith.tun(
                   enable: value,
                 ),
@@ -239,12 +242,13 @@ class TunStackItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stack =
-        ref.watch(patchClashConfigProvider.select((state) => state.tun.stack));
+        ref.watch(patchMihomoConfigProvider.select((state) => state.tun.stack));
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
     final isEnabled = overrideNetworkSettings;
-    commonPrint.log("TunStackItem.build: stack=${stack.name}, isEnabled=$isEnabled");
+    commonPrint
+        .log("TunStackItem.build: stack=${stack.name}, isEnabled=$isEnabled");
 
     return AbsorbPointer(
       absorbing: !isEnabled,
@@ -261,12 +265,12 @@ class TunStackItem extends ConsumerWidget {
               if (value == null) {
                 return;
               }
-              ref.read(patchClashConfigProvider.notifier).updateState(
+              ref.read(patchMihomoConfigProvider.notifier).updateState(
                     (state) => state.copyWith.tun(
                       stack: value,
                     ),
                   );
-              globalState.appController.updateClashConfigDebounce();
+              globalState.appController.updateMihomoConfigDebounce();
             },
             title: appLocalizations.stackMode,
           ),
@@ -310,32 +314,32 @@ class BypassDomainItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-      title: Text(appLocalizations.bypassDomain),
-      subtitle: Text(appLocalizations.bypassDomainDesc),
-      delegate: OpenDelegate(
-        blur: false,
-        title: appLocalizations.bypassDomain,
-        widget: Consumer(
-          builder: (_, ref, __) {
-            _initActions(context, ref);
-            final bypassDomain = ref.watch(
-                networkSettingProvider.select((state) => state.bypassDomain));
-            return ListInputPage(
-              title: appLocalizations.bypassDomain,
-              items: bypassDomain,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(networkSettingProvider.notifier).updateState(
-                      (state) => state.copyWith(
-                        bypassDomain: List.from(items),
-                      ),
-                    );
-              },
-            );
-          },
+        title: Text(appLocalizations.bypassDomain),
+        subtitle: Text(appLocalizations.bypassDomainDesc),
+        delegate: OpenDelegate(
+          blur: false,
+          title: appLocalizations.bypassDomain,
+          widget: Consumer(
+            builder: (_, ref, __) {
+              _initActions(context, ref);
+              final bypassDomain = ref.watch(
+                  networkSettingProvider.select((state) => state.bypassDomain));
+              return ListInputPage(
+                title: appLocalizations.bypassDomain,
+                items: bypassDomain,
+                titleBuilder: Text.new,
+                onChange: (items) {
+                  ref.read(networkSettingProvider.notifier).updateState(
+                        (state) => state.copyWith(
+                          bypassDomain: List.from(items),
+                        ),
+                      );
+                },
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 }
 
 class RouteModeItem extends ConsumerWidget {
@@ -390,7 +394,7 @@ class RouteAddressItem extends ConsumerWidget {
         widget: Consumer(
           builder: (_, ref, __) {
             final routeAddress = ref.watch(
-              patchClashConfigProvider.select(
+              patchMihomoConfigProvider.select(
                 (state) => state.tun.routeAddress,
               ),
             );
@@ -399,7 +403,7 @@ class RouteAddressItem extends ConsumerWidget {
               items: routeAddress,
               titleBuilder: Text.new,
               onChange: (items) {
-                ref.read(patchClashConfigProvider.notifier).updateState(
+                ref.read(patchMihomoConfigProvider.notifier).updateState(
                       (state) => state.copyWith.tun(
                         routeAddress: List.from(items),
                       ),
@@ -438,7 +442,6 @@ final networkItems = [
     items: [
       const OverrideNetworkSettingsItemNetwork(),
       if (system.isDesktop) const TUNItem(),
-      if (Platform.isMacOS) const AutoSetSystemDnsItem(),
       const TunStackItem(),
       if (!system.isDesktop) ...[
         const RouteModeItem(),
@@ -470,7 +473,7 @@ class NetworkListView extends ConsumerWidget {
                     accessControl: state.accessControl,
                   ),
                 );
-            ref.read(patchClashConfigProvider.notifier).updateState(
+            ref.read(patchMihomoConfigProvider.notifier).updateState(
                   (state) => state.copyWith(
                     tun: defaultTun,
                   ),

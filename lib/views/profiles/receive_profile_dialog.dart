@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -32,33 +32,34 @@ class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
       final ip = await NetworkInfo().getWifiIP();
       const port = 8899;
 
-      final router = shelf_router.Router();
-      router.post('/add-profile', (shelf.Request request) async {
-        final body = await request.readAsString();
-        final json = jsonDecode(body);
-        final url = json['url'] as String?;
+      final router = shelf_router.Router()
+        ..post('/add-profile', (shelf.Request request) async {
+          final body = await request.readAsString();
+          final json = jsonDecode(body);
+          final url = json['url'] as String?;
 
-        if (url != null && url.isNotEmpty) {
-          print('Received subscription link: $url');
-          if (mounted) Navigator.of(context).pop(url);
-          return shelf.Response.ok('Link received by TV');
-        }
-        return shelf.Response.badRequest(body: 'URL not found');
-      });
+          if (url != null && url.isNotEmpty) {
+            commonPrint.log('Received subscription link: $url');
+            if (mounted) Navigator.of(context).pop(url);
+            return shelf.Response.ok('Link received by TV');
+          }
+          return shelf.Response.badRequest(body: 'URL not found');
+        });
 
       _server = await shelf_io.serve(router.call, ip!, port);
-      print('Server started at http://${_server?.address.host}:${_server?.port}');
+      commonPrint.log(
+          'Server started at http://${_server?.address.host}:${_server?.port}');
 
       setState(() {
         _qrData = jsonEncode({
-          'type': 'flclashx_tv_sync',
+          'type': 'mihox_tv_sync',
           'ip': _server?.address.host,
           'port': _server?.port,
         });
         _isLoading = false;
       });
     } catch (e) {
-      print('Error starting server: $e');
+      commonPrint.log('Error starting server: $e');
       if (mounted) Navigator.of(context).pop();
     }
   }
@@ -66,7 +67,7 @@ class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
   @override
   void dispose() {
     _server?.close(force: true);
-    print('Server stopped');
+    commonPrint.log('Server stopped');
     super.dispose();
   }
 

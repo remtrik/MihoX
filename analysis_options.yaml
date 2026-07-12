@@ -6,13 +6,18 @@ analyzer:
     strict-inference: false
     strict-raw-types: false
   errors:
+    empty_catches: ignore
     missing_required_param: error
     missing_return: error
+    only_throw_errors: ignore
+    prefer_asserts_with_message: ignore
+    strict_top_level_inference: ignore
     todo: ignore
+    type_annotate_public_apis: ignore
   exclude:
     - build/**
     - lib/generated_plugin_registrant.dart
-    - lib/clash/generated/**
+    - lib/mihomo/generated/**
     - lib/l10n/**
     - plugins/flutter_distributor/**
 

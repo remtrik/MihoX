@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 import 'widgets/start_button.dart';
-
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -40,40 +40,41 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
   @override
   void dispose() {
     _isEditNotifier.dispose();
+    _addedWidgetsNotifier.dispose();
     super.dispose();
   }
 
   @override
-  Widget? get floatingActionButton => null; // Moved to bottom of body
+  Widget? get floatingActionButton => null;
 
   Widget _buildIsEdit(Widget Function(bool) builder) => ValueListenableBuilder(
-      valueListenable: _isEditNotifier,
-      builder: (_, isEdit, ___) => builder(isEdit),
-    );
+        valueListenable: _isEditNotifier,
+        builder: (_, isEdit, ___) => builder(isEdit),
+      );
 
   @override
   List<Widget> get actions => [
         _buildIsEdit((isEdit) => isEdit
-              ? ValueListenableBuilder(
-                  valueListenable: _addedWidgetsNotifier,
-                  builder: (_, addedChildren, child) {
-                    if (addedChildren.isEmpty) {
-                      return Container();
-                    }
-                    return child!;
-                  },
-                  child: IconButton(
-                    onPressed: _showAddWidgetsModal,
-                    icon: const Icon(
-                      Icons.add_circle,
-                    ),
+            ? ValueListenableBuilder(
+                valueListenable: _addedWidgetsNotifier,
+                builder: (_, addedChildren, child) {
+                  if (addedChildren.isEmpty) {
+                    return Container();
+                  }
+                  return child!;
+                },
+                child: IconButton(
+                  onPressed: _showAddWidgetsModal,
+                  icon: const Icon(
+                    Icons.add_circle,
                   ),
-                )
-              : const SizedBox()),
+                ),
+              )
+            : const SizedBox()),
         Consumer(
           builder: (context, ref, child) {
-            final denyEditing = ref.watch(currentProfileProvider
-                .select((profile) => profile?.providerHeaders['flclashx-denywidgets']));
+            final denyEditing = ref.watch(currentProfileProvider.select(
+                (profile) => profile?.providerHeaders['mihox-denywidgets']));
 
             if (denyEditing == 'true') {
               return const SizedBox.shrink();
@@ -81,10 +82,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
 
             return IconButton(
               icon: _buildIsEdit((isEdit) => isEdit
-                    ? const Icon(Icons.save)
-                    : const Icon(
-                        Icons.edit,
-                      )),
+                  ? const Icon(Icons.save)
+                  : const Icon(
+                      Icons.edit,
+                    )),
               onPressed: _handleUpdateIsEdit,
             );
           },
@@ -94,18 +95,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
   void _showAddWidgetsModal() {
     showSheet(
       builder: (_, type) => ValueListenableBuilder(
-          valueListenable: _addedWidgetsNotifier,
-          builder: (_, value, __) => AdaptiveSheetScaffold(
-              type: type,
-              body: _AddDashboardWidgetModal(
-                items: value,
-                onAdd: (gridItem) {
-                  key.currentState?.handleAdd(gridItem);
-                },
-              ),
-              title: appLocalizations.add,
-            ),
+        valueListenable: _addedWidgetsNotifier,
+        builder: (_, value, __) => AdaptiveSheetScaffold(
+          type: type,
+          body: _AddDashboardWidgetModal(
+            items: value,
+            onAdd: (gridItem) {
+              key.currentState?.handleAdd(gridItem);
+            },
+          ),
+          title: appLocalizations.add,
         ),
+      ),
       context: context,
     );
   }
@@ -144,14 +145,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     if (!item.platforms.contains(SupportPlatform.currentPlatform)) {
       return false;
     }
-    
+
     if (!globalModeEnabled) {
-      if (item == DashboardWidget.outboundMode || 
+      if (item == DashboardWidget.outboundMode ||
           item == DashboardWidget.outboundModeV2) {
         return false;
       }
     }
-    
+
     if (item == DashboardWidget.announce && !hasAnnounceData) {
       return false;
     }
@@ -161,7 +162,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     if (item == DashboardWidget.changeServerButton && !hasServerInfoData) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -174,30 +175,33 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     final hasServerInfo = ref.watch(hasServerInfoDataProvider);
     final columns = max(4 * ((dashboardState.viewWidth / 320).ceil()), 8);
     final spacing = 16.ap;
-    
+
     bool isAllowed(DashboardWidget item) => _isAllowedWidget(
-      item,
-      globalModeEnabled: globalModeEnabled,
-      hasAnnounceData: hasAnnounce,
-      hasServiceInfoData: hasServiceInfo,
-      hasServerInfoData: hasServerInfo,
-    );
-    
-    final children = [
-      ...dashboardState.dashboardWidgets
-          .where(isAllowed)
-          .map(
-            (item) => item.widget,
-          ),
+          item,
+          globalModeEnabled: globalModeEnabled,
+          hasAnnounceData: hasAnnounce,
+          hasServiceInfoData: hasServiceInfo,
+          hasServerInfoData: hasServerInfo,
+        );
+
+    final allowedWidgets = [
+      for (final item in dashboardState.dashboardWidgets)
+        if (isAllowed(item)) item.widget,
     ];
+    final allowedWidgetsSet = allowedWidgets.toSet();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _addedWidgetsNotifier.value = DashboardWidget.values
-          .where(
-            (item) => !children.contains(item.widget) && isAllowed(item),
-          )
-          .map((item) => item.widget)
-          .toList();
+      if (!mounted) return;
+      final addedWidgets = [
+        for (final item in DashboardWidget.values)
+          if (!allowedWidgetsSet.contains(item.widget) && isAllowed(item))
+            item.widget,
+      ];
+      if (!listEquals(_addedWidgetsNotifier.value, addedWidgets)) {
+        _addedWidgetsNotifier.value = addedWidgets;
+      }
     });
+
     return Column(
       children: [
         Expanded(
@@ -208,34 +212,28 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
                 bottom: 16,
               ),
               child: _buildIsEdit((isEdit) => isEdit
-                    ? SystemBackBlock(
-                        child: CommonPopScope(
-                          child: SuperGrid(
-                            key: key,
-                            crossAxisCount: columns,
-                            crossAxisSpacing: spacing,
-                            mainAxisSpacing: spacing,
-                            onUpdate: _handleSave,
-                            children: [
-                              ...dashboardState.dashboardWidgets
-                                  .where(isAllowed)
-                                  .map(
-                                    (item) => item.widget,
-                                  ),
-                            ],
-                          ),
-                          onPop: () {
-                            _handleUpdateIsEdit();
-                            return false;
-                          },
+                  ? SystemBackBlock(
+                      child: CommonPopScope(
+                        child: SuperGrid(
+                          key: key,
+                          crossAxisCount: columns,
+                          crossAxisSpacing: spacing,
+                          mainAxisSpacing: spacing,
+                          onUpdate: _handleSave,
+                          children: allowedWidgets,
                         ),
-                      )
-                    : Grid(
-                        crossAxisCount: columns,
-                        crossAxisSpacing: spacing,
-                        mainAxisSpacing: spacing,
-                        children: children,
-                      )),
+                        onPop: () {
+                          _handleUpdateIsEdit();
+                          return false;
+                        },
+                      ),
+                    )
+                  : Grid(
+                      crossAxisCount: columns,
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: spacing,
+                      children: allowedWidgets,
+                    )),
             ),
           ),
         ),
@@ -247,7 +245,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
 }
 
 class _AddDashboardWidgetModal extends StatelessWidget {
-
   const _AddDashboardWidgetModal({
     required this.items,
     required this.onAdd,
@@ -257,90 +254,65 @@ class _AddDashboardWidgetModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DeferredPointerHandler(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(
-          16,
-        ),
-        child: Grid(
-          crossAxisCount: 8,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          children: items
-              .map(
-                (item) => item.wrap(
-                  builder: (child) => _AddedContainer(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(
+            16,
+          ),
+          child: Grid(
+            crossAxisCount: 8,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: items
+                .map(
+                  (item) => item.wrap(
+                    builder: (child) => _AddedContainer(
                       onAdd: () {
                         onAdd(item);
                       },
                       child: child,
                     ),
-                ),
-              )
-              .toList(),
+                  ),
+                )
+                .toList(),
+          ),
         ),
-      ),
-    );
+      );
 }
 
-class _AddedContainer extends StatefulWidget {
-
+class _AddedContainer extends StatelessWidget {
   const _AddedContainer({
     required this.child,
     required this.onAdd,
   });
+
   final Widget child;
   final VoidCallback onAdd;
 
   @override
-  State<_AddedContainer> createState() => _AddedContainerState();
-}
-
-class _AddedContainerState extends State<_AddedContainer> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(_AddedContainer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.child != widget.child) {}
-  }
-
-  Future<void> _handleAdd() async {
-    widget.onAdd();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) => Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ActivateBox(
-          child: widget.child,
-        ),
-        Positioned(
-          top: -8,
-          right: -8,
-          child: DeferPointer(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: IconButton.filled(
-                iconSize: 20,
-                padding: const EdgeInsets.all(2),
-                onPressed: _handleAdd,
-                icon: const Icon(
-                  Icons.add,
+        clipBehavior: Clip.none,
+        children: [
+          ActivateBox(
+            child: child,
+          ),
+          Positioned(
+            top: -8,
+            right: -8,
+            child: DeferPointer(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: IconButton.filled(
+                  iconSize: 20,
+                  padding: const EdgeInsets.all(2),
+                  onPressed: onAdd,
+                  icon: const Icon(
+                    Icons.add,
+                  ),
                 ),
               ),
             ),
-          ),
-        )
-      ],
-    );
+          )
+        ],
+      );
 }

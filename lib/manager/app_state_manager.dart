@@ -1,16 +1,14 @@
 import 'dart:async';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/tile.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/plugins/tile.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
-
   const AppStateManager({
     super.key,
     required this.child,
@@ -27,76 +25,72 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    ref.listenManual(layoutChangeProvider, (prev, next) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (prev != next) {
-          globalState.cacheHeightMap = {};
-        }
-      });
-    });
-    ref.listenManual(
-      checkIpProvider,
-      (prev, next) {
-        if (prev != next && next.b) {
-          detectionState.startCheck();
-        }
-      },
-      fireImmediately: true,
-    );
-    ref.listenManual(configStateProvider, (prev, next) {
-      if (prev != next) {
-        globalState.appController.savePreferencesDebounce();
-      }
-    });
-    ref.listenManual(
-      autoSetSystemDnsStateProvider,
-      (prev, next) async {
-        if (prev == next) {
-          return;
-        }
-        if (next.a == true && next.b == true) {
-          system.setMacOSDns(false);
-        } else {
-          system.setMacOSDns(true);
-        }
-      },
-    );
-    ref.listenManual(
-      patchClashConfigProvider.select((state) => state.mode),
-      (prev, next) {
-        if (prev != next) {
-          tile?.updateMode(next.name);
-        }
-      },
-      fireImmediately: true,
-    );
-    ref.listenManual(
-      globalModeEnabledProvider,
-      (prev, next) {
-        if (prev != next) {
-          tile?.updateGlobalModeEnabled(next);
-        }
-      },
-      fireImmediately: true,
-    );
-    ref.listenManual(
-      globalModeEnabledProvider,
-      (prev, next) {
-        if (next) {
-          return;
-        }
-        final currentMode = ref.read(
-          patchClashConfigProvider.select((state) => state.mode),
-        );
-        if (currentMode != Mode.global) {
-          return;
-        }
+    ref
+      ..listenManual(layoutChangeProvider, (prev, next) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          globalState.appController.changeMode(Mode.rule);
+          if (prev != next) {
+            globalState.cacheHeightMap = {};
+          }
         });
-      },
-      fireImmediately: true,
-    );
+      })
+      ..listenManual(
+        checkIpProvider,
+        (prev, next) {
+          if (prev != next && next.b) {
+            detectionState.startCheck();
+          }
+        },
+        fireImmediately: true,
+      )
+      ..listenManual(configStateProvider, (prev, next) {
+        if (prev != next) {
+          globalState.appController.savePreferencesDebounce();
+        }
+      })
+      ..listenManual(
+        autoSetSystemDnsStateProvider,
+        (prev, next) async {
+          if (prev == next) {
+            return;
+          }
+        },
+      )
+      ..listenManual(
+        patchMihomoConfigProvider.select((state) => state.mode),
+        (prev, next) {
+          if (prev != next) {
+            tile?.updateMode(next.name);
+          }
+        },
+        fireImmediately: true,
+      )
+      ..listenManual(
+        globalModeEnabledProvider,
+        (prev, next) {
+          if (prev != next) {
+            tile?.updateGlobalModeEnabled(enabled: next);
+          }
+        },
+        fireImmediately: true,
+      )
+      ..listenManual(
+        globalModeEnabledProvider,
+        (prev, next) {
+          if (next) {
+            return;
+          }
+          final currentMode = ref.read(
+            patchMihomoConfigProvider.select((state) => state.mode),
+          );
+          if (currentMode != Mode.global) {
+            return;
+          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            globalState.appController.changeMode(Mode.rule);
+          });
+        },
+        fireImmediately: true,
+      );
   }
 
   @override
@@ -106,7 +100,6 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void dispose() async {
-    await system.setMacOSDns(true);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -116,7 +109,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     commonPrint.log("$state");
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      globalState.appController.savePreferences();
+      await globalState.appController.savePreferences();
     } else {
       render?.resume();
     }
@@ -124,22 +117,20 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void didChangePlatformBrightness() {
-    globalState.appController.updateBrightness(
-      WidgetsBinding.instance.platformDispatcher.platformBrightness,
-    );
+    globalState.appController.brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
   }
 
   @override
   Widget build(BuildContext context) => Listener(
-      onPointerHover: (_) {
-        render?.resume();
-      },
-      child: widget.child,
-    );
+        onPointerHover: (_) {
+          render?.resume();
+        },
+        child: widget.child,
+      );
 }
 
 class AppEnvManager extends StatelessWidget {
-
   const AppEnvManager({
     super.key,
     required this.child,
@@ -147,23 +138,5 @@ class AppEnvManager extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    if (kDebugMode) {
-      if (globalState.isPre) {
-        return Banner(
-          message: 'DEBUG',
-          location: BannerLocation.topEnd,
-          child: child,
-        );
-      }
-    }
-    if (globalState.isPre) {
-      return Banner(
-        message: 'PRE',
-        location: BannerLocation.topEnd,
-        child: child,
-      );
-    }
-    return child;
-  }
+  Widget build(BuildContext context) => child;
 }

@@ -1,7 +1,7 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/plugins/tile.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/plugins/tile.dart';
+import 'package:mihox/state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/config.g.dart';
@@ -130,7 +130,8 @@ class Profiles extends _$Profiles with AutoDisposeNotifierMixin {
     state = profilesTemp;
   }
 
-  void updateProfile(String profileId, Profile Function(Profile profile) builder) {
+  void updateProfile(
+      String profileId, Profile Function(Profile profile) builder) {
     final profilesTemp = List<Profile>.from(state);
     final index = profilesTemp.indexWhere((element) => element.id == profileId);
     if (index != -1) {
@@ -157,23 +158,7 @@ class CurrentProfileId extends _$CurrentProfileId
     );
     // Notify tile service about profile change
     tile?.updateTile();
-  }
-}
-
-@riverpod
-class AppDAVSetting extends _$AppDAVSetting with AutoDisposeNotifierMixin {
-  @override
-  DAV? build() => globalState.config.dav;
-
-  @override
-  void onUpdate(DAV? value) {
-    globalState.config = globalState.config.copyWith(
-      dav: value,
-    );
-  }
-
-  void updateState(DAV? Function(DAV? state) builder) {
-    state = builder(state);
+    globalState.appController.savePreferencesDebounce();
   }
 }
 
@@ -265,16 +250,17 @@ class ScriptState extends _$ScriptState with AutoDisposeNotifierMixin {
     );
   }
 
-  bool isExits(String label) => state.scripts.indexWhere((item) => item.label == label) != -1;
+  bool isExits(String label) =>
+      state.scripts.indexWhere((item) => item.label == label) != -1;
 }
 
 @riverpod
-class PatchClashConfig extends _$PatchClashConfig
+class PatchMihomoConfig extends _$PatchMihomoConfig
     with AutoDisposeNotifierMixin {
   @override
-  ClashConfig build() => globalState.config.patchClashConfig;
+  MihomoConfig build() => globalState.config.patchMihomoConfig;
 
-  void updateState(ClashConfig? Function(ClashConfig state) builder) {
+  void updateState(MihomoConfig? Function(MihomoConfig state) builder) {
     final newState = builder(state);
     if (newState == null) {
       return;
@@ -283,9 +269,9 @@ class PatchClashConfig extends _$PatchClashConfig
   }
 
   @override
-  void onUpdate(ClashConfig value) {
+  void onUpdate(MihomoConfig value) {
     globalState.config = globalState.config.copyWith(
-      patchClashConfig: value,
+      patchMihomoConfig: value,
     );
   }
 }

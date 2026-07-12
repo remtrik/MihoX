@@ -3,11 +3,11 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/providers/state.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/providers/state.dart';
+import 'package:mihox/state.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:win32/win32.dart';
 
@@ -92,8 +92,9 @@ class _TrayContainerState extends ConsumerState<TrayManager> with TrayListener {
           final menuRight = rect.ref.right;
           final menuBottom = rect.ref.bottom;
 
-          calloc.free(point);
-          calloc.free(rect);
+          calloc
+            ..free(point)
+            ..free(rect);
 
           if (cursorX < menuLeft ||
               cursorX > menuRight ||

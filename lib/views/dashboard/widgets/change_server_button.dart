@@ -1,25 +1,20 @@
 import 'dart:convert';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/common.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/common.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class ChangeServerButton extends ConsumerWidget {
   const ChangeServerButton({super.key});
 
   String? _decodeBase64IfNeeded(String? value) {
     if (value == null || value.isEmpty) return value;
-
-    try {
-      final decoded = utf8.decode(base64.decode(value));
-      return decoded;
-    } catch (e) {
-      return value;
-    }
+    return utils.decodeBase64(value);
   }
 
   String? _extractFlag(String text) {
@@ -73,7 +68,7 @@ class ChangeServerButton extends ConsumerWidget {
     }
 
     final serverInfoGroupName = _decodeBase64IfNeeded(
-      profile.providerHeaders['flclashx-serverinfo'],
+      profile.providerHeaders['mihox-serverinfo'],
     );
 
     if (serverInfoGroupName == null || serverInfoGroupName.isEmpty) {
@@ -112,7 +107,7 @@ class ChangeServerButton extends ConsumerWidget {
       height: getWidgetHeight(1),
       child: CommonCard(
         onPressed: () {
-          globalState.appController.toPage(PageLabel.proxies);
+          globalState.appController.page = PageLabel.proxies;
         },
         child: Container(
           padding: baseInfoEdgeInsets.copyWith(
@@ -223,7 +218,7 @@ class ChangeServerButton extends ConsumerWidget {
         height: getWidgetHeight(1),
         child: CommonCard(
           onPressed: () {
-            globalState.appController.toPage(PageLabel.proxies);
+            globalState.appController.page = PageLabel.proxies;
           },
           child: Container(
             padding: baseInfoEdgeInsets.copyWith(

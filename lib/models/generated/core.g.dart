@@ -41,13 +41,13 @@ Map<String, dynamic> _$$UpdateParamsImplToJson(_$UpdateParamsImpl instance) =>
       'tun': instance.tun,
       'mixed-port': instance.mixedPort,
       'allow-lan': instance.allowLan,
-      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode]!,
-      'mode': _$ModeEnumMap[instance.mode]!,
-      'log-level': _$LogLevelEnumMap[instance.logLevel]!,
+      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode],
+      'mode': _$ModeEnumMap[instance.mode],
+      'log-level': _$LogLevelEnumMap[instance.logLevel],
       'ipv6': instance.ipv6,
       'tcp-concurrent': instance.tcpConcurrent,
       'external-controller':
-          _$ExternalControllerStatusEnumMap[instance.externalController]!,
+          _$ExternalControllerStatusEnumMap[instance.externalController],
       'unified-delay': instance.unifiedDelay,
     };
 
@@ -182,7 +182,7 @@ _$AppMessageImpl _$$AppMessageImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$AppMessageImplToJson(_$AppMessageImpl instance) =>
     <String, dynamic>{
-      'type': _$AppMessageTypeEnumMap[instance.type]!,
+      'type': _$AppMessageTypeEnumMap[instance.type],
       'data': instance.data,
     };
 
@@ -201,7 +201,7 @@ _$InvokeMessageImpl _$$InvokeMessageImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$InvokeMessageImplToJson(_$InvokeMessageImpl instance) =>
     <String, dynamic>{
-      'type': _$InvokeMessageTypeEnumMap[instance.type]!,
+      'type': _$InvokeMessageTypeEnumMap[instance.type],
       'data': instance.data,
     };
 
@@ -286,14 +286,14 @@ _$ActionImpl _$$ActionImplFromJson(Map<String, dynamic> json) => _$ActionImpl(
 
 Map<String, dynamic> _$$ActionImplToJson(_$ActionImpl instance) =>
     <String, dynamic>{
-      'method': _$ActionMethodEnumMap[instance.method]!,
+      'method': _$ActionMethodEnumMap[instance.method],
       'data': instance.data,
       'id': instance.id,
     };
 
 const _$ActionMethodEnumMap = {
   ActionMethod.message: 'message',
-  ActionMethod.initClash: 'initClash',
+  ActionMethod.initMihomo: 'initMihomo',
   ActionMethod.getIsInit: 'getIsInit',
   ActionMethod.forceGc: 'forceGc',
   ActionMethod.shutdown: 'shutdown',
@@ -323,6 +323,7 @@ const _$ActionMethodEnumMap = {
   ActionMethod.getMemory: 'getMemory',
   ActionMethod.crash: 'crash',
   ActionMethod.setupConfig: 'setupConfig',
+  ActionMethod.healthCheck: 'healthCheck',
   ActionMethod.setState: 'setState',
   ActionMethod.startTun: 'startTun',
   ActionMethod.stopTun: 'stopTun',
@@ -343,10 +344,10 @@ _$ActionResultImpl _$$ActionResultImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$ActionResultImplToJson(_$ActionResultImpl instance) =>
     <String, dynamic>{
-      'method': _$ActionMethodEnumMap[instance.method]!,
+      'method': _$ActionMethodEnumMap[instance.method],
       'data': instance.data,
       'id': instance.id,
-      'code': _$ResultTypeEnumMap[instance.code]!,
+      'code': _$ResultTypeEnumMap[instance.code],
     };
 
 const _$ResultTypeEnumMap = {

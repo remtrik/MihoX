@@ -2,25 +2,23 @@
 
 import 'dart:io';
 
-import 'package:flclashx/views/dashboard/widgets/announce_widget.dart';
-import 'package:flclashx/views/dashboard/widgets/metainfo_widget.dart';
-import 'package:flclashx/views/dashboard/widgets/widgets.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:mihox/common/print.dart';
+import 'package:mihox/views/dashboard/widgets/announce_widget.dart';
+import 'package:mihox/views/dashboard/widgets/metainfo_widget.dart';
+import 'package:mihox/views/dashboard/widgets/widgets.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 enum SupportPlatform {
   Windows,
-  MacOS,
   Linux,
   Android;
 
   static SupportPlatform get currentPlatform {
     if (Platform.isWindows) {
       return SupportPlatform.Windows;
-    } else if (Platform.isMacOS) {
-      return SupportPlatform.MacOS;
     } else if (Platform.isLinux) {
       return SupportPlatform.Linux;
     } else if (Platform.isAndroid) {
@@ -32,7 +30,6 @@ enum SupportPlatform {
 
 const desktopPlatforms = [
   SupportPlatform.Linux,
-  SupportPlatform.MacOS,
   SupportPlatform.Windows,
 ];
 
@@ -44,13 +41,13 @@ enum GroupType {
   Relay;
 
   static GroupType parseProfileType(String type) => switch (type) {
-      "url-test" => URLTest,
-      "select" => Selector,
-      "fallback" => Fallback,
-      "load-balance" => LoadBalance,
-      "relay" => Relay,
-      String() => throw UnimplementedError(),
-    };
+        "url-test" => URLTest,
+        "select" => Selector,
+        "fallback" => Fallback,
+        "load-balance" => LoadBalance,
+        "relay" => Relay,
+        String() => throw UnimplementedError(),
+      };
 }
 
 enum GroupName { GLOBAL, Proxy, Auto, Fallback }
@@ -62,7 +59,8 @@ extension GroupTypeExtension on GroupType {
       )
       .toList();
 
-  bool get isComputedSelected => [GroupType.URLTest, GroupType.Fallback].contains(this);
+  bool get isComputedSelected =>
+      [GroupType.URLTest, GroupType.Fallback].contains(this);
 
   static GroupType? getGroupType(String value) {
     final index = GroupTypeExtension.valueList.indexOf(value);
@@ -145,10 +143,6 @@ enum RecoveryOption {
 enum ChipType { action, delete }
 
 enum CommonCardType { plain, filled }
-//
-// extension CommonCardTypeExt on CommonCardType {
-//   CommonCardType get variant => CommonCardType.plain;
-// }
 
 enum ProxiesType { tab, list }
 
@@ -171,9 +165,9 @@ enum ExternalControllerStatus {
   @JsonValue("127.0.0.1:9090")
   open("127.0.0.1:9090");
 
-  final String value;
-
   const ExternalControllerStatus(this.value);
+
+  final String value;
 }
 
 enum KeyboardModifier {
@@ -200,20 +194,20 @@ enum KeyboardModifier {
     PhysicalKeyboardKey.shiftRight,
   ]);
 
-  final List<PhysicalKeyboardKey> physicalKeys;
-
   const KeyboardModifier(this.physicalKeys);
+
+  final List<PhysicalKeyboardKey> physicalKeys;
 }
 
 extension KeyboardModifierExt on KeyboardModifier {
   HotKeyModifier toHotKeyModifier() => switch (this) {
-      KeyboardModifier.alt => HotKeyModifier.alt,
-      KeyboardModifier.capsLock => HotKeyModifier.capsLock,
-      KeyboardModifier.control => HotKeyModifier.control,
-      KeyboardModifier.fn => HotKeyModifier.fn,
-      KeyboardModifier.meta => HotKeyModifier.meta,
-      KeyboardModifier.shift => HotKeyModifier.shift,
-    };
+        KeyboardModifier.alt => HotKeyModifier.alt,
+        KeyboardModifier.capsLock => HotKeyModifier.capsLock,
+        KeyboardModifier.control => HotKeyModifier.control,
+        KeyboardModifier.fn => HotKeyModifier.fn,
+        KeyboardModifier.meta => HotKeyModifier.meta,
+        KeyboardModifier.shift => HotKeyModifier.shift,
+      };
 }
 
 enum HotAction {
@@ -234,9 +228,9 @@ enum FontFamily {
   jetBrainsMono("JetBrainsMono"),
   icon("Icons");
 
-  final String value;
-
   const FontFamily(this.value);
+
+  final String value;
 }
 
 enum RouteMode {
@@ -246,7 +240,7 @@ enum RouteMode {
 
 enum ActionMethod {
   message,
-  initClash,
+  initMihomo,
   getIsInit,
   forceGc,
   shutdown,
@@ -276,6 +270,7 @@ enum ActionMethod {
   getMemory,
   crash,
   setupConfig,
+  healthCheck,
 
   ///Android,
   setState,
@@ -296,8 +291,8 @@ enum WindowsHelperServiceStatus {
 }
 
 enum FunctionTag {
-  updateClashConfig,
-  setupClashConfig,
+  updateMihomoConfig,
+  setupMihomoConfig,
   updateStatus,
   updateGroups,
   addCheckIpNum,
@@ -408,13 +403,13 @@ enum DashboardWidget {
     ),
   );
 
-  final GridItem widget;
-  final List<SupportPlatform> platforms;
-
   const DashboardWidget(
     this.widget, {
     this.platforms = SupportPlatform.values,
   });
+
+  final GridItem widget;
+  final List<SupportPlatform> platforms;
 
   static DashboardWidget getDashboardWidget(GridItem gridItem) {
     const dashboardWidgets = DashboardWidget.values;
@@ -442,7 +437,7 @@ extension DashboardWidgetParser on DashboardWidget {
         );
         result.add(widget);
       } catch (e) {
-        print('no data widget "$name"');
+        commonPrint.log('no data widget "$name"');
       }
     }
     return result;
@@ -500,9 +495,9 @@ enum RuleAction {
   SUB_RULE("SUB-RULE"),
   MATCH("MATCH");
 
-  final String value;
-
   const RuleAction(this.value);
+
+  final String value;
 }
 
 extension RuleActionExt on RuleAction {

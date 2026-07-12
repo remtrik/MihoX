@@ -18,6 +18,7 @@ type ActionResult struct {
 	Method   Method         `json:"method"`
 	Data     interface{}    `json:"data"`
 	Code     int            `json:"code"`
+	Port     int64          `json:"-"`
 	Callback unsafe.Pointer `json:"-"`
 }
 
@@ -40,9 +41,9 @@ func (result ActionResult) error(data interface{}) {
 
 func handleAction(action *Action, result ActionResult) {
 	switch action.Method {
-	case initClashMethod:
+	case initMihomoMethod:
 		paramsString := action.Data.(string)
-		result.success(handleInitClash(paramsString))
+		result.success(handleInitMihomo(paramsString))
 		return
 	case getIsInitMethod:
 		result.success(handleGetIsInit())
@@ -185,6 +186,12 @@ func handleAction(action *Action, result ActionResult) {
 		data := action.Data.(string)
 		handleSetState(data)
 		result.success(true)
+	case healthCheckMethod:
+		groupName, _ := action.Data.(string)
+		handleHealthCheck(groupName, func(value string) {
+			result.success(value)
+		})
+		return
 	case crashMethod:
 		result.success(true)
 		handleCrash()

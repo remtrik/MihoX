@@ -79,7 +79,7 @@ _$LogImpl _$$LogImplFromJson(Map<String, dynamic> json) => _$LogImpl(
     );
 
 Map<String, dynamic> _$$LogImplToJson(_$LogImpl instance) => <String, dynamic>{
-      'LogLevel': _$LogLevelEnumMap[instance.logLevel]!,
+      'LogLevel': _$LogLevelEnumMap[instance.logLevel],
       'Payload': instance.payload,
       'dateTime': instance.dateTime,
     };
@@ -93,29 +93,15 @@ const _$LogLevelEnumMap = {
   LogLevel.app: 'app',
 };
 
-_$DAVImpl _$$DAVImplFromJson(Map<String, dynamic> json) => _$DAVImpl(
-      uri: json['uri'] as String,
-      user: json['user'] as String,
-      password: json['password'] as String,
-      fileName: json['fileName'] as String? ?? defaultDavFileName,
-    );
-
-Map<String, dynamic> _$$DAVImplToJson(_$DAVImpl instance) => <String, dynamic>{
-      'uri': instance.uri,
-      'user': instance.user,
-      'password': instance.password,
-      'fileName': instance.fileName,
-    };
-
 _$VersionInfoImpl _$$VersionInfoImplFromJson(Map<String, dynamic> json) =>
     _$VersionInfoImpl(
-      clashName: json['clashName'] as String? ?? "",
+      mihomoName: json['mihomoName'] as String? ?? "",
       version: json['version'] as String? ?? "",
     );
 
 Map<String, dynamic> _$$VersionInfoImplToJson(_$VersionInfoImpl instance) =>
     <String, dynamic>{
-      'clashName': instance.clashName,
+      'mihomoName': instance.mihomoName,
       'version': instance.version,
     };
 
@@ -124,6 +110,7 @@ _$ProxyImpl _$$ProxyImplFromJson(Map<String, dynamic> json) => _$ProxyImpl(
       type: json['type'] as String,
       now: json['now'] as String?,
       serverDescription: json['serverDescription'] as String?,
+      network: json['network'] as String?,
     );
 
 Map<String, dynamic> _$$ProxyImplToJson(_$ProxyImpl instance) =>
@@ -132,6 +119,7 @@ Map<String, dynamic> _$$ProxyImplToJson(_$ProxyImpl instance) =>
       'type': instance.type,
       'now': instance.now,
       'serverDescription': instance.serverDescription,
+      'network': instance.network,
     };
 
 _$GroupImpl _$$GroupImplFromJson(Map<String, dynamic> json) => _$GroupImpl(
@@ -149,7 +137,7 @@ _$GroupImpl _$$GroupImplFromJson(Map<String, dynamic> json) => _$GroupImpl(
 
 Map<String, dynamic> _$$GroupImplToJson(_$GroupImpl instance) =>
     <String, dynamic>{
-      'type': _$GroupTypeEnumMap[instance.type]!,
+      'type': _$GroupTypeEnumMap[instance.type],
       'all': instance.all,
       'now': instance.now,
       'hidden': instance.hidden,
@@ -178,7 +166,7 @@ _$HotKeyActionImpl _$$HotKeyActionImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$HotKeyActionImplToJson(_$HotKeyActionImpl instance) =>
     <String, dynamic>{
-      'action': _$HotActionEnumMap[instance.action]!,
+      'action': _$HotActionEnumMap[instance.action],
       'key': instance.key,
       'modifiers':
           instance.modifiers.map((e) => _$KeyboardModifierEnumMap[e]!).toList(),

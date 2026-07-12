@@ -12,7 +12,6 @@ extension IterableExt<T> on Iterable<T> {
   }
 
   Iterable<List<T>> chunks(int size) sync* {
-    if (length == 0) return;
     final iterator = this.iterator;
     while (iterator.moveNext()) {
       final chunk = [iterator.current];
@@ -40,7 +39,7 @@ extension IterableExt<T> on Iterable<T> {
   }
 
   Iterable<T> takeLast({int count = 50}) {
-    if (count <= 0) return Iterable.empty();
+    if (count <= 0) return const Iterable.empty();
     return count >= length ? this : toList().skip(length - count);
   }
 }
@@ -53,17 +52,15 @@ extension ListExt<T> on List<T> {
     }
   }
 
-  List<T> intersection(List<T> list) => where((item) => list.contains(item)).toList();
+  List<T> intersection(List<T> list) {
+    final set = list.toSet();
+    return where(set.contains).toList();
+  }
 
   List<List<T>> batch(int maxConcurrent) {
-    final batches = (length / maxConcurrent).ceil();
     final res = <List<T>>[];
-    for (var i = 0; i < batches; i++) {
-      if (i != batches - 1) {
-        res.add(sublist(i * maxConcurrent, maxConcurrent * (i + 1)));
-      } else {
-        res.add(sublist(i * maxConcurrent, length));
-      }
+    for (var i = 0; i < length; i += maxConcurrent) {
+      res.add(sublist(i, (i + maxConcurrent).clamp(0, length)));
     }
     return res;
   }
@@ -102,10 +99,5 @@ extension DoubleListExt on List<double> {
 }
 
 extension MapExt<K, V> on Map<K, V> {
-  V? updateCacheValue(K key, V Function() callback) {
-    if (this[key] == null) {
-      this[key] = callback();
-    }
-    return this[key];
-  }
+  V? updateCacheValue(K key, V Function() callback) => this[key] ??= callback();
 }

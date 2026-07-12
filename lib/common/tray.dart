@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flclashx/common/utils.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mihox/common/utils.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/models/models.dart';
+import 'package:mihox/state.dart';
 import 'package:tray_manager/tray_manager.dart';
 
 import 'app_localizations.dart';
@@ -19,8 +20,8 @@ class Tray {
     required bool isRunning,
     bool force = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid) {
+      // Skip tray on Android
       return;
     }
     if (Platform.isLinux || force) {
@@ -35,9 +36,7 @@ class Tray {
       isTemplate: true,
     );
     if (!Platform.isLinux) {
-      await trayManager.setToolTip(
-        appName,
-      );
+      await trayManager.setToolTip(appName);
     }
   }
 
@@ -45,8 +44,8 @@ class Tray {
     required TrayState trayState,
     bool focus = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid) {
+      // Skip tray on Android
       return;
     }
     if (!Platform.isLinux) {
@@ -88,25 +87,26 @@ class Tray {
     }
     menuItems.add(MenuItem.separator());
     if (trayState.isStart) {
-      menuItems.add(
-        MenuItem.checkbox(
-          label: appLocalizations.tun,
-          onClick: (_) {
-            globalState.appController.updateTun();
-          },
-          checked: trayState.tunEnable,
-        ),
-      );
-      menuItems.add(
-        MenuItem.checkbox(
-          label: appLocalizations.systemProxy,
-          onClick: (_) {
-            globalState.appController.updateSystemProxy();
-          },
-          checked: trayState.systemProxy,
-        ),
-      );
-      menuItems.add(MenuItem.separator());
+      menuItems
+        ..add(
+          MenuItem.checkbox(
+            label: appLocalizations.tun,
+            onClick: (_) {
+              globalState.appController.updateTun();
+            },
+            checked: trayState.tunEnable,
+          ),
+        )
+        ..add(
+          MenuItem.checkbox(
+            label: appLocalizations.systemProxy,
+            onClick: (_) {
+              globalState.appController.updateSystemProxy();
+            },
+            checked: trayState.systemProxy,
+          ),
+        )
+        ..add(MenuItem.separator());
     }
     final autoStartMenuItem = MenuItem.checkbox(
       label: appLocalizations.autoLaunch,
@@ -121,9 +121,10 @@ class Tray {
         await _copyEnv(trayState.port);
       },
     );
-    menuItems.add(autoStartMenuItem);
-    menuItems.add(copyEnvVarMenuItem);
-    menuItems.add(MenuItem.separator());
+    menuItems
+      ..add(autoStartMenuItem)
+      ..add(copyEnvVarMenuItem)
+      ..add(MenuItem.separator());
     final restartMenuItem = MenuItem(
       label: appLocalizations.restart,
       onClick: (_) async {
@@ -141,25 +142,16 @@ class Tray {
     final menu = Menu(items: menuItems);
     await trayManager.setContextMenu(menu);
     if (Platform.isLinux) {
-      await _updateSystemTray(
+      unawaited(_updateSystemTray(
         brightness: trayState.brightness,
         isRunning: trayState.isStart,
         force: focus,
-      );
+      ));
     }
   }
 
   Future<void> updateTrayTitle([Traffic? traffic]) async {
-    // if (!Platform.isMacOS) {
-    //   return;
-    // }
-    // if (traffic == null) {
-    //   await trayManager.setTitle("");
-    // } else {
-    //   await trayManager.setTitle(
-    //     "${traffic.up.shortShow} ↑ \n${traffic.down.shortShow} ↓",
-    //   );
-    // }
+    //return;
   }
 
   Future<void> _copyEnv(int port) async {
@@ -169,11 +161,7 @@ class Tray {
         ? "set \$env:all_proxy=$url"
         : "export all_proxy=$url";
 
-    await Clipboard.setData(
-      ClipboardData(
-        text: cmdline,
-      ),
-    );
+    await Clipboard.setData(ClipboardData(text: cmdline));
   }
 }
 

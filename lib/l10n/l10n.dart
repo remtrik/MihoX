@@ -249,24 +249,9 @@ class AppLocalizations {
     return Intl.message('English', name: 'en', desc: '', args: []);
   }
 
-  /// `Japanese`
-  String get ja {
-    return Intl.message('Japanese', name: 'ja', desc: '', args: []);
-  }
-
   /// `Russian`
   String get ru {
     return Intl.message('Russian', name: 'ru', desc: '', args: []);
-  }
-
-  /// `Simplified Chinese`
-  String get zh_CN {
-    return Intl.message(
-      'Simplified Chinese',
-      name: 'zh_CN',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Theme`
@@ -969,10 +954,10 @@ class AppLocalizations {
     return Intl.message('ProxyPort', name: 'proxyPort', desc: '', args: []);
   }
 
-  /// `Set the Clash listening port`
+  /// `Set the Mihomo listening port`
   String get proxyPortDesc {
     return Intl.message(
-      'Set the Clash listening port',
+      'Set the Mihomo listening port',
       name: 'proxyPortDesc',
       desc: '',
       args: [],
@@ -1034,10 +1019,10 @@ class AppLocalizations {
     );
   }
 
-  /// `A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.`
+  /// `A multi-platform proxy client based on Mihomo, simple and easy to use, open-source and ad-free.`
   String get desc {
     return Intl.message(
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.',
+      'A multi-platform proxy client based on Mihomo, simple and easy to use, open-source and ad-free.',
       name: 'desc',
       desc: '',
       args: [],
@@ -1079,10 +1064,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Opening it will lose part of its application ability and gain the support of full amount of Clash.`
+  /// `Opening it will lose part of its application ability and gain the support of full amount of Mihomo.`
   String get compatibleDesc {
     return Intl.message(
-      'Opening it will lose part of its application ability and gain the support of full amount of Clash.',
+      'Opening it will lose part of its application ability and gain the support of full amount of Mihomo.',
       name: 'compatibleDesc',
       desc: '',
       args: [],
@@ -1114,10 +1099,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Sync data via WebDAV or file`
+  /// `Sync data via file`
   String get backupAndRecoveryDesc {
     return Intl.message(
-      'Sync data via WebDAV or file',
+      'Sync data via file',
       name: 'backupAndRecoveryDesc',
       desc: '',
       args: [],
@@ -1184,61 +1169,11 @@ class AppLocalizations {
     return Intl.message('No info', name: 'noInfo', desc: '', args: []);
   }
 
-  /// `Please bind WebDAV`
-  String get pleaseBindWebDAV {
-    return Intl.message(
-      'Please bind WebDAV',
-      name: 'pleaseBindWebDAV',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bind`
-  String get bind {
-    return Intl.message('Bind', name: 'bind', desc: '', args: []);
-  }
-
   /// `Connectivity：`
   String get connectivity {
     return Intl.message(
       'Connectivity：',
       name: 'connectivity',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `WebDAV configuration`
-  String get webDAVConfiguration {
-    return Intl.message(
-      'WebDAV configuration',
-      name: 'webDAVConfiguration',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Address`
-  String get address {
-    return Intl.message('Address', name: 'address', desc: '', args: []);
-  }
-
-  /// `WebDAV server address`
-  String get addressHelp {
-    return Intl.message(
-      'WebDAV server address',
-      name: 'addressHelp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter a valid WebDAV address`
-  String get addressTip {
-    return Intl.message(
-      'Please enter a valid WebDAV address',
-      name: 'addressTip',
       desc: '',
       args: [],
     );
@@ -1359,10 +1294,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Once enabled, the Clash kernel can be controlled via API`
+  /// `Once enabled, the Mihomo kernel can be controlled via API`
   String get externalControllerDesc {
     return Intl.message(
-      'Once enabled, the Clash kernel can be controlled via API',
+      'Once enabled, the Mihomo kernel can be controlled via API',
       name: 'externalControllerDesc',
       desc: '',
       args: [],
@@ -1532,6 +1467,16 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Active`
+  String get connectionsActive {
+    return Intl.message('Active', name: 'connectionsActive', desc: '', args: []);
+  }
+
+  /// `Log`
+  String get connectionsLog {
+    return Intl.message('Log', name: 'connectionsLog', desc: '', args: []);
   }
 
   /// `Intranet IP`
@@ -1787,26 +1732,6 @@ class AppLocalizations {
   /// `Remote`
   String get remote {
     return Intl.message('Remote', name: 'remote', desc: '', args: []);
-  }
-
-  /// `Backup local data to WebDAV`
-  String get remoteBackupDesc {
-    return Intl.message(
-      'Backup local data to WebDAV',
-      name: 'remoteBackupDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery data from WebDAV`
-  String get remoteRecoveryDesc {
-    return Intl.message(
-      'Recovery data from WebDAV',
-      name: 'remoteRecoveryDesc',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Backup local data to local`
@@ -2312,21 +2237,6 @@ class AppLocalizations {
   /// `TUN`
   String get action_tun {
     return Intl.message('TUN', name: 'action_tun', desc: '', args: []);
-  }
-
-  /// `Disclaimer`
-  String get disclaimer {
-    return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);
-  }
-
-  /// `This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software.`
-  String get disclaimerDesc {
-    return Intl.message(
-      'This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software.',
-      name: 'disclaimerDesc',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Agree`
@@ -3309,16 +3219,6 @@ class AppLocalizations {
     return Intl.message('Traffic', name: 'traffic', desc: '', args: []);
   }
 
-  /// `Unlimited Traffic`
-  String get trafficUnlimited {
-    return Intl.message(
-      'Unlimited Traffic',
-      name: 'trafficUnlimited',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Lifetime Subscription`
   String get subscriptionEternal {
     return Intl.message(
@@ -3605,9 +3505,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
-      Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ru'),
-      Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }
 

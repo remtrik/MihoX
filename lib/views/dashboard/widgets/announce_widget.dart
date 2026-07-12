@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/widgets.dart';
 
 class AnnounceWidget extends ConsumerWidget {
   const AnnounceWidget({super.key});
@@ -14,10 +15,10 @@ class AnnounceWidget extends ConsumerWidget {
       r'https?://[^\s]+',
       caseSensitive: false,
     );
-    
+
     final spans = <InlineSpan>[];
     var lastIndex = 0;
-    
+
     for (final match in urlPattern.allMatches(text)) {
       if (match.start > lastIndex) {
         spans.add(TextSpan(
@@ -25,29 +26,29 @@ class AnnounceWidget extends ConsumerWidget {
           style: Theme.of(context).textTheme.bodyLarge,
         ));
       }
-      
+
       final url = match.group(0)!;
       spans.add(TextSpan(
         text: url,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
             globalState.openUrl(url);
           },
       ));
-      
+
       lastIndex = match.end;
     }
-    
+
     if (lastIndex < text.length) {
       spans.add(TextSpan(
         text: text.substring(lastIndex),
         style: Theme.of(context).textTheme.bodyLarge,
       ));
     }
-    
+
     return spans;
   }
 

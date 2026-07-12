@@ -4,18 +4,18 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:archive/archive.dart';
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/archive.dart';
-import 'package:flclashx/services/subscription_notification_service.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:mihox/common/archive.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/mihomo.dart';
+import 'package:mihox/plugins/app.dart';
+import 'package:mihox/providers/providers.dart';
+import 'package:mihox/services/subscription_notification_service.dart';
+import 'package:mihox/state.dart';
+import 'package:mihox/widgets/dialog.dart';
 import 'package:path/path.dart' hide windows;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,18 +29,19 @@ class AppController {
   AppController(this.context, WidgetRef ref) : _ref = ref;
   int? lastProfileModified;
   Timer? _profileUpdateTimer;
+  //bool _isRestartingCore = false;
   final BuildContext context;
   final WidgetRef _ref;
 
-  void setupClashConfigDebounce() {
-    debouncer.call(FunctionTag.setupClashConfig, () async {
-      await setupClashConfig();
+  void setupMihomoConfigDebounce() {
+    debouncer.call(FunctionTag.setupMihomoConfig, () async {
+      await setupMihomoConfig();
     });
   }
 
-  void updateClashConfigDebounce() {
-    debouncer.call(FunctionTag.updateClashConfig, () async {
-      await updateClashConfig();
+  void updateMihomoConfigDebounce() {
+    debouncer.call(FunctionTag.updateMihomoConfig, () async {
+      await updateMihomoConfig();
     });
   }
 
@@ -82,9 +83,9 @@ class AppController {
   /// Update cached server name in VPN plugin for foreground notification
   /// Also sends IPC message to service isolate to update selectedMap
   void _updateForegroundServerName(String groupName, String serverName) {
-    vpn?.updateServerName(serverName);
+    vpn?.serverName = serverName;
     // Send IPC message to service isolate (Android only)
-    clashLib?.sendIpcMessage({
+    mihomoLib?.sendIpcMessage({
       'action': 'updateForegroundServer',
       'groupName': groupName,
       'serverName': serverName,
@@ -99,15 +100,10 @@ class AppController {
     final profileName = profile.label ?? profile.id;
 
     // Decode service name from header
-    String serviceName = "";
-    final svc = profile.providerHeaders['flclashx-servicename'];
+    var serviceName = "";
+    final svc = profile.providerHeaders['mihox-servicename'];
     if (svc != null && svc.isNotEmpty) {
-      try {
-        final normalized = base64.normalize(svc);
-        serviceName = utf8.decode(base64.decode(normalized)).trim();
-      } catch (_) {
-        serviceName = svc.trim();
-      }
+      serviceName = utils.decodeBase64(svc);
     }
 
     vpn?.updateProfileInfo(
@@ -116,23 +112,34 @@ class AppController {
     );
 
     // Get current server name from selectedMap
-    String? groupName = profile.providerHeaders['flclashx-serverinfo'];
+    final groupName = profile.providerHeaders['mihox-serverinfo'];
     if (groupName != null && groupName.isNotEmpty) {
-      String decodedGroupName;
-      try {
-        final normalized = base64.normalize(groupName);
-        decodedGroupName = utf8.decode(base64.decode(normalized)).trim();
-      } catch (_) {
-        decodedGroupName = groupName.trim();
-      }
-      final serverName = profile.selectedMap[decodedGroupName] ?? "";
-      vpn?.updateServerName(serverName);
+      final serverName =
+          profile.selectedMap[utils.decodeBase64(groupName)] ?? "";
+      vpn?.serverName = serverName;
     }
   }
 
+  /*Future<void> restartCore() async {
+    if (_isRestartingCore) {
+      return;
+    }
+    _isRestartingCore = true;
+    try {
+      commonPrint.log("restart core");
+      await mihomoService?.reStart();
+      await _initCore();
+      if (_ref.read(runTimeProvider.notifier).isStart) {
+        await globalState.handleStart();
+      }
+    } finally {
+      _isRestartingCore = false;
+    }
+  }*/
+
   Future<void> restartCore() async {
     commonPrint.log("restart core");
-    await clashService?.reStart();
+    await mihomoService?.reStart();
     await _initCore();
     if (_ref.read(runTimeProvider.notifier).isStart) {
       await globalState.handleStart();
@@ -162,7 +169,7 @@ class AppController {
       applyProfileDebounce();
     } else {
       await globalState.handleStop();
-      clashCore.resetTraffic();
+      mihomoCore.resetTraffic();
       _ref.read(trafficsProvider.notifier).clear();
       _ref.read(totalTrafficProvider.notifier).value = Traffic();
       _ref.read(runTimeProvider.notifier).value = null;
@@ -182,10 +189,10 @@ class AppController {
   }
 
   Future<void> updateTraffic() async {
-    final traffic = await clashCore.getTraffic();
+    final traffic = await mihomoCore.getTraffic();
     _ref.read(trafficsProvider.notifier).addTraffic(traffic);
     _ref.read(totalTrafficProvider.notifier).value =
-        await clashCore.getTotalTraffic();
+        await mihomoCore.getTotalTraffic();
   }
 
   Future<void> addProfile(Profile profile) async {
@@ -197,7 +204,7 @@ class AppController {
 
   Future<void> deleteProfile(String id) async {
     _ref.read(profilesProvider.notifier).deleteProfileById(id);
-    clearEffect(id);
+    await clearEffect(id);
     if (globalState.config.currentProfileId == id) {
       final profiles = globalState.config.profiles;
       final currentProfileId = _ref.read(currentProfileIdProvider.notifier);
@@ -206,14 +213,14 @@ class AppController {
         currentProfileId.value = updateId;
       } else {
         currentProfileId.value = null;
-        updateStatus(false);
+        await updateStatus(false);
       }
     }
   }
 
   Future<void> updateProviders() async {
     _ref.read(providersProvider.notifier).value =
-        await clashCore.getExternalProviders();
+        await mihomoCore.getExternalProviders();
   }
 
   Future<void> updateLocalIp() async {
@@ -244,7 +251,7 @@ class AppController {
                 autoCheckUpdate: effectiveSettings.contains('autoupdate'),
               ));
     } catch (e) {
-      // Silently ignore subscription settings errors
+      commonPrint.log("applySubscriptionSettings failed: $e");
     }
   }
 
@@ -252,7 +259,7 @@ class AppController {
     final headers = profile.providerHeaders;
     if (headers.isEmpty) return;
 
-    final customBehavior = headers['flclashx-custom'];
+    final customBehavior = headers['mihox-custom'];
 
     final shouldApply = switch (customBehavior) {
       'add' => isNewProfile,
@@ -276,7 +283,7 @@ class AppController {
         return;
       }
 
-      final settingsHeader = headers['flclashx-settings'];
+      final settingsHeader = headers['mihox-settings'];
       if (settingsHeader != null) {
         final settings = settingsHeader
             .split(',')
@@ -292,7 +299,7 @@ class AppController {
 
   void _applyThemeColor(Map<String, String> headers) {
     try {
-      final hexHeader = headers['flclashx-hex'];
+      final hexHeader = headers['mihox-hex'];
       if (hexHeader != null && hexHeader.isNotEmpty) {
         _applyThemeColorFromHex(hexHeader);
       }
@@ -308,8 +315,8 @@ class AppController {
       final variantName = parts.length > 1 ? parts[1].trim() : null;
 
       // Check for pureblack flag in any position after color
-      bool enablePureBlack = false;
-      for (int i = 1; i < parts.length; i++) {
+      var enablePureBlack = false;
+      for (var i = 1; i < parts.length; i++) {
         final part = parts[i].trim().toLowerCase();
         if (part == 'pureblack') {
           enablePureBlack = true;
@@ -328,7 +335,7 @@ class AppController {
       );
 
       commonPrint
-          .log('Applying theme from flclashx-hex: #${hexString.toUpperCase()}'
+          .log('Applying theme from mihox-hex: #${hexString.toUpperCase()}'
               '${variantName != null ? ', variant=$variantName' : ''}'
               '${enablePureBlack ? ', pureBlack=true' : ''}');
 
@@ -415,12 +422,7 @@ class AppController {
       textToDecode = encodedText.substring(7);
     }
 
-    try {
-      final normalized = base64.normalize(textToDecode);
-      announceText = utf8.decode(base64.decode(normalized));
-    } catch (e) {
-      announceText = encodedText;
-    }
+    announceText = utils.decodeBase64(textToDecode);
 
     if (announceText.isNotEmpty) {
       final actions = <Widget>[];
@@ -513,6 +515,7 @@ class AppController {
       if (jsonString == null) return null;
       return Map<String, String>.from(json.decode(jsonString));
     } catch (e) {
+      commonPrint.log("Failed to get saved metadata for $key: $e");
       return null;
     }
   }
@@ -615,7 +618,7 @@ class AppController {
           final reason = forceUpdate ? "force update" : "metadata changed";
           commonPrint.log(
               "$fileName needs update for profile $currentProfileId ($reason), downloading from $url...");
-          final result = await clashCore.updateGeoData(
+          final result = await mihomoCore.updateGeoData(
             UpdateGeoDataParams(geoType: geoType, geoName: fileName),
           );
 
@@ -648,8 +651,8 @@ class AppController {
     }
   }
 
-  void setProfiles(List<Profile> profiles) {
-    _ref.read(profilesProvider.notifier).value = profiles;
+  set profiles(List<Profile> value) {
+    _ref.read(profilesProvider.notifier).value = value;
   }
 
   void addLog(Log log) {
@@ -657,20 +660,19 @@ class AppController {
   }
 
   void updateOrAddHotKeyAction(HotKeyAction hotKeyAction) {
-    final hotKeyActions = _ref.read(hotKeyActionsProvider);
-    final index =
-        hotKeyActions.indexWhere((item) => item.action == hotKeyAction.action);
+    final actions = List.of(_ref.read(hotKeyActionsProvider));
+
+    final index = actions.indexWhere(
+      (item) => item.action == hotKeyAction.action,
+    );
+
     if (index == -1) {
-      _ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..add(hotKeyAction);
+      actions.add(hotKeyAction);
     } else {
-      _ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..[index] = hotKeyAction;
+      actions[index] = hotKeyAction;
     }
 
-    _ref.read(hotKeyActionsProvider.notifier).value = index == -1
-        ? (List.from(hotKeyActions)..add(hotKeyAction))
-        : (List.from(hotKeyActions)..[index] = hotKeyAction);
+    _ref.read(hotKeyActionsProvider.notifier).value = actions;
   }
 
   List<Group> getCurrentGroups() =>
@@ -680,7 +682,7 @@ class AppController {
 
   int getProxiesColumns() => _ref.read(getProxiesColumnsProvider);
 
-  dynamic addSortNum() => _ref.read(sortNumProvider.notifier).add();
+  int addSortNum() => _ref.read(sortNumProvider.notifier).add();
 
   String? getCurrentGroupName() {
     final currentGroupName = _ref.read(currentProfileProvider.select(
@@ -705,22 +707,22 @@ class AppController {
     );
   }
 
-  Future<void> updateClashConfig() async {
+  Future<void> updateMihomoConfig() async {
     final commonScaffoldState = globalState.homeScaffoldKey.currentState;
     if (commonScaffoldState?.mounted != true) return;
     await commonScaffoldState?.loadingRun(() async {
-      await _updateClashConfig();
+      await _updateMihomoConfig();
     });
   }
 
-  Future<void> _updateClashConfig() async {
+  Future<void> _updateMihomoConfig() async {
     final updateParams = _ref.read(updateParamsProvider);
     final res = await _requestAdmin(updateParams.tun.enable);
     if (res.isError) {
       return;
     }
     final realTunEnable = _ref.read(realTunEnableProvider);
-    final message = await clashCore.updateConfig(
+    final message = await mihomoCore.updateConfig(
       updateParams.copyWith.tun(
         enable: realTunEnable,
       ),
@@ -730,34 +732,36 @@ class AppController {
 
   Future<Result<bool>> _requestAdmin(bool enableTun) async {
     final realTunEnable = _ref.read(realTunEnableProvider);
+    var finalEnableTun = enableTun;
     if (enableTun != realTunEnable && realTunEnable == false) {
       final code = await system.authorizeCore();
       switch (code) {
         case AuthorizeCode.success:
+          _ref.read(realTunEnableProvider.notifier).value = finalEnableTun;
           await restartCore();
           return Result.error("");
         case AuthorizeCode.none:
           break;
         case AuthorizeCode.error:
-          enableTun = false;
+          finalEnableTun = false;
           break;
       }
     }
-    _ref.read(realTunEnableProvider.notifier).value = enableTun;
-    return Result.success(enableTun);
+    _ref.read(realTunEnableProvider.notifier).value = finalEnableTun;
+    return Result.success(finalEnableTun);
   }
 
-  Future<void> setupClashConfig() async {
+  Future<void> setupMihomoConfig() async {
     final commonScaffoldState = globalState.homeScaffoldKey.currentState;
     if (commonScaffoldState?.mounted != true) return;
     await commonScaffoldState?.loadingRun(() async {
-      await _setupClashConfig();
+      await _setupMihomoConfig();
     });
   }
 
-  Future<void> _setupClashConfig() async {
+  Future<void> _setupMihomoConfig() async {
     await _ref.read(currentProfileProvider)?.checkAndUpdate();
-    var patchConfig = _ref.read(patchClashConfigProvider);
+    var patchConfig = _ref.read(patchMihomoConfigProvider);
 
     // Sync network settings from provider config if not overriding
     final appSetting = _ref.read(appSettingProvider);
@@ -766,27 +770,27 @@ class AppController {
           await globalState.syncNetworkSettingsFromProvider(patchConfig);
       // Always update provider when using provider settings to ensure UI reflects config
       _ref
-          .read(patchClashConfigProvider.notifier)
+          .read(patchMihomoConfigProvider.notifier)
           .updateState((state) => syncedConfig);
       patchConfig = syncedConfig;
     }
 
-    // flclashx-androidsecure header: on Android, when the current profile
+    // mihox-androidsecure header: on Android, when the current profile
     // declares "androidsecure: true", force mixedPort=0 on the Dart-side
-    // ClashConfig so that all downstream providers (coreStateProvider,
+    // MihomoConfig so that all downstream providers (coreStateProvider,
     // proxyStateProvider, http.handleFindProxy) observe the disabled inbound
     // and behave consistently with patchRawConfig's forced override. Applied
     // after syncFromProvider so it overrides both user and provider values.
     if (Platform.isAndroid) {
       final profile = _ref.read(currentProfileProvider);
-      final secure = profile?.providerHeaders['flclashx-androidsecure']
+      final secure = profile?.providerHeaders['mihox-androidsecure']
               ?.trim()
               .toLowerCase() ==
           'true';
       if (secure && patchConfig.mixedPort != 0) {
         patchConfig = patchConfig.copyWith(mixedPort: 0);
         _ref
-            .read(patchClashConfigProvider.notifier)
+            .read(patchMihomoConfigProvider.notifier)
             .updateState((state) => state.copyWith(mixedPort: 0));
       }
     }
@@ -800,7 +804,7 @@ class AppController {
     final params = await globalState.getSetupParams(
       pathConfig: realPatchConfig,
     );
-    final message = await clashCore.setupConfig(params);
+    final message = await mihomoCore.setupConfig(params);
     lastProfileModified = await _ref.read(
       currentProfileProvider.select(
         (state) => state?.profileLastModified,
@@ -812,8 +816,8 @@ class AppController {
   }
 
   Future _applyProfile() async {
-    clashCore.requestGc();
-    await setupClashConfig();
+    mihomoCore.requestGc();
+    await setupMihomoConfig();
     await updateGroups();
     await updateProviders();
   }
@@ -837,7 +841,7 @@ class AppController {
     final currentProfileId = _ref.read(currentProfileIdProvider);
     if (currentProfileId != null) {
       final profiles = _ref.read(profilesProvider);
-      var currentProfile = profiles.firstWhere(
+      final currentProfile = profiles.firstWhere(
         (p) => p.id == currentProfileId,
         orElse: () => profiles.first,
       );
@@ -860,8 +864,8 @@ class AppController {
     }
   }
 
-  void updateBrightness(Brightness brightness) {
-    _ref.read(appBrightnessProvider.notifier).value = brightness;
+  set brightness(Brightness value) {
+    _ref.read(appBrightnessProvider.notifier).value = value;
   }
 
   Future<void> autoUpdateProfiles() async {
@@ -924,15 +928,16 @@ class AppController {
             "Auto-update disabled for current profile, skipping startup update");
       }
     } catch (e, stackTrace) {
-      commonPrint.log("Failed to update subscription info on startup: $e");
-      commonPrint.log("Stack trace: $stackTrace");
+      commonPrint
+        ..log("Failed to update subscription info on startup: $e")
+        ..log("Stack trace: $stackTrace");
     }
   }
 
   Future<void> updateGroups() async {
     try {
       final newGroups = await retry(
-        task: () async => clashCore.getProxiesGroups(),
+        task: () async => mihomoCore.getProxiesGroups(),
         retryIf: (res) => res.isEmpty,
       );
 
@@ -967,14 +972,14 @@ class AppController {
     required String groupName,
     required String proxyName,
   }) async {
-    await clashCore.changeProxy(
+    await mihomoCore.changeProxy(
       ChangeProxyParams(
         groupName: groupName,
         proxyName: proxyName,
       ),
     );
     if (_ref.read(appSettingProvider).closeConnections) {
-      clashCore.closeConnections();
+      mihomoCore.closeConnections();
     }
     addCheckIpNumDebounce();
   }
@@ -1006,19 +1011,21 @@ class AppController {
     Future.delayed(commonDuration, system.exit);
     try {
       await savePreferences();
-      await system.setMacOSDns(true);
       await proxy?.stopProxy();
-      await clashCore.shutdown();
-      await clashService?.destroy();
+      await mihomoCore.shutdown();
+      await mihomoService?.destroy();
+      if (Platform.isWindows) {
+        //await windows?.stopService();
+      }
     } finally {
-      system.exit();
+      await system.exit();
     }
   }
 
   Future<void> handleRestart() async {
     commonPrint.log("Starting application restart...");
 
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    if (Platform.isLinux || Platform.isWindows) {
       final executablePath = Platform.resolvedExecutable;
       commonPrint.log("Launching new process: $executablePath");
 
@@ -1035,7 +1042,7 @@ class AppController {
       }
     }
 
-    system.exit();
+    await system.exit();
   }
 
   Future handleClear() async {
@@ -1045,7 +1052,7 @@ class AppController {
       commonPrint.log("stopped proxy/VPN");
 
       // Stop core
-      await clashCore.shutdown();
+      await mihomoCore.shutdown();
       commonPrint.log("shutdown core");
 
       // Wait a bit for all file handles to close
@@ -1061,9 +1068,9 @@ class AppController {
 
       // Delete profiles directory
       final profilesDir = Directory(profilesPath);
-      if (await profilesDir.exists()) {
+      if (profilesDir.existsSync()) {
         try {
-          await profilesDir.delete(recursive: true);
+          profilesDir.deleteSync(recursive: true);
           commonPrint.log("deleted profiles directory");
         } catch (e) {
           commonPrint.log("failed to delete profiles directory: $e");
@@ -1074,14 +1081,14 @@ class AppController {
       final filesToDelete = [
         'cache.db',
         'libCachedImageData.json',
-        'FlClashX.lock',
+        'MihoX.lock',
       ];
 
       for (final fileName in filesToDelete) {
         final file = File(join(homePath, fileName));
-        if (await file.exists()) {
+        if (file.existsSync()) {
           try {
-            await file.delete();
+            file.deleteSync();
             commonPrint.log("deleted $fileName");
           } catch (e) {
             commonPrint.log("failed to delete $fileName: $e");
@@ -1108,16 +1115,13 @@ class AppController {
   Future<void> autoCheckUpdate() async {
     if (!_ref.read(appSettingProvider).autoCheckUpdate) return;
     final res = await request.checkForUpdate();
-    checkUpdateResultHandle(data: res);
+    await checkUpdateResultHandle(data: res);
   }
 
   Future<void> checkUpdateResultHandle({
     Map<String, dynamic>? data,
     bool handleError = false,
   }) async {
-    if (globalState.isPre) {
-      return;
-    }
     if (data != null) {
       final tagName = data['tag_name'];
       final body = data['body'];
@@ -1149,7 +1153,7 @@ class AppController {
         Uri.parse("https://github.com/$repository/releases/latest"),
       ));
     } else if (handleError) {
-      globalState.showMessage(
+      await globalState.showMessage(
         title: appLocalizations.checkUpdate,
         message: TextSpan(
           text: appLocalizations.checkUpdateError,
@@ -1168,19 +1172,19 @@ class AppController {
     );
     if (res == true) {
       final file = File(await appPath.sharedPreferencesPath);
-      final isExists = await file.exists();
+      final isExists = file.existsSync();
       if (isExists) {
-        await file.delete();
+        file.deleteSync();
       }
     }
     await handleExit();
   }
 
   Future<void> _initCore() async {
-    final isInit = await clashCore.isInit;
+    final isInit = await mihomoCore.isInit;
     if (!isInit) {
-      await clashCore.init();
-      await clashCore.setState(
+      await mihomoCore.init();
+      await mihomoCore.setState(
         globalState.getCoreState(),
       );
     }
@@ -1191,26 +1195,24 @@ class AppController {
     FlutterError.onError = (details) {
       commonPrint.log(details.stack.toString());
     };
-    updateTray(true);
+    await updateTray(true);
     await _initCore();
     await _initStatus();
-    autoLaunch?.updateStatus(
-      _ref.read(appSettingProvider).autoLaunch,
+    await autoLaunch?.updateStatus(
+      isAutoLaunch: _ref.read(appSettingProvider).autoLaunch,
     );
     // Delay subscription update to ensure network is ready after app initialization
     Future.delayed(
         const Duration(seconds: 1), _updateCurrentProfileSubscription);
-    autoUpdateProfiles();
-    autoCheckUpdate();
-    if (!Platform.isMacOS) {
-      if (!_ref.read(appSettingProvider).silentLaunch) {
-        window?.show();
-      } else {
-        window?.hide();
-      }
+    await autoUpdateProfiles();
+    await autoCheckUpdate();
+    if (!_ref.read(appSettingProvider).silentLaunch) {
+      await window?.show();
+    } else {
+      await window?.hide();
     }
+
     await _handlePreference();
-    await _handlerDisclaimer();
     _ref.read(initProvider.notifier).value = true;
   }
 
@@ -1232,12 +1234,12 @@ class AppController {
     _ref.read(delayDataSourceProvider.notifier).setDelay(delay);
   }
 
-  void toPage(PageLabel pageLabel) {
-    _ref.read(currentPageLabelProvider.notifier).value = pageLabel;
+  set page(PageLabel value) {
+    _ref.read(currentPageLabelProvider.notifier).value = value;
   }
 
   void toProfiles() {
-    toPage(PageLabel.profiles);
+    page = PageLabel.profiles;
   }
 
   void initLink() {
@@ -1263,56 +1265,16 @@ class AppController {
         if (res != true) {
           return;
         }
-        addProfileFormURL(url);
+        await addProfileFormURL(url);
       },
     );
-  }
-
-  Future<bool> showDisclaimer() async =>
-      await globalState.showCommonDialog<bool>(
-        dismissible: false,
-        child: CommonDialog(
-          title: appLocalizations.disclaimer,
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop<bool>(false);
-              },
-              child: Text(appLocalizations.exit),
-            ),
-            TextButton(
-              onPressed: () {
-                _ref.read(appSettingProvider.notifier).updateState(
-                      (state) => state.copyWith(disclaimerAccepted: true),
-                    );
-                Navigator.of(context).pop<bool>(true);
-              },
-              child: Text(appLocalizations.agree),
-            )
-          ],
-          child: SelectableText(
-            appLocalizations.disclaimerDesc,
-          ),
-        ),
-      ) ??
-      false;
-
-  Future<void> _handlerDisclaimer() async {
-    if (_ref.read(appSettingProvider).disclaimerAccepted) {
-      return;
-    }
-    final isDisclaimerAccepted = await showDisclaimer();
-    if (!isDisclaimerAccepted) {
-      await handleExit();
-    }
-    return;
   }
 
   Future<void> addProfileFormURL(String url) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
-    toPage(PageLabel.dashboard);
+    page = PageLabel.dashboard;
     final commonScaffoldState = globalState.homeScaffoldKey.currentState;
     if (commonScaffoldState?.mounted != true) return;
 
@@ -1353,7 +1315,7 @@ class AppController {
     }
     if (!context.mounted) return;
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
-    toPage(PageLabel.dashboard);
+    page = PageLabel.dashboard;
     final commonScaffoldState = globalState.homeScaffoldKey.currentState;
     if (commonScaffoldState?.mounted != true) return;
     final profile = await commonScaffoldState?.loadingRun<Profile?>(
@@ -1371,7 +1333,7 @@ class AppController {
   Future<void> addProfileFormQrCode() async {
     final url = await globalState.safeRun(picker.pickerConfigQRCode);
     if (url == null) return;
-    addProfileFormURL(url);
+    await addProfileFormURL(url);
   }
 
   void updateViewSize(Size size) {
@@ -1437,12 +1399,12 @@ class AppController {
     final providersDirPath = await appPath.getProvidersDirPath(profileId);
     return Isolate.run(() async {
       final profileFile = File(profilePath);
-      final isExists = await profileFile.exists();
+      final isExists = profileFile.existsSync();
       if (isExists) {
         unawaited(profileFile.delete(recursive: true));
       }
       final providersFileDir = File(providersDirPath);
-      final providersFileIsExists = await providersFileDir.exists();
+      final providersFileIsExists = providersFileDir.existsSync();
       if (providersFileIsExists) {
         unawaited(providersFileDir.delete(recursive: true));
       }
@@ -1450,7 +1412,7 @@ class AppController {
   }
 
   void updateTun() {
-    _ref.read(patchClashConfigProvider.notifier).updateState(
+    _ref.read(patchMihomoConfigProvider.notifier).updateState(
           (state) => state.copyWith.tun(enable: !state.tun.enable),
         );
   }
@@ -1466,7 +1428,7 @@ class AppController {
   void _applyCustomViewSettings(Profile profile) {
     final headers = profile.providerHeaders;
 
-    final dashboardLayout = headers['flclashx-widgets'];
+    final dashboardLayout = headers['mihox-widgets'];
     if (dashboardLayout != null && dashboardLayout.isNotEmpty) {
       final newLayout = DashboardWidgetParser.parseLayout(dashboardLayout);
       if (newLayout.isNotEmpty) {
@@ -1476,11 +1438,11 @@ class AppController {
       }
     }
 
-    final proxiesView = headers['flclashx-view'];
+    final proxiesView = headers['mihox-view'];
     if (proxiesView != null && proxiesView.isNotEmpty) {
-      final proxiesStyleNotifier =
-          _ref.read(proxiesStyleSettingProvider.notifier);
-      proxiesStyleNotifier.updateState((currentState) {
+      _ref
+          .read(proxiesStyleSettingProvider.notifier)
+          .updateState((currentState) {
         var newState = currentState;
         final settings = proxiesView.split(';');
         for (final setting in settings) {
@@ -1612,7 +1574,7 @@ class AppController {
   }
 
   void changeMode(Mode mode) {
-    _ref.read(patchClashConfigProvider.notifier).updateState(
+    _ref.read(patchMihomoConfigProvider.notifier).updateState(
           (state) => state.copyWith(mode: mode),
         );
     if (mode == Mode.global) {
@@ -1634,18 +1596,16 @@ class AppController {
   }
 
   Future<void> updateVisible() async {
-    if (Platform.isMacOS) return;
-
     final visible = await window?.isVisible;
     if (visible != null && !visible) {
-      window?.show();
+      await window?.show();
     } else {
-      window?.hide();
+      await window?.hide();
     }
   }
 
   void updateMode() {
-    _ref.read(patchClashConfigProvider.notifier).updateState(
+    _ref.read(patchMihomoConfigProvider.notifier).updateState(
       (state) {
         final index = Mode.values.indexWhere((item) => item == state.mode);
         if (index == -1) {
@@ -1711,16 +1671,16 @@ class AppController {
     final profilesPath = await appPath.profilesPath;
     final configJson = globalState.config.toJson();
     return Isolate.run<List<int>>(() async {
-      final archive = Archive();
-      archive.addJson("config.json", configJson);
-      archive.addDirectoryToArchive(profilesPath, homeDirPath);
+      final archive = Archive()
+        ..addJson("config.json", configJson)
+        ..addDirectoryToArchive(profilesPath, homeDirPath);
       final zipEncoder = ZipEncoder();
       return zipEncoder.encode(archive);
     });
   }
 
   Future<void> updateTray([bool focus = false]) async {
-    tray.update(
+    await tray.update(
       trayState: _ref.read(trayStateProvider),
     );
   }
@@ -1754,15 +1714,15 @@ class AppController {
       await file.create(recursive: true);
       await file.writeAsBytes(profile.content);
     }
-    final clashConfigIndex =
-        configs.indexWhere((config) => config.name == "clashConfig.json");
-    if (clashConfigIndex != -1) {
-      final clashConfigFile = configs[clashConfigIndex];
+    final mihomoConfigIndex =
+        configs.indexWhere((config) => config.name == "mihomoConfig.json");
+    if (mihomoConfigIndex != -1) {
+      final mihomoConfigFile = configs[mihomoConfigIndex];
       tempConfig = tempConfig.copyWith(
-        patchClashConfig: ClashConfig.fromJson(
+        patchMihomoConfig: MihomoConfig.fromJson(
           json.decode(
             utf8.decode(
-              clashConfigFile.content,
+              mihomoConfigFile.content,
             ),
           ),
         ),
@@ -1790,12 +1750,11 @@ class AppController {
     }
     final onlyProfiles = recoveryOption == RecoveryOption.onlyProfiles;
     if (!onlyProfiles) {
-      _ref.read(patchClashConfigProvider.notifier).value =
-          config.patchClashConfig;
+      _ref.read(patchMihomoConfigProvider.notifier).value =
+          config.patchMihomoConfig;
       _ref.read(appSettingProvider.notifier).value = config.appSetting;
       _ref.read(currentProfileIdProvider.notifier).value =
           config.currentProfileId;
-      _ref.read(appDAVSettingProvider.notifier).value = config.dav;
       _ref.read(themeSettingProvider.notifier).value = config.themeProps;
       _ref.read(windowSettingProvider.notifier).value = config.windowProps;
       _ref.read(vpnSettingProvider.notifier).value = config.vpnProps;
