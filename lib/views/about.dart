@@ -125,7 +125,7 @@ class AboutView extends StatelessWidget {
           ListItem(
             title: Text(appLocalizations.originalRepository),
             trailing: const Icon(Icons.insert_link),
-            onTap: () => globalState.openUrl('https://github.com/chen08209/MihoX'),
+            onTap: () => globalState.openUrl('https://github.com/pluralplay/FlClashX'),
           ),
           ListItem(
             title: Text(appLocalizations.core),
