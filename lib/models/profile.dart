@@ -213,6 +213,7 @@ extension ProfileExtension on Profile {
     final headersToCollect = [
       'announce',
       'support-url',
+      'profile-title',
       'profile-update-interval',
       'x-hwid-limit',
     ];
@@ -248,8 +249,15 @@ extension ProfileExtension on Profile {
       }
     }
 
+    var profileNameHeader = providerHeaders['profile-title'];
+    if (profileNameHeader == null || profileNameHeader.isEmpty) {
+      profileNameHeader = utils.getFileNameForDisposition(disposition) ?? id;
+    } else if (profileNameHeader.startsWith('base64:')) {
+      profileNameHeader = utils.decodeBase64(profileNameHeader.substring(7));
+    }
+
     return copyWith(
-      label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
+      label: label ?? profileNameHeader,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,
       providerHeaders: providerHeaders,
