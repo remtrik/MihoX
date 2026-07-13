@@ -66,7 +66,8 @@ class MihomoService extends MihomoHandlerInterface {
       commonPrint.log(error.toString());
       if (error is SocketException) {
         globalState.showNotifier(error.toString());
-        // globalState.appController.restartCore();
+        // temporary change
+        globalState.appController.restartCore();
       }
     });
   }
