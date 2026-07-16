@@ -12,20 +12,24 @@ class Protocol {
   static Protocol? _instance;
 
   void register(String scheme) {
-    final protocolRegKey = 'Software\\Classes\\$scheme';
-    const protocolRegValue = RegistryValue.string(
-      'URL Protocol',
-      '',
-    );
-    const protocolCmdRegKey = r'shell\open\command';
-    final protocolCmdRegValue = RegistryValue.string(
-      '',
-      '"${Platform.resolvedExecutable}" "%1"',
-    );
-    Registry.currentUser.createKey(protocolRegKey)
-      ..createValue(protocolRegValue)
-      ..createKey(protocolCmdRegKey)
-      ..createValue(protocolCmdRegValue);
+    final root = CURRENT_USER.create(r'Software\Classes\$scheme');
+
+    try {
+      root.setValue('URL Protocol', const RegistryValue.string(''));
+
+      final command = root.create(r'shell\open\command');
+
+      try {
+        command.setValue(
+          '',
+          RegistryValue.string('"${Platform.resolvedExecutable}" "%1"'),
+        );
+      } finally {
+        command.close();
+      }
+    } finally {
+      root.close();
+    }
   }
 }
 

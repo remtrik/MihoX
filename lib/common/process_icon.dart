@@ -45,42 +45,42 @@ Future<ImageProvider?> _loadWindowsIcon(String exePath) {
 // SHGetFileInfo(exe) -> HICON -> GetIconInfo -> GetDIBits(32bpp) -> BGRA pixels ->
 // ui.Image -> PNG bytes.
 Future<Uint8List?> _extractIconBytes(String exePath) async {
-  final pathPtr = exePath.toNativeUtf16();
+  final pathPtr = exePath.toPcwstr();
   final shfi = calloc<SHFILEINFO>();
-  var hIcon = 0;
+  HICON? hIcon;
   try {
     final res = SHGetFileInfo(
       pathPtr,
-      0,
+      const FILE_FLAGS_AND_ATTRIBUTES(0),
       shfi,
       sizeOf<SHFILEINFO>(),
       SHGFI_ICON | SHGFI_LARGEICON,
     );
     if (res == 0) return null;
     hIcon = shfi.ref.hIcon;
-    if (hIcon == 0) return null;
+    if (hIcon.isNull) return null;
     return await _hIconToPng(hIcon);
   } finally {
-    if (hIcon != 0) DestroyIcon(hIcon);
+    if (hIcon != null && !hIcon.isNull) DestroyIcon(hIcon);
     free(pathPtr);
     free(shfi);
   }
 }
 
-Future<Uint8List?> _hIconToPng(int hIcon) async {
+Future<Uint8List?> _hIconToPng(HICON hIcon) async {
   final iconInfo = calloc<ICONINFO>();
   final bmp = calloc<BITMAP>();
   final bi = calloc<BITMAPINFO>();
-  var hbmColor = 0;
-  var hbmMask = 0;
-  var hdc = 0;
+  HBITMAP? hbmColor;
+  HBITMAP? hbmMask;
+  HDC? hdc;
   Pointer<Uint8>? buffer;
   try {
-    if (GetIconInfo(hIcon, iconInfo) == 0) return null;
+    if (!GetIconInfo(hIcon, iconInfo).value) return null;
     hbmColor = iconInfo.ref.hbmColor;
     hbmMask = iconInfo.ref.hbmMask;
-    if (hbmColor == 0) return null;
-    if (GetObject(hbmColor, sizeOf<BITMAP>(), bmp.cast()) == 0) return null;
+    if (hbmColor.isNull) return null;
+    if (GetObject(HGDIOBJ(hbmColor), sizeOf<BITMAP>(), bmp.cast()) == 0) return null;
 
     final w = bmp.ref.bmWidth;
     final h = bmp.ref.bmHeight;
@@ -95,7 +95,7 @@ Future<Uint8List?> _hIconToPng(int hIcon) async {
 
     final count = w * h;
     buffer = calloc<Uint8>(count * 4);
-    hdc = GetDC(NULL);
+    hdc = GetDC(null);
     final got = GetDIBits(
       hdc,
       hbmColor,
@@ -136,9 +136,9 @@ Future<Uint8List?> _hIconToPng(int hIcon) async {
     image.dispose();
     return png?.buffer.asUint8List();
   } finally {
-    if (hdc != 0) ReleaseDC(NULL, hdc);
-    if (hbmColor != 0) DeleteObject(hbmColor);
-    if (hbmMask != 0) DeleteObject(hbmMask);
+    if (hdc != null) ReleaseDC(null, hdc);
+    if (hbmColor != null && !hbmColor.isNull) DeleteObject(HGDIOBJ(hbmColor));
+    if (hbmMask != null && !hbmMask.isNull) DeleteObject(HGDIOBJ(hbmMask));
     if (buffer != null) free(buffer);
     free(iconInfo);
     free(bmp);

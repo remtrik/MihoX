@@ -30,12 +30,11 @@ class SubscriptionInfo with _$SubscriptionInfo {
 
   factory SubscriptionInfo.formHString(String? info) {
     if (info == null) return const SubscriptionInfo();
-    final list = info.split(";");
-    final map = <String, int?>{};
-    for (final i in list) {
-      final keyValue = i.trim().split("=");
-      map[keyValue[0]] = int.tryParse(keyValue[1]);
-    }
+    final map = <String, int?>{
+      for (final pair in info.split(';'))
+        if (pair.trim().split('=') case [final key, final value])
+          key: int.tryParse(value),
+    };
     return SubscriptionInfo(
       upload: map["upload"] ?? 0,
       download: map["download"] ?? 0,
@@ -92,12 +91,8 @@ class OverrideData with _$OverrideData {
 }
 
 extension OverrideDataExt on OverrideData {
-  List<String> get runningRule {
-    if (!enable) {
-      return [];
-    }
-    return rule.rules.map((item) => item.value).toList();
-  }
+  List<String> get runningRule =>
+      enable ? rule.rules.map((item) => item.value).toList() : [];
 }
 
 @freezed
@@ -113,17 +108,13 @@ class OverrideRule with _$OverrideRule {
 }
 
 extension OverrideRuleExt on OverrideRule {
-  List<Rule> get rules => switch (type == OverrideRuleType.override) {
-        true => overrideRules,
-        false => addedRules,
-      };
+  List<Rule> get rules =>
+      type == OverrideRuleType.override ? overrideRules : addedRules;
 
-  OverrideRule updateRules(List<Rule> Function(List<Rule> rules) builder) {
-    if (type == OverrideRuleType.added) {
-      return copyWith(addedRules: builder(addedRules));
-    }
-    return copyWith(overrideRules: builder(overrideRules));
-  }
+  OverrideRule updateRules(List<Rule> Function(List<Rule> rules) builder) =>
+      type == OverrideRuleType.added
+          ? copyWith(addedRules: builder(addedRules))
+          : copyWith(overrideRules: builder(overrideRules));
 }
 
 extension ProfilesExt on List<Profile> {
@@ -134,17 +125,13 @@ extension ProfilesExt on List<Profile> {
 }
 
 extension ProfileExtension on Profile {
-  ProfileType get type =>
-      url.isEmpty == true ? ProfileType.file : ProfileType.url;
+  ProfileType get type => url.isEmpty ? ProfileType.file : ProfileType.url;
 
-  bool get realAutoUpdate => url.isEmpty == true ? false : autoUpdate;
+  bool get realAutoUpdate => url.isEmpty ? false : autoUpdate;
 
   Future<void> checkAndUpdate() async {
-    final isExists = await check();
-    if (!isExists) {
-      if (url.isNotEmpty) {
-        await update();
-      }
+    if (!await check() && url.isNotEmpty) {
+      await update();
     }
   }
 
@@ -156,8 +143,7 @@ extension ProfileExtension on Profile {
   Future<File> getFile() async {
     final path = await appPath.getProfilePath(id);
     final file = File(path);
-    final isExists = file.existsSync();
-    if (!isExists) {
+    if (!file.existsSync()) {
       file.createSync(recursive: true);
     }
     return file;
@@ -175,12 +161,8 @@ extension ProfileExtension on Profile {
       throw Exception("Invalid URL");
     }
 
-    switch (uri.scheme.toLowerCase()) {
-      case 'http':
-      case 'https':
-        break;
-      default:
-        throw Exception("Raw ${uri.scheme}:// links are not yet supported");
+    if (!{'http', 'https'}.contains(uri.scheme.toLowerCase())) {
+      throw Exception("Raw ${uri.scheme}:// links are not yet supported");
     }
 
     final headers = <String, dynamic>{};

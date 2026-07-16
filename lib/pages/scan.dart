@@ -30,7 +30,7 @@ class _ScanPageState extends State<ScanPage> {
 
   Future<void> _scanFromImage() async {
     final imagePath = system.isDesktop
-        ? (await FilePicker.platform.pickFiles(type: FileType.image))
+        ? (await FilePicker.pickFiles(type: FileType.image))
             ?.files
             .single
             .path

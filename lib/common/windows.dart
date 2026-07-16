@@ -5,7 +5,7 @@ import 'package:ffi/ffi.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/enum/enum.dart';
 import 'package:path/path.dart';
-import 'package:win32/win32.dart';
+import 'package:win32_registry/win32_registry.dart';
 
 class Windows {
   factory Windows() {
@@ -50,11 +50,6 @@ class Windows {
       int Function(int hwnd, Pointer<Utf16> pszSubAppName,
           Pointer<Utf16> pszSubIdList)>('SetWindowTheme');
 
-  static final _darkModeKeyPath =
-      r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
-          .toNativeUtf16();
-  static final _darkModeValueName = 'AppsUseLightTheme'.toNativeUtf16();
-
   int Function(int)? _lookupIntFn(int moduleHandle, int ordinal) {
     final ptr =
         _getProcAddress(moduleHandle, Pointer<Utf8>.fromAddress(ordinal));
@@ -72,42 +67,9 @@ class Windows {
   }
 
   bool isDarkMode() {
-    final phkResult = calloc<HKEY>();
-    try {
-      final openResult = RegOpenKeyEx(
-        HKEY_CURRENT_USER,
-        _darkModeKeyPath,
-        0,
-        KEY_READ,
-        phkResult,
-      );
-      if (openResult != ERROR_SUCCESS) return false;
-
-      final hKey = phkResult.value;
-      final data = calloc<DWORD>();
-      final dataSize = calloc<DWORD>()..value = sizeOf<DWORD>();
-      try {
-        final queryResult = RegQueryValueEx(
-          hKey,
-          _darkModeValueName,
-          nullptr,
-          nullptr,
-          data.cast(),
-          dataSize,
-        );
-        RegCloseKey(hKey);
-        if (queryResult != ERROR_SUCCESS) return false;
-        return data.value == 0; // 0 means "not light mode" i.e. dark
-      } finally {
-        calloc
-          ..free(data)
-          ..free(dataSize);
-      }
-    } catch (_) {
-      return false;
-    } finally {
-      calloc.free(phkResult);
-    }
+    final key = CURRENT_USER.open(r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize');
+    final value = key.getInt('AppsUseLightTheme');
+    return value == 0; // 0 means "not light mode" i.e. dark
   }
 
   void enableDarkModeForApp() {

@@ -28,12 +28,12 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
     if (!Platform.isWindows) return;
 
     try {
-      final className = '#32768'.toNativeUtf16();
-      final hwnd = FindWindow(className, nullptr);
+      final className = '#32768'.toPcwstr();
+      final hwnd = FindWindow(className, nullptr as PCWSTR?);
       calloc.free(className);
 
       if (hwnd != 0) {
-        windows?.applyDarkModeToMenu(hwnd);
+        windows?.applyDarkModeToMenu(hwnd as int);
       }
     } catch (e) {}
   }

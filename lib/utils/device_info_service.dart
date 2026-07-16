@@ -55,11 +55,11 @@ class DeviceInfoService {
       const keyPath = r'SOFTWARE\Microsoft\Cryptography';
       const valueName = 'MachineGuid';
 
-      final key = Registry.openPath(RegistryHive.localMachine, path: keyPath);
-      final data = key.getValue(valueName);
+      final key = LOCAL_MACHINE.open(keyPath);
+      final data = key.getString(valueName);
       key.close();
 
-      return data?.toString();
+      return data;
     } catch (e) {
       return null;
     }
@@ -92,11 +92,6 @@ class DeviceInfoService {
       } else if (Platform.isLinux) {
         final info = await _deviceInfoPlugin.linuxInfo;
         final combined = info.machineId ?? '${info.id}-${info.name}';
-        return combined;
-      } else if (Platform.isMacOS) {
-        final info = await _deviceInfoPlugin.macOsInfo;
-        final combined =
-            info.systemGUID ?? '${info.model}-${info.computerName}';
         return combined;
       }
       return null;
@@ -159,11 +154,6 @@ class DeviceInfoService {
         os = 'Linux';
         osVersion = info.versionId;
         model = info.name;
-      } else if (Platform.isMacOS) {
-        final info = await _deviceInfoPlugin.macOsInfo;
-        os = 'macOS';
-        osVersion = info.osRelease;
-        model = info.model;
       }
     } catch (e) {
       // Silently handle errors in device info retrieval

@@ -135,7 +135,7 @@ class UaItem extends ConsumerWidget {
         options: [
           null,
           "MihomoforWindows/${globalState.packageInfo.version}",
-          "MihoX/${globalState.packageInfo.version}",
+          "FlClashX/${globalState.packageInfo.version}",
           "INCY/${globalState.packageInfo.version}",
           "Happ/${globalState.packageInfo.version}",
         ],

@@ -1,38 +1,34 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:launch_at_startup/launch_at_startup.dart';
-
-import 'constant.dart';
+import 'launch_linux.dart';
+import 'launch_windows.dart';
 import 'system.dart';
 
-class AutoLaunch {
+abstract class AutoLaunch {
   factory AutoLaunch() {
-    _instance ??= AutoLaunch._internal();
-    return _instance!;
-  }
+    if (Platform.isWindows) {
+      return WindowsAutoLaunch();
+    }
 
-  AutoLaunch._internal() {
-    launchAtStartup.setup(
-      appName: appName,
-      appPath: Platform.resolvedExecutable,
+    if (Platform.isLinux) {
+      return LinuxAutoLaunch();
+    }
+
+    throw UnsupportedError(
+      'AutoLaunch is not supported on ${Platform.operatingSystem}',
     );
   }
-  static AutoLaunch? _instance;
 
-  Future<bool> get isEnable async => launchAtStartup.isEnabled();
+  Future<bool> get isEnable;
 
-  Future<bool> enable() async => launchAtStartup.enable();
+  Future<bool> enable();
 
-  Future<bool> disable() async => launchAtStartup.disable();
+  Future<bool> disable();
 
   Future<void> updateStatus({required bool isAutoLaunch}) async {
-    if (kDebugMode) {
-      return;
-    }
     if (await isEnable == isAutoLaunch) return;
-    if (isAutoLaunch == true) {
+
+    if (isAutoLaunch) {
       await enable();
     } else {
       await disable();
