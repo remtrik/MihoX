@@ -11,7 +11,7 @@ import 'package:mihox/models/models.dart';
 import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:nativeapi/nativeapi.dart';
 
 import 'item.dart';
 import 'requests.dart';
@@ -175,7 +175,7 @@ class _ZashboardButton extends StatelessWidget {
       );
       return;
     }
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    UrlOpener.instance.open(url);
   }
 
   @override

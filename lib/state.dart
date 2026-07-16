@@ -16,8 +16,8 @@ import 'package:mihox/mihomo/mihomo.dart';
 import 'package:mihox/plugins/service.dart';
 import 'package:mihox/widgets/dialog.dart';
 import 'package:mihox/widgets/scaffold.dart';
+import 'package:nativeapi/nativeapi.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
@@ -288,7 +288,7 @@ class GlobalState {
     if (res != true) {
       return;
     }
-    await launchUrl(Uri.parse(url));
+    UrlOpener.instance.open(url);
   }
 
   Future<void> migrateOldData(Config config) async {

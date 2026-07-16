@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/state.dart';
-import 'package:screen_retriever/screen_retriever.dart';
+import 'package:nativeapi/nativeapi.dart' hide TitleBarStyle;
 import 'package:window_manager/window_manager.dart';
 
 class Window {
@@ -48,11 +48,11 @@ class Window {
   ) async {
     final right = left + width;
     final bottom = top + height;
-    final displays = await screenRetriever.getAllDisplays();
+    final displays = DisplayManager.instance.getAll();
     return displays.any((display) {
       final bounds = Rect.fromLTWH(
-        display.visiblePosition!.dx,
-        display.visiblePosition!.dy,
+        display.position.dx,
+        display.position.dy,
         display.size.width,
         display.size.height,
       );

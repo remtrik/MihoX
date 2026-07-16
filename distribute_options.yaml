@@ -50,6 +50,13 @@ releases:
           platform: windows
           target: exe
 
+  - name: stable-linux
+    jobs:
+      - name: release-stable-linux-appimage
+        package:
+          platform: linux
+          target: appimage
+
   - name: stable-android
     jobs:
       - name: release-stable-android-separate

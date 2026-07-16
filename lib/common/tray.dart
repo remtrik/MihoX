@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Image;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mihox/common/utils.dart';
 import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart';
 import 'package:mihox/state.dart';
-import 'package:tray_manager/tray_manager.dart';
+import 'package:nativeapi/nativeapi.dart';
 
 import 'app_localizations.dart';
 import 'constant.dart';
 import 'window.dart';
+
+final trayIcon = TrayIcon();
 
 class Tray {
   Future _updateSystemTray({
@@ -20,24 +22,41 @@ class Tray {
     required bool isRunning,
     bool force = false,
   }) async {
-    if (Platform.isAndroid) {
-      // Skip tray on Android
-      return;
-    }
-    if (Platform.isLinux || force) {
-      await trayManager.destroy();
-    }
-    await trayManager.setIcon(
+    if (Platform.isAndroid) return;
+
+    trayIcon.icon = Image.fromAsset(
       utils.getTrayIconPath(
         brightness: brightness ??
             WidgetsBinding.instance.platformDispatcher.platformBrightness,
         isRunning: isRunning,
       ),
-      isTemplate: true,
     );
+    trayIcon.isVisible = true;
+
     if (!Platform.isLinux) {
-      await trayManager.setToolTip(appName);
+      trayIcon.tooltip = appName;
     }
+  }
+
+  void _addItem(
+    Menu menu,
+    String label,
+    FutureOr<void> Function() onClick,
+  ) {
+    final item = MenuItem(label)..on<MenuItemClickedEvent>((_) => onClick());
+    menu.addItem(item);
+  }
+
+  void _addCheckboxItem(
+    Menu menu,
+    String label,
+    FutureOr<void> Function() onClick, {
+    required bool checked,
+  }) {
+    final item = MenuItem(label, MenuItemType.checkbox)
+      ..state = checked ? MenuItemState.checked : MenuItemState.unchecked
+      ..on<MenuItemClickedEvent>((_) => onClick());
+    menu.addItem(item);
   }
 
   Future<void> update({
@@ -55,92 +74,84 @@ class Tray {
         force: focus,
       );
     }
-    final menuItems = <MenuItem>[];
-    final showMenuItem = MenuItem(
-      label: appLocalizations.show,
-      onClick: (_) {
-        window?.show();
-      },
-    );
-    menuItems.add(showMenuItem);
-    final startMenuItem = MenuItem.checkbox(
-      label: trayState.isStart ? appLocalizations.stop : appLocalizations.start,
-      onClick: (_) async {
+
+    final menu = Menu();
+
+    _addItem(menu, appLocalizations.show, () {
+      window?.show();
+    });
+
+    _addCheckboxItem(
+      menu,
+      trayState.isStart ? appLocalizations.stop : appLocalizations.start,
+      () {
         globalState.appController.updateStart();
       },
       checked: false,
     );
-    menuItems.add(startMenuItem);
+
     if (trayState.globalModeEnabled) {
-      menuItems.add(MenuItem.separator());
+      menu.addSeparator();
       for (final mode in Mode.values) {
-        menuItems.add(
-          MenuItem.checkbox(
-            label: Intl.message(mode.name),
-            onClick: (_) {
-              globalState.appController.changeMode(mode);
-            },
-            checked: mode == trayState.mode,
-          ),
+        _addCheckboxItem(
+          menu,
+          Intl.message(mode.name),
+          () {
+            globalState.appController.changeMode(mode);
+          },
+          checked: mode == trayState.mode,
         );
       }
     }
-    menuItems.add(MenuItem.separator());
+
+    menu.addSeparator();
+
     if (trayState.isStart) {
-      menuItems
-        ..add(
-          MenuItem.checkbox(
-            label: appLocalizations.tun,
-            onClick: (_) {
-              globalState.appController.updateTun();
-            },
-            checked: trayState.tunEnable,
-          ),
-        )
-        ..add(
-          MenuItem.checkbox(
-            label: appLocalizations.systemProxy,
-            onClick: (_) {
-              globalState.appController.updateSystemProxy();
-            },
-            checked: trayState.systemProxy,
-          ),
-        )
-        ..add(MenuItem.separator());
+      _addCheckboxItem(
+        menu,
+        appLocalizations.tun,
+        () {
+          globalState.appController.updateTun();
+        },
+        checked: trayState.tunEnable,
+      );
+      _addCheckboxItem(
+        menu,
+        appLocalizations.systemProxy,
+        () {
+          globalState.appController.updateSystemProxy();
+        },
+        checked: trayState.systemProxy,
+      );
+      menu.addSeparator();
     }
-    final autoStartMenuItem = MenuItem.checkbox(
-      label: appLocalizations.autoLaunch,
-      onClick: (_) async {
+
+    _addCheckboxItem(
+      menu,
+      appLocalizations.autoLaunch,
+      () {
         globalState.appController.updateAutoLaunch();
       },
       checked: trayState.autoLaunch,
     );
-    final copyEnvVarMenuItem = MenuItem(
-      label: appLocalizations.copyEnvVar,
-      onClick: (_) async {
-        await _copyEnv(trayState.port);
-      },
-    );
-    menuItems
-      ..add(autoStartMenuItem)
-      ..add(copyEnvVarMenuItem)
-      ..add(MenuItem.separator());
-    final restartMenuItem = MenuItem(
-      label: appLocalizations.restart,
-      onClick: (_) async {
-        await globalState.appController.handleRestart();
-      },
-    );
-    menuItems.add(restartMenuItem);
-    final exitMenuItem = MenuItem(
-      label: appLocalizations.exit,
-      onClick: (_) async {
-        await globalState.appController.handleExit();
-      },
-    );
-    menuItems.add(exitMenuItem);
-    final menu = Menu(items: menuItems);
-    await trayManager.setContextMenu(menu);
+
+    _addItem(menu, appLocalizations.copyEnvVar, () async {
+      await _copyEnv(trayState.port);
+    });
+
+    menu.addSeparator();
+
+    _addItem(menu, appLocalizations.restart, () async {
+      await globalState.appController.handleRestart();
+    });
+
+    _addItem(menu, appLocalizations.exit, () async {
+      await globalState.appController.handleExit();
+    });
+
+    trayIcon.contextMenu = menu;
+    trayIcon.contextMenuTrigger = ContextMenuTrigger.rightClicked;
+
     if (Platform.isLinux) {
       unawaited(_updateSystemTray(
         brightness: trayState.brightness,

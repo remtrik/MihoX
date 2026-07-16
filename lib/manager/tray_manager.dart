@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -8,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/providers/state.dart';
 import 'package:mihox/state.dart';
-import 'package:tray_manager/tray_manager.dart';
+import 'package:nativeapi/nativeapi.dart';
 import 'package:win32/win32.dart';
 
 class TrayManager extends ConsumerStatefulWidget {
@@ -22,103 +21,51 @@ class TrayManager extends ConsumerStatefulWidget {
   ConsumerState<TrayManager> createState() => _TrayContainerState();
 }
 
-class _TrayContainerState extends ConsumerState<TrayManager> with TrayListener {
-  Timer? _menuMonitor;
+class _TrayContainerState extends ConsumerState<TrayManager> {
+  final List<int> _listenerIds = [];
 
-  void _closeWindowsPopupMenu() {
+  void _applyWindowsMenuDarkMode() {
     if (!Platform.isWindows) return;
 
     try {
       final className = '#32768'.toNativeUtf16();
       final hwnd = FindWindow(className, nullptr);
+      calloc.free(className);
 
       if (hwnd != 0) {
-        PostMessage(hwnd, WM_CLOSE, 0, 0);
+        windows?.applyDarkModeToMenu(hwnd);
       }
-
-      calloc.free(className);
     } catch (e) {}
-
-    _stopMenuMonitor();
-  }
-
-  void _startMenuMonitor() {
-    if (!Platform.isWindows) return;
-
-    _menuMonitor?.cancel();
-    var themeApplied = false;
-    var waitCycles = 0;
-
-    _menuMonitor = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      try {
-        final className = '#32768'.toNativeUtf16();
-        final hwnd = FindWindow(className, nullptr);
-        calloc.free(className);
-
-        if (hwnd == 0) {
-          _stopMenuMonitor();
-          return;
-        }
-
-        if (IsWindowVisible(hwnd) == 0) {
-          _stopMenuMonitor();
-          return;
-        }
-
-        if (!themeApplied) {
-          windows?.applyDarkModeToMenu(hwnd);
-          themeApplied = true;
-        }
-
-        if (waitCycles < 3) {
-          waitCycles++;
-          return;
-        }
-
-        final leftButtonPressed = GetAsyncKeyState(VK_LBUTTON) & 0x8000;
-        final rightButtonPressed = GetAsyncKeyState(VK_RBUTTON) & 0x8000;
-
-        if (leftButtonPressed != 0 || rightButtonPressed != 0) {
-          final point = calloc<POINT>();
-          GetCursorPos(point);
-
-          final rect = calloc<RECT>();
-          GetWindowRect(hwnd, rect);
-
-          final cursorX = point.ref.x;
-          final cursorY = point.ref.y;
-          final menuLeft = rect.ref.left;
-          final menuTop = rect.ref.top;
-          final menuRight = rect.ref.right;
-          final menuBottom = rect.ref.bottom;
-
-          calloc
-            ..free(point)
-            ..free(rect);
-
-          if (cursorX < menuLeft ||
-              cursorX > menuRight ||
-              cursorY < menuTop ||
-              cursorY > menuBottom) {
-            PostMessage(hwnd, WM_CLOSE, 0, 0);
-            _stopMenuMonitor();
-          }
-        }
-      } catch (e) {
-        _stopMenuMonitor();
-      }
-    });
-  }
-
-  void _stopMenuMonitor() {
-    _menuMonitor?.cancel();
-    _menuMonitor = null;
   }
 
   @override
   void initState() {
     super.initState();
-    trayManager.addListener(this);
+
+    trayIcon.contextMenuTrigger = ContextMenuTrigger.rightClicked;
+
+    _listenerIds
+      ..add(
+        trayIcon.contextMenu?.on<MenuOpenedEvent>((event) {
+              _applyWindowsMenuDarkMode();
+            }) ??
+            -1,
+      )
+      ..add(
+        trayIcon.contextMenu?.on<MenuItemClickedEvent>((event) {
+              render?.active();
+            }) ??
+            -1,
+      )
+      ..add(
+        trayIcon.on<TrayIconClickedEvent>((event) {
+          trayIcon.closeContextMenu();
+          if (!Platform.isLinux) {
+            window?.show();
+          }
+        }),
+      );
+
     ref.listenManual(
       trayStateProvider,
       (prev, next) {
@@ -133,30 +80,14 @@ class _TrayContainerState extends ConsumerState<TrayManager> with TrayListener {
   Widget build(BuildContext context) => widget.child;
 
   @override
-  void onTrayIconRightMouseDown() {
-    trayManager.popUpContextMenu();
-    _startMenuMonitor();
-  }
-
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
-    render?.active();
-    _closeWindowsPopupMenu();
-    super.onTrayMenuItemClick(menuItem);
-  }
-
-  @override
-  void onTrayIconMouseDown() {
-    _closeWindowsPopupMenu();
-    if (!Platform.isLinux) {
-      window?.show();
-    }
-  }
-
-  @override
   void dispose() {
-    _stopMenuMonitor();
-    trayManager.removeListener(this);
+    for (final id in _listenerIds) {
+      if (id >= 0) {
+        trayIcon.contextMenu?.removeListener(id);
+        trayIcon.removeListener(id);
+      }
+    }
+    trayIcon.dispose();
     super.dispose();
   }
 }
