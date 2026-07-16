@@ -162,7 +162,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
       if (file == null) {
         return;
       }
-      _controller.text = String.fromCharCodes(file.bytes?.toList() ?? []);
+      _controller.text = String.fromCharCodes(await file.readAsBytes());
       return;
     }
     final url = await globalState.showCommonDialog(

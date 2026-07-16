@@ -40,13 +40,13 @@ class BackupAndRecovery extends ConsumerWidget {
     RecoveryOption recoveryOption,
   ) async {
     final file = await picker.pickerFile();
-    final data = file?.bytes;
+    final data = file?.readAsBytes();
     if (data == null || !context.mounted) return;
     final commonScaffoldState = context.commonScaffoldState;
     final res = await commonScaffoldState?.loadingRun<bool>(
       () async {
         await globalState.appController.recoveryData(
-          List<int>.from(data),
+          List<int>.from(await data),
           recoveryOption,
         );
         return true;

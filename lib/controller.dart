@@ -1306,7 +1306,7 @@ class AppController {
 
   Future<Null> addProfileFormFile() async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
-    final bytes = platformFile?.bytes;
+    final bytes = await platformFile?.readAsBytes();
     if (bytes == null) {
       return null;
     }

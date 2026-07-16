@@ -133,7 +133,7 @@ class ProviderItem extends StatelessWidget {
   Future<void> _handleSideLoadProvider() async {
     await globalState.safeRun<void>(() async {
       final platformFile = await picker.pickerFile();
-      final bytes = platformFile?.bytes;
+      final bytes = await platformFile?.readAsBytes();
       if (bytes == null || provider.path == null) return;
       final file = await File(provider.path!).create(recursive: true);
       await file.writeAsBytes(bytes);
