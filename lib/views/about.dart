@@ -67,9 +67,8 @@ class AboutView extends StatelessWidget {
                     avatar: c.avatar,
                     name: c.name,
                     size: avatarSize,
-                    onTap: c.clickable
-                        ? () => globalState.openUrl(c.link)
-                        : null,
+                    onTap:
+                        c.clickable ? () => globalState.openUrl(c.link) : null,
                   ),
               ],
             ),
@@ -79,9 +78,10 @@ class AboutView extends StatelessWidget {
 
   List<Widget> _buildGratitudeSection() {
     const people = [
-      ThanksPerson(name: 'cool_coala', avatar: 'assets/images/avatars/cool_coala.jpg'),
-      ThanksPerson(name: 'arpic',      avatar: 'assets/images/avatars/arpic.jpg'),
-      ThanksPerson(name: 'legiz',      avatar: 'assets/images/avatars/legiz.jpg'),
+      ThanksPerson(
+          name: 'cool_coala', avatar: 'assets/images/avatars/cool_coala.jpg'),
+      ThanksPerson(name: 'arpic', avatar: 'assets/images/avatars/arpic.jpg'),
+      ThanksPerson(name: 'legiz', avatar: 'assets/images/avatars/legiz.jpg'),
     ];
     return generateSection(
       separated: false,
@@ -125,7 +125,8 @@ class AboutView extends StatelessWidget {
           ListItem(
             title: Text(appLocalizations.originalRepository),
             trailing: const Icon(Icons.insert_link),
-            onTap: () => globalState.openUrl('https://github.com/pluralplay/FlClashX'),
+            onTap: () =>
+                globalState.openUrl('https://github.com/pluralplay/FlClashX'),
           ),
           ListItem(
             title: Text(appLocalizations.core),
@@ -254,8 +255,7 @@ class _PersonAvatar extends StatelessWidget {
       radius: size / 2,
       foregroundImage:
           avatar != null ? AssetImage(avatar!) as ImageProvider : null,
-      backgroundColor:
-          avatar == null ? colorScheme.primaryContainer : null,
+      backgroundColor: avatar == null ? colorScheme.primaryContainer : null,
       child: avatar == null
           ? Text(
               name[0].toUpperCase(),
@@ -300,7 +300,9 @@ class _CoreVersionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final coreVersion = globalState.coreVersion;
-    if (coreVersion == null || coreVersion.isEmpty) return const SizedBox.shrink();
+    if (coreVersion == null || coreVersion.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;

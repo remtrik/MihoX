@@ -18,6 +18,7 @@ import 'package:mihox/widgets/dialog.dart';
 import 'package:mihox/widgets/scaffold.dart';
 import 'package:nativeapi/nativeapi.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
@@ -288,7 +289,14 @@ class GlobalState {
     if (res != true) {
       return;
     }
-    UrlOpener.instance.open(url);
+    if (Platform.isAndroid) {
+        unawaited(launchUrl(
+          Uri.parse(url),
+        ));
+      } else {
+        UrlOpener.instance
+            .open(url);
+      }
   }
 
   Future<void> migrateOldData(Config config) async {

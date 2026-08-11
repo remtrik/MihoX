@@ -19,6 +19,7 @@ import 'package:mihox/widgets/dialog.dart';
 import 'package:nativeapi/nativeapi.dart';
 import 'package:path/path.dart' hide windows;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'models/models.dart';
@@ -147,7 +148,6 @@ class AppController {
   }
 
   Future<void> updateStatus(bool isStart) async {
-
     if (isStart) {
       // Initialize foreground notification cache before starting
       initForegroundCache();
@@ -1148,7 +1148,14 @@ class AppController {
       if (res != true) {
         return;
       }
-      UrlOpener.instance.open("https://github.com/$repository/releases/latest");
+      if (Platform.isAndroid) {
+        unawaited(launchUrl(
+          Uri.parse("https://github.com/$repository/releases/latest"),
+        ));
+      } else {
+        UrlOpener.instance
+            .open("https://github.com/$repository/releases/latest");
+      }
     } else if (handleError) {
       await globalState.showMessage(
         title: appLocalizations.checkUpdate,

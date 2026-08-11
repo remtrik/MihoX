@@ -7,12 +7,12 @@ import 'package:mihox/common/common.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Picker {
-  Future<PlatformFile?> pickerFile() async {
-    final filePickerResult = await FilePicker.pickFile(
-      initialDirectory: await appPath.downloadDirPath,
-    );
-    return filePickerResult;
-  }
+  Future<PlatformFile?> pickerFile({FileType fileType = FileType.any, List<String>? allowedExtensions}) async => 
+      FilePicker.pickFile(
+        type: fileType,
+        allowedExtensions: allowedExtensions,
+        initialDirectory: await appPath.downloadDirPath,
+      );
 
   Future<String?> saveFile(String fileName, Uint8List bytes) async {
     final path = await FilePicker.saveFile(

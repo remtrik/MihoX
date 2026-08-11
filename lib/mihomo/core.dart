@@ -89,6 +89,9 @@ class MihomoCore {
   FutureOr<String> validateConfig(String data) =>
       mihomoInterface.validateConfig(data);
 
+  FutureOr<String> convertV2ray(String data) =>
+      mihomoInterface.convertV2ray(data);
+
   Future<String> updateConfig(UpdateParams updateParams) =>
       mihomoInterface.updateConfig(updateParams);
 

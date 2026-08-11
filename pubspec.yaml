@@ -36,7 +36,7 @@ dependencies:
   shelf: ^1.4.2
   shelf_router: ^1.1.4
   http: ^1.6.0
-  nativeapi: ^0.1.1
+  nativeapi: ^0.1.4
   network_info_plus: ^8.0.0
   package_info_plus: ^10.0.0
   freezed_annotation: ^2.4.4

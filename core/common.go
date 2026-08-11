@@ -15,6 +15,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/batch"
+	"github.com/metacubex/mihomo/common/convert"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -437,4 +438,23 @@ func UnmarshalJson(data []byte, v any) error {
 	decoder.UseNumber()
 	err := decoder.Decode(v)
 	return err
+}
+
+// handleConvertV2ray converts a V2Ray (v2rayN / NekoBox / base64 subscription)
+// link string into a list of mihomo proxy maps using the mihomo kernel.
+func handleConvertV2ray(data string) string {
+	proxies, err := convert.ConvertsV2Ray([]byte(data))
+	if err != nil {
+		log.Warnln("[Convert] convert v2ray failed: %v", err)
+		return jsonMustMarshal(map[string]any{"error": err.Error()})
+	}
+	return jsonMustMarshal(proxies)
+}
+
+func jsonMustMarshal(v any) string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return "[]"
+	}
+	return string(data)
 }

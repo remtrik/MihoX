@@ -76,6 +76,8 @@ mixin MihomoInterface {
   FutureOr<bool> resetConnections();
 
   Future<bool> setState(CoreState state);
+
+  FutureOr<String> convertV2ray(String data);
 }
 
 mixin AndroidMihomoInterface {
@@ -196,10 +198,10 @@ abstract class MihomoHandlerInterface with MihomoInterface {
 
   @override
   Future<void> healthCheck([String groupName = '']) => invoke<String>(
-      method: ActionMethod.healthCheck,
-      data: groupName,
-      timeout: const Duration(seconds: 30),
-    );
+        method: ActionMethod.healthCheck,
+        data: groupName,
+        timeout: const Duration(seconds: 30),
+      );
 
   @override
   Future<String> updateConfig(UpdateParams updateParams) => invoke<String>(
@@ -372,5 +374,11 @@ abstract class MihomoHandlerInterface with MihomoInterface {
   @override
   FutureOr<String> getMemory() => invoke<String>(
         method: ActionMethod.getMemory,
+      );
+
+  @override
+  FutureOr<String> convertV2ray(String data) => invoke<String>(
+        method: ActionMethod.convertV2ray,
+        data: data,
       );
 }

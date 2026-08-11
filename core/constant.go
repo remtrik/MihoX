@@ -108,6 +108,7 @@ const (
 	getConfigMethod                Method = "getConfig"
 	getCoreVersionMethod           Method = "getCoreVersion"
 	healthCheckMethod              Method = "healthCheck"
+	convertV2rayMethod             Method = "convertV2ray"
 )
 
 type Method string

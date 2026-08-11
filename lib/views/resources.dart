@@ -34,6 +34,13 @@ class ResourcesView extends ConsumerStatefulWidget {
 }
 
 class _ResourcesViewState extends ConsumerState<ResourcesView> {
+  static const _allGeoUpdates = <(String geoType, String geoName)>[
+    ("GeoIp", "GeoIP.dat"),
+    ("MMDB", "geoip.metadb"),
+    ("GeoSite", "GeoSite.dat"),
+    ("ASN", "GeoLite2-ASN.mmdb"),
+  ];
+
   bool _isUpdatingAll = false;
   String? _currentlyUpdating;
   final Set<String> _individuallyUpdating = {};
@@ -56,51 +63,18 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
     });
 
     try {
-      setState(() => _currentlyUpdating = "GeoIP.dat");
-      try {
-        final result1 = await mihomoCore.updateGeoData(
-            const UpdateGeoDataParams(geoType: "GeoIp", geoName: "GeoIP.dat"));
-        if (result1.isNotEmpty) {
-          throw Exception("GeoIP.dat: $result1");
+      for (final (geoType, geoName) in _allGeoUpdates) {
+        setState(() => _currentlyUpdating = geoName);
+        try {
+          final result = await mihomoCore.updateGeoData(
+            UpdateGeoDataParams(geoType: geoType, geoName: geoName),
+          );
+          if (result.isNotEmpty) {
+            throw Exception("$geoName: $result");
+          }
+        } catch (e) {
+          commonPrint.log("Failed to update $geoName: $e");
         }
-      } catch (e) {
-        commonPrint.log("Failed to update GeoIP.dat: $e");
-      }
-
-      setState(() => _currentlyUpdating = "geoip.metadb");
-      try {
-        final result2 = await mihomoCore.updateGeoData(
-            const UpdateGeoDataParams(
-                geoType: "MMDB", geoName: "geoip.metadb"));
-        if (result2.isNotEmpty) {
-          throw Exception("geoip.metadb: $result2");
-        }
-      } catch (e) {
-        commonPrint.log("Failed to update geoip.metadb: $e");
-      }
-
-      setState(() => _currentlyUpdating = "GeoSite.dat");
-      try {
-        final result3 = await mihomoCore.updateGeoData(
-            const UpdateGeoDataParams(
-                geoType: "GeoSite", geoName: "GeoSite.dat"));
-        if (result3.isNotEmpty) {
-          throw Exception("GeoSite.dat: $result3");
-        }
-      } catch (e) {
-        commonPrint.log("Failed to update GeoSite.dat: $e");
-      }
-
-      setState(() => _currentlyUpdating = "GeoLite2-ASN.mmdb");
-      try {
-        final result4 = await mihomoCore.updateGeoData(
-            const UpdateGeoDataParams(
-                geoType: "ASN", geoName: "GeoLite2-ASN.mmdb"));
-        if (result4.isNotEmpty) {
-          throw Exception("GeoLite2-ASN.mmdb: $result4");
-        }
-      } catch (e) {
-        commonPrint.log("Failed to update GeoLite2-ASN.mmdb: $e");
       }
     } finally {
       if (mounted) {
@@ -292,13 +266,11 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
             await globalState.getProfileConfig(currentProfileId);
         final geoXUrl = profileConfig["geox-url"];
         if (geoXUrl != null && geoXUrl is Map) {
-          if (geoItem.key == 'geoip') {
-            return geoXUrl['geoip'] ?? geoXUrl['geo-ip'];
-          } else if (geoItem.key == 'geosite') {
-            return geoXUrl['geosite'] ?? geoXUrl['geo-site'];
-          } else {
-            return geoXUrl[geoItem.key];
-          }
+          return switch (geoItem.key) {
+            'geoip' => geoXUrl['geoip'] ?? geoXUrl['geo-ip'],
+            'geosite' => geoXUrl['geosite'] ?? geoXUrl['geo-site'],
+            _ => geoXUrl[geoItem.key],
+          };
         }
       }
     } catch (e) {}

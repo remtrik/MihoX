@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,11 +13,27 @@ import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
 import 'package:nativeapi/nativeapi.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'item.dart';
 import 'requests.dart';
 
 enum _ConnTab { active, log }
+
+void _listenConnectionsPageVisible(
+  WidgetRef ref,
+  void Function(bool visible) onVisibleChanged,
+) {
+  ref.listenManual(
+    isCurrentPageProvider(
+      PageLabel.connections,
+      handler: (pageLabel, viewMode) =>
+          pageLabel == PageLabel.tools && viewMode == ViewMode.mobile,
+    ),
+    (prev, next) => onVisibleChanged(next == true),
+    fireImmediately: true,
+  );
+}
 
 /// The merged "Подключения" page: one nav entry hosting an Active/Log segmented
 /// switch over an IndexedStack of the two bodies. Owns the shared app-bar (actions,
@@ -62,19 +79,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      isCurrentPageProvider(
-        PageLabel.connections,
-        handler: (pageLabel, viewMode) =>
-            pageLabel == PageLabel.tools && viewMode == ViewMode.mobile,
-      ),
-      (prev, next) {
-        if (prev != next && next == true) {
-          initPageState();
-        }
-      },
-      fireImmediately: true,
-    );
+    _listenConnectionsPageVisible(ref, (visible) {
+      if (visible) initPageState();
+    });
   }
 
   void _selectTab(_ConnTab tab) {
@@ -86,50 +93,50 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
 
   @override
   Widget build(BuildContext context) => Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Center(
-            child: CommonTabBar<_ConnTab>(
-              groupValue: _tab,
-              thumbColor: context.colorScheme.surface,
-              backgroundColor: context.colorScheme.surfaceContainerHighest,
-              onValueChanged: (value) {
-                if (value != null) _selectTab(value);
-              },
-              children: {
-                _ConnTab.active: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Text(appLocalizations.connectionsActive),
-                ),
-                _ConnTab.log: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Text(appLocalizations.connectionsLog),
-                ),
-              },
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Center(
+              child: CommonTabBar<_ConnTab>(
+                groupValue: _tab,
+                thumbColor: context.colorScheme.surface,
+                backgroundColor: context.colorScheme.surfaceContainerHighest,
+                onValueChanged: (value) {
+                  if (value != null) _selectTab(value);
+                },
+                children: {
+                  _ConnTab.active: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Text(appLocalizations.connectionsActive),
+                  ),
+                  _ConnTab.log: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Text(appLocalizations.connectionsLog),
+                  ),
+                },
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: IndexedStack(
-            index: _tab.index,
-            children: [
-              ActiveConnectionsBody(
-                query: _query,
-                keywords: _keywords,
-                active: _tab == _ConnTab.active,
-              ),
-              LogConnectionsBody(
-                query: _query,
-                keywords: _keywords,
-              ),
-            ],
+          Expanded(
+            child: IndexedStack(
+              index: _tab.index,
+              children: [
+                ActiveConnectionsBody(
+                  query: _query,
+                  keywords: _keywords,
+                  active: _tab == _ConnTab.active,
+                ),
+                LogConnectionsBody(
+                  query: _query,
+                  keywords: _keywords,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
 }
 
 // Public zashboard instance, used when the profile doesn't self-host one (no
@@ -142,29 +149,34 @@ const _publicZashboardBase = 'https://board.zash.run.place';
 class _ZashboardButton extends StatelessWidget {
   const _ZashboardButton();
 
+  // 0.0.0.0/empty bind addresses aren't browser-reachable; assume same device.
+  static String _normalizeHost(String host) {
+    final trimmed = host.trim();
+    return (trimmed.isEmpty || trimmed == '0.0.0.0' || trimmed == '::')
+        ? '127.0.0.1'
+        : trimmed;
+  }
+
   String? _buildUrl() {
     final ec = globalState.effectiveExternalController.value.trim();
     if (ec.isEmpty) return null;
+
     final idx = ec.lastIndexOf(':');
-    var host = idx > 0 ? ec.substring(0, idx).trim() : '';
-    final port = idx >= 0 ? ec.substring(idx + 1).trim() : ec.trim();
-    // 0.0.0.0/empty bind addresses aren't browser-reachable; assume same device.
-    if (host.isEmpty || host == '0.0.0.0' || host == '::') {
-      host = '127.0.0.1';
-    }
+    final host = _normalizeHost(idx > 0 ? ec.substring(0, idx) : '');
+    final port = (idx >= 0 ? ec.substring(idx + 1) : ec).trim();
     final secret = globalState.effectiveSecret.value.trim();
     final query =
         'hostname=$host&port=$port&secret=${Uri.encodeQueryComponent(secret)}';
+
     // Self-hosted: the core serves zashboard at external-ui (e.g. /ui/). When no
     // external-ui is set, fall back to the public instance so users who don't host
     // their own dashboard still get a working link.
     final ui = globalState.effectiveExternalUi.value
         .trim()
         .replaceAll(RegExp(r'^/+|/+$'), '');
-    if (ui.isEmpty) {
-      return '$_publicZashboardBase/#/setup?$query';
-    }
-    return 'http://$host:$port/$ui/#/setup?$query';
+    return ui.isEmpty
+        ? '$_publicZashboardBase/#/setup?$query'
+        : 'http://$host:$port/$ui/#/setup?$query';
   }
 
   Future<void> _open(BuildContext context) async {
@@ -175,7 +187,11 @@ class _ZashboardButton extends StatelessWidget {
       );
       return;
     }
-    UrlOpener.instance.open(url);
+    if (Platform.isAndroid) {
+      unawaited(launchUrl(Uri.parse(url)));
+    } else {
+      UrlOpener.instance.open(url);
+    }
   }
 
   @override
@@ -237,18 +253,10 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
       query: widget.query,
       keywords: widget.keywords,
     );
-    ref.listenManual(
-      isCurrentPageProvider(
-        PageLabel.connections,
-        handler: (pageLabel, viewMode) =>
-            pageLabel == PageLabel.tools && viewMode == ViewMode.mobile,
-      ),
-      (prev, next) {
-        _isPageVisible = next == true;
-        _syncPolling();
-      },
-      fireImmediately: true,
-    );
+    _listenConnectionsPageVisible(ref, (visible) {
+      _isPageVisible = visible;
+      _syncPolling();
+    });
   }
 
   @override
@@ -256,7 +264,8 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query ||
         !listEquals(oldWidget.keywords, widget.keywords)) {
-      _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
+      _connectionsStateNotifier.value =
+          _connectionsStateNotifier.value.copyWith(
         query: widget.query,
         keywords: widget.keywords,
       );
@@ -270,21 +279,21 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
     timer?.cancel();
     timer = null;
     if (_shouldPoll) {
-      _updateConnections();
+      unawaited(_updateConnections());
     }
   }
 
   Future<void> _updateConnections() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted && _shouldPoll) {
-        _connectionsStateNotifier.value =
-            _connectionsStateNotifier.value.copyWith(
-          connections: await mihomoCore.getConnections(),
-        );
-        timer = Timer(const Duration(seconds: 2), () async {
-          unawaited(_updateConnections());
-        });
-      }
+    if (!mounted || !_shouldPoll) return;
+
+    final connections = await mihomoCore.getConnections();
+    if (!mounted || !_shouldPoll) return;
+
+    _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
+      connections: connections,
+    );
+    timer = Timer(const Duration(seconds: 2), () {
+      unawaited(_updateConnections());
     });
   }
 
@@ -326,8 +335,8 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
           final connections = state.list;
           if (connections.isEmpty) {
             return NullStatus(
-              label: appLocalizations
-                  .nullTip(appLocalizations.connectionsActive),
+              label:
+                  appLocalizations.nullTip(appLocalizations.connectionsActive),
             );
           }
           return CommonScrollBar(

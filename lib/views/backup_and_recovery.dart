@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +40,7 @@ class BackupAndRecovery extends ConsumerWidget {
     BuildContext context,
     RecoveryOption recoveryOption,
   ) async {
-    final file = await picker.pickerFile();
+    final file = await picker.pickerFile(fileType: FileType.custom, allowedExtensions: ["zip"]);
     final data = file?.readAsBytes();
     if (data == null || !context.mounted) return;
     final commonScaffoldState = context.commonScaffoldState;

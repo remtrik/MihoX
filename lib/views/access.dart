@@ -12,6 +12,28 @@ import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
 
+void _updateAccessSelection(
+  WidgetRef ref,
+  List<String> valueList,
+  Package package,
+  bool? value,
+) {
+  if (value == true) {
+    valueList.add(package.packageName);
+  } else {
+    valueList.remove(package.packageName);
+  }
+  ref.read(vpnSettingProvider.notifier).updateState((state) =>
+      switch (state.accessControl.mode == AccessControlMode.acceptSelected) {
+        true => state.copyWith.accessControl(
+            acceptList: valueList,
+          ),
+        false => state.copyWith.accessControl(
+            rejectList: valueList,
+          ),
+      });
+}
+
 class AccessView extends ConsumerStatefulWidget {
   const AccessView({super.key});
 
@@ -149,22 +171,8 @@ class _AccessViewState extends ConsumerState<AccessView> {
         icon: const Icon(Icons.tune),
       );
 
-  void _handleSelected(List<String> valueList, Package package, bool? value) {
-    if (value == true) {
-      valueList.add(package.packageName);
-    } else {
-      valueList.remove(package.packageName);
-    }
-    ref.read(vpnSettingProvider.notifier).updateState((state) =>
-        switch (state.accessControl.mode == AccessControlMode.acceptSelected) {
-          true => state.copyWith.accessControl(
-              acceptList: valueList,
-            ),
-          false => state.copyWith.accessControl(
-              rejectList: valueList,
-            ),
-        });
-  }
+  void _handleSelected(List<String> valueList, Package package, bool? value) =>
+      _updateAccessSelection(ref, valueList, package, value);
 
   @override
   Widget build(BuildContext context) {
@@ -438,24 +446,6 @@ class AccessControlSearchDelegate extends SearchDelegate {
         icon: const Icon(Icons.arrow_back),
       );
 
-  void _handleSelected(
-      WidgetRef ref, List<String> valueList, Package package, bool? value) {
-    if (value == true) {
-      valueList.add(package.packageName);
-    } else {
-      valueList.remove(package.packageName);
-    }
-    ref.read(vpnSettingProvider.notifier).updateState((state) =>
-        switch (state.accessControl.mode == AccessControlMode.acceptSelected) {
-          true => state.copyWith.accessControl(
-              acceptList: valueList,
-            ),
-          false => state.copyWith.accessControl(
-              rejectList: valueList,
-            ),
-        });
-  }
-
   Widget _packageList() {
     final lowQuery = query.toLowerCase();
     return Consumer(
@@ -497,12 +487,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
                 value: valueList.contains(package.packageName),
                 isActive: isAccessControl,
                 onChanged: (value) {
-                  _handleSelected(
-                    ref,
-                    valueList,
-                    package,
-                    value,
-                  );
+                  _updateAccessSelection(ref, valueList, package, value);
                 },
               );
             },
@@ -529,153 +514,138 @@ class AccessControlPanel extends ConsumerStatefulWidget {
 }
 
 class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
-  IconData _getIconWithAccessControlMode(AccessControlMode mode) =>
+  (IconData, String) _accessControlModeInfo(AccessControlMode mode) =>
       switch (mode) {
-        AccessControlMode.acceptSelected => Icons.adjust_outlined,
-        AccessControlMode.rejectSelected => Icons.block_outlined,
+        AccessControlMode.acceptSelected => (
+            Icons.adjust_outlined,
+            appLocalizations.whitelistMode,
+          ),
+        AccessControlMode.rejectSelected => (
+            Icons.block_outlined,
+            appLocalizations.blacklistMode,
+          ),
       };
 
-  String _getTextWithAccessControlMode(AccessControlMode mode) =>
-      switch (mode) {
-        AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
-        AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
+  (IconData, String) _accessSortTypeInfo(AccessSortType type) =>
+      switch (type) {
+        AccessSortType.none => (Icons.sort, appLocalizations.defaultText),
+        AccessSortType.name => (Icons.sort_by_alpha, appLocalizations.name),
+        AccessSortType.time => (Icons.timeline, appLocalizations.time),
       };
 
-  String _getTextWithAccessSortType(AccessSortType type) => switch (type) {
-        AccessSortType.none => appLocalizations.defaultText,
-        AccessSortType.name => appLocalizations.name,
-        AccessSortType.time => appLocalizations.time,
-      };
-
-  IconData _getIconWithProxiesSortType(AccessSortType type) => switch (type) {
-        AccessSortType.none => Icons.sort,
-        AccessSortType.name => Icons.sort_by_alpha,
-        AccessSortType.time => Icons.timeline,
-      };
-
-  List<Widget> _buildModeSetting() => generateSection(
-        title: appLocalizations.mode,
+  List<Widget> _buildChipSection({
+    required String title,
+    required Widget Function(BuildContext context, WidgetRef ref)
+        contentBuilder,
+  }) =>
+      generateSection(
+        title: title,
         items: [
           SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
-            child: Consumer(
-              builder: (_, ref, __) {
-                final accessControlMode = ref.watch(
-                  vpnSettingProvider
-                      .select((state) => state.accessControl.mode),
-                );
-                return Wrap(
-                  spacing: 16,
-                  children: [
-                    for (final item in AccessControlMode.values)
-                      SettingInfoCard(
-                        Info(
-                          label: _getTextWithAccessControlMode(item),
-                          iconData: _getIconWithAccessControlMode(item),
-                        ),
-                        isSelected: accessControlMode == item,
-                        onPressed: () {
-                          ref.read(vpnSettingProvider.notifier).updateState(
-                                (state) => state.copyWith.accessControl(
-                                  mode: item,
-                                ),
-                              );
-                        },
-                      )
-                  ],
-                );
-              },
-            ),
-          )
-        ],
-      );
-
-  List<Widget> _buildSortSetting() => generateSection(
-        title: appLocalizations.sort,
-        items: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            child: Consumer(
-              builder: (_, ref, __) {
-                final accessSortType = ref.watch(
-                  vpnSettingProvider
-                      .select((state) => state.accessControl.sort),
-                );
-                return Wrap(
-                  spacing: 16,
-                  children: [
-                    for (final item in AccessSortType.values)
-                      SettingInfoCard(
-                        Info(
-                          label: _getTextWithAccessSortType(item),
-                          iconData: _getIconWithProxiesSortType(item),
-                        ),
-                        isSelected: accessSortType == item,
-                        onPressed: () {
-                          ref.read(vpnSettingProvider.notifier).updateState(
-                                (state) => state.copyWith.accessControl(
-                                  sort: item,
-                                ),
-                              );
-                        },
-                      ),
-                  ],
-                );
-              },
-            ),
+            child: Consumer(builder: (context, ref, __) => contentBuilder(context, ref)),
           ),
         ],
       );
 
-  List<Widget> _buildSourceSetting() => generateSection(
+  List<Widget> _buildModeSetting() => _buildChipSection(
+        title: appLocalizations.mode,
+        contentBuilder: (_, ref) {
+          final accessControlMode = ref.watch(
+            vpnSettingProvider.select((state) => state.accessControl.mode),
+          );
+          return Wrap(
+            spacing: 16,
+            children: [
+              for (final item in AccessControlMode.values)
+                Builder(builder: (_) {
+                  final (icon, label) = _accessControlModeInfo(item);
+                  return SettingInfoCard(
+                    Info(label: label, iconData: icon),
+                    isSelected: accessControlMode == item,
+                    onPressed: () {
+                      ref.read(vpnSettingProvider.notifier).updateState(
+                            (state) => state.copyWith.accessControl(
+                              mode: item,
+                            ),
+                          );
+                    },
+                  );
+                })
+            ],
+          );
+        },
+      );
+
+  List<Widget> _buildSortSetting() => _buildChipSection(
+        title: appLocalizations.sort,
+        contentBuilder: (_, ref) {
+          final accessSortType = ref.watch(
+            vpnSettingProvider.select((state) => state.accessControl.sort),
+          );
+          return Wrap(
+            spacing: 16,
+            children: [
+              for (final item in AccessSortType.values)
+                Builder(builder: (_) {
+                  final (icon, label) = _accessSortTypeInfo(item);
+                  return SettingInfoCard(
+                    Info(label: label, iconData: icon),
+                    isSelected: accessSortType == item,
+                    onPressed: () {
+                      ref.read(vpnSettingProvider.notifier).updateState(
+                            (state) => state.copyWith.accessControl(
+                              sort: item,
+                            ),
+                          );
+                    },
+                  );
+                }),
+            ],
+          );
+        },
+      );
+
+  List<Widget> _buildSourceSetting() => _buildChipSection(
         title: appLocalizations.source,
-        items: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            child: Consumer(
-              builder: (_, ref, __) {
-                final vm2 = ref.watch(
-                  vpnSettingProvider.select(
-                    (state) => VM2(
-                      a: state.accessControl.isFilterSystemApp,
-                      b: state.accessControl.isFilterNonInternetApp,
-                    ),
-                  ),
-                );
-                return Wrap(
-                  spacing: 16,
-                  children: [
-                    SettingTextCard(
-                      appLocalizations.systemApp,
-                      isSelected: vm2.a == false,
-                      onPressed: () {
-                        ref.read(vpnSettingProvider.notifier).updateState(
-                              (state) => state.copyWith.accessControl(
-                                isFilterSystemApp: !vm2.a,
-                              ),
-                            );
-                      },
-                    ),
-                    SettingTextCard(
-                      appLocalizations.noNetworkApp,
-                      isSelected: vm2.b == false,
-                      onPressed: () {
-                        ref.read(vpnSettingProvider.notifier).updateState(
-                              (state) => state.copyWith.accessControl(
-                                isFilterNonInternetApp: !vm2.b,
-                              ),
-                            );
-                      },
-                    )
-                  ],
-                );
-              },
+        contentBuilder: (_, ref) {
+          final vm2 = ref.watch(
+            vpnSettingProvider.select(
+              (state) => VM2(
+                a: state.accessControl.isFilterSystemApp,
+                b: state.accessControl.isFilterNonInternetApp,
+              ),
             ),
-          )
-        ],
+          );
+          return Wrap(
+            spacing: 16,
+            children: [
+              SettingTextCard(
+                appLocalizations.systemApp,
+                isSelected: vm2.a == false,
+                onPressed: () {
+                  ref.read(vpnSettingProvider.notifier).updateState(
+                        (state) => state.copyWith.accessControl(
+                          isFilterSystemApp: !vm2.a,
+                        ),
+                      );
+                },
+              ),
+              SettingTextCard(
+                appLocalizations.noNetworkApp,
+                isSelected: vm2.b == false,
+                onPressed: () {
+                  ref.read(vpnSettingProvider.notifier).updateState(
+                        (state) => state.copyWith.accessControl(
+                          isFilterNonInternetApp: !vm2.b,
+                        ),
+                      );
+                },
+              )
+            ],
+          );
+        },
       );
 
   Future<void> _copyToClipboard() async {

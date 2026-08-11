@@ -271,6 +271,7 @@ enum ActionMethod {
   crash,
   setupConfig,
   healthCheck,
+  convertV2ray,
 
   ///Android,
   setState,

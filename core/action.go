@@ -192,6 +192,10 @@ func handleAction(action *Action, result ActionResult) {
 			result.success(value)
 		})
 		return
+	case convertV2rayMethod:
+		data := action.Data.(string)
+		result.success(handleConvertV2ray(data))
+		return
 	case crashMethod:
 		result.success(true)
 		handleCrash()
