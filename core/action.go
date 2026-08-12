@@ -44,63 +44,47 @@ func handleAction(action *Action, result ActionResult) {
 	case initMihomoMethod:
 		paramsString := action.Data.(string)
 		result.success(handleInitMihomo(paramsString))
-		return
 	case getIsInitMethod:
 		result.success(handleGetIsInit())
-		return
 	case forceGcMethod:
 		handleForceGc()
 		result.success(true)
-		return
 	case shutdownMethod:
 		result.success(handleShutdown())
-		return
 	case validateConfigMethod:
 		data := []byte(action.Data.(string))
 		result.success(handleValidateConfig(data))
-		return
 	case updateConfigMethod:
 		data := []byte(action.Data.(string))
 		result.success(handleUpdateConfig(data))
-		return
 	case setupConfigMethod:
 		data := []byte(action.Data.(string))
 		result.success(handleSetupConfig(data))
-		return
 	case getProxiesMethod:
 		result.success(handleGetProxies())
-		return
 	case changeProxyMethod:
 		data := action.Data.(string)
 		handleChangeProxy(data, func(value string) {
 			result.success(value)
 		})
-		return
 	case getTrafficMethod:
 		result.success(handleGetTraffic())
-		return
 	case getTotalTrafficMethod:
 		result.success(handleGetTotalTraffic())
-		return
 	case resetTrafficMethod:
 		handleResetTraffic()
 		result.success(true)
-		return
 	case asyncTestDelayMethod:
 		data := action.Data.(string)
 		handleAsyncTestDelay(data, func(value string) {
 			result.success(value)
 		})
-		return
 	case getConnectionsMethod:
 		result.success(handleGetConnections())
-		return
 	case closeConnectionsMethod:
 		result.success(handleCloseConnections())
-		return
 	case resetConnectionsMethod:
 		result.success(handleResetConnections())
-		return
 	case getConfigMethod:
 		path := action.Data.(string)
 		config, err := handleGetConfig(path)
@@ -109,17 +93,13 @@ func handleAction(action *Action, result ActionResult) {
 			return
 		}
 		result.success(config)
-		return
 	case getCoreVersionMethod:
 		result.success(constant.Version)
-		return
 	case closeConnectionMethod:
 		id := action.Data.(string)
 		result.success(handleCloseConnection(id))
-		return
 	case getExternalProvidersMethod:
 		result.success(handleGetExternalProviders())
-		return
 	case getExternalProviderMethod:
 		externalProviderName := action.Data.(string)
 		result.success(handleGetExternalProvider(externalProviderName))
@@ -136,13 +116,11 @@ func handleAction(action *Action, result ActionResult) {
 		handleUpdateGeoData(geoType, geoName, func(value string) {
 			result.success(value)
 		})
-		return
 	case updateExternalProviderMethod:
 		providerName := action.Data.(string)
 		handleUpdateExternalProvider(providerName, func(value string) {
 			result.success(value)
 		})
-		return
 	case sideLoadExternalProviderMethod:
 		paramsString := action.Data.(string)
 		var params = map[string]string{}
@@ -156,32 +134,25 @@ func handleAction(action *Action, result ActionResult) {
 		handleSideLoadExternalProvider(providerName, []byte(data), func(value string) {
 			result.success(value)
 		})
-		return
 	case startLogMethod:
 		handleStartLog()
 		result.success(true)
-		return
 	case stopLogMethod:
 		handleStopLog()
 		result.success(true)
-		return
 	case startListenerMethod:
 		result.success(handleStartListener())
-		return
 	case stopListenerMethod:
 		result.success(handleStopListener())
-		return
 	case getCountryCodeMethod:
 		ip := action.Data.(string)
 		handleGetCountryCode(ip, func(value string) {
 			result.success(value)
 		})
-		return
 	case getMemoryMethod:
 		handleGetMemory(func(value string) {
 			result.success(value)
 		})
-		return
 	case setStateMethod:
 		data := action.Data.(string)
 		handleSetState(data)
@@ -191,11 +162,9 @@ func handleAction(action *Action, result ActionResult) {
 		handleHealthCheck(groupName, func(value string) {
 			result.success(value)
 		})
-		return
 	case convertV2rayMethod:
 		data := action.Data.(string)
 		result.success(handleConvertV2ray(data))
-		return
 	case crashMethod:
 		result.success(true)
 		handleCrash()

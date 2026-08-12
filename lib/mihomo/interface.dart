@@ -174,7 +174,6 @@ abstract class MihomoHandlerInterface with MihomoInterface {
       );
 
   @override
-  @override
   Future<bool> shutdown() => invoke<bool>(
         method: ActionMethod.shutdown,
         timeout: const Duration(seconds: 1),

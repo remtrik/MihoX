@@ -30,7 +30,6 @@ class AppController {
   AppController(this.context, WidgetRef ref) : _ref = ref;
   int? lastProfileModified;
   Timer? _profileUpdateTimer;
-  //bool _isRestartingCore = false;
   final BuildContext context;
   final WidgetRef _ref;
 
@@ -120,23 +119,6 @@ class AppController {
       vpn?.serverName = serverName;
     }
   }
-
-  /*Future<void> restartCore() async {
-    if (_isRestartingCore) {
-      return;
-    }
-    _isRestartingCore = true;
-    try {
-      commonPrint.log("restart core");
-      await mihomoService?.reStart();
-      await _initCore();
-      if (_ref.read(runTimeProvider.notifier).isStart) {
-        await globalState.handleStart();
-      }
-    } finally {
-      _isRestartingCore = false;
-    }
-  }*/
 
   Future<void> restartCore() async {
     commonPrint.log("restart core");
@@ -1405,12 +1387,12 @@ class AppController {
       final profileFile = File(profilePath);
       final isExists = profileFile.existsSync();
       if (isExists) {
-        unawaited(profileFile.delete(recursive: true));
+        profileFile.deleteSync(recursive: true);
       }
       final providersFileDir = File(providersDirPath);
       final providersFileIsExists = providersFileDir.existsSync();
       if (providersFileIsExists) {
-        unawaited(providersFileDir.delete(recursive: true));
+        providersFileDir.deleteSync(recursive: true);
       }
     });
   }

@@ -225,7 +225,11 @@ class MihomoLibHandler {
     final pathChar = path.toNativeUtf8().cast<Char>();
     final configRaw = mihomoFFI.getConfig(pathChar);
     final configString = configRaw.cast<Utf8>().toDartString();
-    if (configString.isEmpty) return {};
+    if (configString.isEmpty) { 
+      malloc.free(pathChar);
+      mihomoFFI.freeCString(configRaw);
+      return {};
+    }
 
     final config = json.decode(configString);
     malloc.free(pathChar);
