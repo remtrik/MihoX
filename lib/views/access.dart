@@ -449,7 +449,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
   Widget _packageList() {
     final lowQuery = query.toLowerCase();
     return Consumer(
-      builder: (context, ref, __) {
+      builder: (context, ref, _) {
         final vm3 = ref.watch(
           packageListSelectorStateProvider.select(
             (state) => VM3(
@@ -544,7 +544,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
           SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
-            child: Consumer(builder: (context, ref, __) => contentBuilder(context, ref)),
+            child: Consumer(builder: (context, ref, _) => contentBuilder(context, ref)),
           ),
         ],
       );

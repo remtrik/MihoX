@@ -49,7 +49,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
 
   Widget _buildIsEdit(Widget Function(bool) builder) => ValueListenableBuilder(
         valueListenable: _isEditNotifier,
-        builder: (_, isEdit, ___) => builder(isEdit),
+        builder: (_, isEdit, _) => builder(isEdit),
       );
 
   @override
@@ -96,7 +96,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     showSheet(
       builder: (_, type) => ValueListenableBuilder(
         valueListenable: _addedWidgetsNotifier,
-        builder: (_, value, __) => AdaptiveSheetScaffold(
+        builder: (_, value, _) => AdaptiveSheetScaffold(
           type: type,
           body: _AddDashboardWidgetModal(
             items: value,

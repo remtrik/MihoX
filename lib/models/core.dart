@@ -18,7 +18,7 @@ abstract mixin class AppMessageListener {
 }
 
 @freezed
-class SetupParams with _$SetupParams {
+abstract class SetupParams with _$SetupParams {
   const factory SetupParams({
     @JsonKey(name: "config") required Map<String, dynamic> config,
     @JsonKey(name: "selected-map") required Map<String, String> selectedMap,
@@ -30,7 +30,7 @@ class SetupParams with _$SetupParams {
 }
 
 @freezed
-class UpdateParams with _$UpdateParams {
+abstract class UpdateParams with _$UpdateParams {
   const factory UpdateParams({
     required Tun tun,
     @JsonKey(name: 'mixed-port') required int mixedPort,
@@ -51,7 +51,7 @@ class UpdateParams with _$UpdateParams {
 }
 
 @freezed
-class CoreState with _$CoreState {
+abstract class CoreState with _$CoreState {
   const factory CoreState({
     @JsonKey(name: "vpn-props") required VpnProps vpnProps,
     @JsonKey(name: "only-statistics-proxy") required bool onlyStatisticsProxy,
@@ -64,7 +64,7 @@ class CoreState with _$CoreState {
 }
 
 @freezed
-class AndroidVpnOptions with _$AndroidVpnOptions {
+abstract class AndroidVpnOptions with _$AndroidVpnOptions {
   const factory AndroidVpnOptions({
     required bool enable,
     required int port,
@@ -83,7 +83,7 @@ class AndroidVpnOptions with _$AndroidVpnOptions {
 }
 
 @freezed
-class InitParams with _$InitParams {
+abstract class InitParams with _$InitParams {
   const factory InitParams({
     @JsonKey(name: "home-dir") required String homeDir,
     required int version,
@@ -94,7 +94,7 @@ class InitParams with _$InitParams {
 }
 
 @freezed
-class ChangeProxyParams with _$ChangeProxyParams {
+abstract class ChangeProxyParams with _$ChangeProxyParams {
   const factory ChangeProxyParams({
     @JsonKey(name: "group-name") required String groupName,
     @JsonKey(name: "proxy-name") required String proxyName,
@@ -105,7 +105,7 @@ class ChangeProxyParams with _$ChangeProxyParams {
 }
 
 @freezed
-class UpdateGeoDataParams with _$UpdateGeoDataParams {
+abstract class UpdateGeoDataParams with _$UpdateGeoDataParams {
   const factory UpdateGeoDataParams({
     @JsonKey(name: "geo-type") required String geoType,
     @JsonKey(name: "geo-name") required String geoName,
@@ -116,7 +116,7 @@ class UpdateGeoDataParams with _$UpdateGeoDataParams {
 }
 
 @freezed
-class AppMessage with _$AppMessage {
+abstract class AppMessage with _$AppMessage {
   const factory AppMessage({
     required AppMessageType type,
     dynamic data,
@@ -127,7 +127,7 @@ class AppMessage with _$AppMessage {
 }
 
 @freezed
-class InvokeMessage with _$InvokeMessage {
+abstract class InvokeMessage with _$InvokeMessage {
   const factory InvokeMessage({
     required InvokeMessageType type,
     dynamic data,
@@ -138,7 +138,7 @@ class InvokeMessage with _$InvokeMessage {
 }
 
 @freezed
-class Delay with _$Delay {
+abstract class Delay with _$Delay {
   const factory Delay({
     required String name,
     required String url,
@@ -149,7 +149,7 @@ class Delay with _$Delay {
 }
 
 @freezed
-class Now with _$Now {
+abstract class Now with _$Now {
   const factory Now({
     required String name,
     required String value,
@@ -159,7 +159,7 @@ class Now with _$Now {
 }
 
 @freezed
-class ProviderSubscriptionInfo with _$ProviderSubscriptionInfo {
+abstract class ProviderSubscriptionInfo with _$ProviderSubscriptionInfo {
   const factory ProviderSubscriptionInfo({
     @JsonKey(name: "UPLOAD") @Default(0) int upload,
     @JsonKey(name: "DOWNLOAD") @Default(0) int download,
@@ -182,7 +182,7 @@ SubscriptionInfo? subscriptionInfoFormCore(Map<String, Object?>? json) {
 }
 
 @freezed
-class ExternalProvider with _$ExternalProvider {
+abstract class ExternalProvider with _$ExternalProvider {
   const factory ExternalProvider({
     required String name,
     required String type,
@@ -200,7 +200,7 @@ class ExternalProvider with _$ExternalProvider {
 }
 
 @freezed
-class Action with _$Action {
+abstract class Action with _$Action {
   const factory Action({
     required ActionMethod method,
     required dynamic data,
@@ -211,7 +211,7 @@ class Action with _$Action {
 }
 
 @freezed
-class ActionResult with _$ActionResult {
+abstract class ActionResult with _$ActionResult {
   const factory ActionResult({
     required ActionMethod method,
     required dynamic data,

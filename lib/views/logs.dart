@@ -186,7 +186,7 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
           _currentMaxWidth = constraints.maxWidth - 40;
           return ValueListenableBuilder<LogsState>(
             valueListenable: _logsStateNotifier,
-            builder: (_, state, __) {
+            builder: (_, state, _) {
               _preLoad();
               final logs = state.list;
               final items = logs

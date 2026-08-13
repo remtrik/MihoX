@@ -147,7 +147,7 @@ class CacheItemExtentListViewState extends State<CacheItemExtentListView> {
         reverse: widget.reverse,
         shrinkWrap: widget.shrinkWrap,
         controller: widget.controller,
-        itemExtentBuilder: (index, __) {
+        itemExtentBuilder: (index, _) {
           _updateCacheHeightMap();
           return globalState.cacheHeightMap[widget.tag]?.updateCacheValue(
             widget.keyBuilder(index),
@@ -196,7 +196,7 @@ class CacheItemExtentSliverReorderableListState
     return SliverReorderableList(
       itemBuilder: widget.itemBuilder,
       itemCount: widget.itemCount,
-      itemExtentBuilder: (index, __) =>
+      itemExtentBuilder: (index, _) =>
           globalState.cacheHeightMap[widget.tag]?.updateCacheValue(
         widget.keyBuilder(index),
         () => widget.itemExtentBuilder(index),

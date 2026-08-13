@@ -59,7 +59,7 @@ class TUNButton extends StatelessWidget {
                   ),
                 ),
                 Consumer(
-                  builder: (_, ref, __) {
+                  builder: (_, ref, _) {
                     final enable = ref.watch(patchMihomoConfigProvider
                         .select((state) => state.tun.enable));
                     return Switch(
@@ -137,7 +137,7 @@ class SystemProxyButton extends StatelessWidget {
                   ),
                 ),
                 Consumer(
-                  builder: (_, ref, __) {
+                  builder: (_, ref, _) {
                     final systemProxy = ref.watch(networkSettingProvider
                         .select((state) => state.systemProxy));
                     return Switch(
@@ -215,7 +215,7 @@ class VpnButton extends StatelessWidget {
                   ),
                 ),
                 Consumer(
-                  builder: (_, ref, __) {
+                  builder: (_, ref, _) {
                     final enable = ref.watch(
                       vpnSettingProvider.select(
                         (state) => state.enable,

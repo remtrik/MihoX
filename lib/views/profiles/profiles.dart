@@ -85,7 +85,7 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
             );
           },
           icon: Consumer(
-            builder: (context, ref, __) {
+            builder: (context, ref, _) {
               final isScriptMode = ref.watch(
                   scriptStateProvider.select((state) => state.realId != null));
               return Icon(
@@ -131,7 +131,7 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
 
   @override
   Widget build(BuildContext context) => Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           ref.listenManual(
             isCurrentPageProvider(PageLabel.profiles),
             (prev, next) {

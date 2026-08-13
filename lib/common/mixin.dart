@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mihox/models/models.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'context.dart';
 
-mixin AutoDisposeNotifierMixin<T> on AutoDisposeNotifier<T> {
+mixin AutoDisposeNotifierMixin<T> on $Notifier<T> {
   set value(T value) {
     state = value;
   }

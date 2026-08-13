@@ -49,7 +49,7 @@ class _ConfigViewState extends State<ConfigView> {
         delegate: OpenDelegate(
           title: "DNS",
           action: Consumer(
-              builder: (_, ref, __) => IconButton(
+              builder: (_, ref, _) => IconButton(
                     onPressed: () async {
                       final res = await globalState.showMessage(
                         title: appLocalizations.reset,

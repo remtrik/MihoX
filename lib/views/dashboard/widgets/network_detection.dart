@@ -51,7 +51,7 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
         height: getWidgetHeight(1),
         child: ValueListenableBuilder<NetworkDetectionState>(
           valueListenable: detectionState.state,
-          builder: (_, state, __) {
+          builder: (_, state, _) {
             final ipInfo = state.ipInfo;
             final isLoading = state.isLoading;
             final theme = Theme.of(context);

@@ -46,7 +46,7 @@ class ProxiesSetting extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             child: Consumer(
-              builder: (_, ref, __) {
+              builder: (_, ref, _) {
                 final proxiesType =
                     ref.watch(proxiesStyleSettingProvider.select(
                   (state) => state.type,
@@ -86,7 +86,7 @@ class ProxiesSetting extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Consumer(
-              builder: (_, ref, __) {
+              builder: (_, ref, _) {
                 final sortType = ref.watch(proxiesStyleSettingProvider.select(
                   (state) => state.sortType,
                 ));
@@ -123,7 +123,7 @@ class ProxiesSetting extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Consumer(
-              builder: (_, ref, __) {
+              builder: (_, ref, _) {
                 final cardType = ref.watch(proxiesStyleSettingProvider.select(
                   (state) => state.cardType,
                 ));
@@ -160,7 +160,7 @@ class ProxiesSetting extends StatelessWidget {
             ),
             scrollDirection: Axis.horizontal,
             child: Consumer(
-              builder: (_, ref, __) {
+              builder: (_, ref, _) {
                 final layout = ref.watch(proxiesStyleSettingProvider.select(
                   (state) => state.layout,
                 ));
@@ -197,7 +197,7 @@ class ProxiesSetting extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             child: Consumer(
-              builder: (_, ref, __) {
+              builder: (_, ref, _) {
                 final iconStyle = ref.watch(proxiesStyleSettingProvider.select(
                   (state) => state.iconStyle,
                 ));

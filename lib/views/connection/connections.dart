@@ -331,7 +331,7 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
   Widget build(BuildContext context) =>
       ValueListenableBuilder<ConnectionsState>(
         valueListenable: _connectionsStateNotifier,
-        builder: (_, state, __) {
+        builder: (_, state, _) {
           final connections = state.list;
           if (connections.isEmpty) {
             return NullStatus(

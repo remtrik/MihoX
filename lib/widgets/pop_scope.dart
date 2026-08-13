@@ -17,7 +17,7 @@ class CommonPopScope extends StatelessWidget {
         canPop: onPop == null ? true : false,
         onPopInvokedWithResult: onPop == null
             ? null
-            : (didPop, __) async {
+            : (didPop, _) async {
                 if (didPop) {
                   return;
                 }

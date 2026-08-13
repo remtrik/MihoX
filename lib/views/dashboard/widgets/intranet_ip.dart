@@ -28,7 +28,7 @@ class IntranetIP extends StatelessWidget {
                 SizedBox(
                   height: globalState.measure.bodyMediumHeight + 2,
                   child: Consumer(
-                    builder: (_, ref, __) {
+                    builder: (_, ref, _) {
                       final localIp = ref.watch(localIpProvider);
                       return FadeThroughBox(
                         child: localIp != null

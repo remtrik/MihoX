@@ -159,7 +159,7 @@ class TrafficUsage extends StatelessWidget {
                       AspectRatio(
                         aspectRatio: 1,
                         child: Consumer(
-                          builder: (_, ref, __) {
+                          builder: (_, ref, _) {
                             final totalTraffic =
                                 ref.watch(totalTrafficProvider);
                             return DonutChart(
@@ -192,7 +192,7 @@ class TrafficUsage extends StatelessWidget {
                 ),
               ),
               Consumer(
-                builder: (_, ref, __) {
+                builder: (_, ref, _) {
                   final totalTraffic = ref.watch(totalTrafficProvider);
                   return Column(
                     mainAxisSize: MainAxisSize.min,

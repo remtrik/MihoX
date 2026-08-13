@@ -6,42 +6,44 @@ part of '../config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AppSettingPropsImpl _$$AppSettingPropsImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AppSettingPropsImpl(
-      locale: json['locale'] as String?,
-      dashboardWidgets: json['dashboardWidgets'] == null
+_AppSettingProps _$AppSettingPropsFromJson(
+  Map<String, dynamic> json,
+) => _AppSettingProps(
+  locale: json['locale'] as String?,
+  dashboardWidgets:
+      json['dashboardWidgets'] == null
           ? defaultDashboardWidgets
           : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
-      onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
-      autoLaunch: json['autoLaunch'] as bool? ?? false,
-      silentLaunch: json['silentLaunch'] as bool? ?? false,
-      autoRun: json['autoRun'] as bool? ?? false,
-      openLogs: json['openLogs'] as bool? ?? false,
-      closeConnections: json['closeConnections'] as bool? ?? true,
-      testUrl: json['testUrl'] as String? ?? defaultTestUrl,
-      isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
-      autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
-      showLabel: json['showLabel'] as bool? ?? false,
-      minimizeOnExit: json['minimizeOnExit'] as bool? ?? false,
-      hidden: json['hidden'] as bool? ?? false,
-      developerMode: json['developerMode'] as bool? ?? false,
-      overrideProviderSettings:
-          json['overrideProviderSettings'] as bool? ?? false,
-      overrideNetworkSettings:
-          json['overrideNetworkSettings'] as bool? ?? false,
-      recoveryStrategy: $enumDecodeNullable(
-              _$RecoveryStrategyEnumMap, json['recoveryStrategy']) ??
-          RecoveryStrategy.compatible,
-    );
+  onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
+  autoLaunch: json['autoLaunch'] as bool? ?? false,
+  silentLaunch: json['silentLaunch'] as bool? ?? false,
+  autoRun: json['autoRun'] as bool? ?? false,
+  openLogs: json['openLogs'] as bool? ?? false,
+  closeConnections: json['closeConnections'] as bool? ?? true,
+  testUrl: json['testUrl'] as String? ?? defaultTestUrl,
+  isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
+  autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
+  showLabel: json['showLabel'] as bool? ?? false,
+  minimizeOnExit: json['minimizeOnExit'] as bool? ?? false,
+  hidden: json['hidden'] as bool? ?? false,
+  developerMode: json['developerMode'] as bool? ?? false,
+  overrideProviderSettings: json['overrideProviderSettings'] as bool? ?? false,
+  overrideNetworkSettings: json['overrideNetworkSettings'] as bool? ?? false,
+  recoveryStrategy:
+      $enumDecodeNullable(
+        _$RecoveryStrategyEnumMap,
+        json['recoveryStrategy'],
+      ) ??
+      RecoveryStrategy.compatible,
+);
 
-Map<String, dynamic> _$$AppSettingPropsImplToJson(
-        _$AppSettingPropsImpl instance) =>
+Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
-      'dashboardWidgets': instance.dashboardWidgets
-          .map((e) => _$DashboardWidgetEnumMap[e]!)
-          .toList(),
+      'dashboardWidgets':
+          instance.dashboardWidgets
+              .map((e) => _$DashboardWidgetEnumMap[e]!)
+              .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'autoLaunch': instance.autoLaunch,
       'silentLaunch': instance.silentLaunch,
@@ -57,7 +59,7 @@ Map<String, dynamic> _$$AppSettingPropsImplToJson(
       'developerMode': instance.developerMode,
       'overrideProviderSettings': instance.overrideProviderSettings,
       'overrideNetworkSettings': instance.overrideNetworkSettings,
-      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy],
+      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy]!,
     };
 
 const _$RecoveryStrategyEnumMap = {
@@ -82,32 +84,36 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.serviceInfo: 'serviceInfo',
 };
 
-_$AccessControlImpl _$$AccessControlImplFromJson(Map<String, dynamic> json) =>
-    _$AccessControlImpl(
+_AccessControl _$AccessControlFromJson(Map<String, dynamic> json) =>
+    _AccessControl(
       enable: json['enable'] as bool? ?? false,
-      mode: $enumDecodeNullable(_$AccessControlModeEnumMap, json['mode']) ??
+      mode:
+          $enumDecodeNullable(_$AccessControlModeEnumMap, json['mode']) ??
           AccessControlMode.rejectSelected,
-      acceptList: (json['acceptList'] as List<dynamic>?)
+      acceptList:
+          (json['acceptList'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      rejectList: (json['rejectList'] as List<dynamic>?)
+      rejectList:
+          (json['rejectList'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      sort: $enumDecodeNullable(_$AccessSortTypeEnumMap, json['sort']) ??
+      sort:
+          $enumDecodeNullable(_$AccessSortTypeEnumMap, json['sort']) ??
           AccessSortType.none,
       isFilterSystemApp: json['isFilterSystemApp'] as bool? ?? true,
       isFilterNonInternetApp: json['isFilterNonInternetApp'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$$AccessControlImplToJson(_$AccessControlImpl instance) =>
+Map<String, dynamic> _$AccessControlToJson(_AccessControl instance) =>
     <String, dynamic>{
       'enable': instance.enable,
-      'mode': _$AccessControlModeEnumMap[instance.mode],
+      'mode': _$AccessControlModeEnumMap[instance.mode]!,
       'acceptList': instance.acceptList,
       'rejectList': instance.rejectList,
-      'sort': _$AccessSortTypeEnumMap[instance.sort],
+      'sort': _$AccessSortTypeEnumMap[instance.sort]!,
       'isFilterSystemApp': instance.isFilterSystemApp,
       'isFilterNonInternetApp': instance.isFilterNonInternetApp,
     };
@@ -123,15 +129,14 @@ const _$AccessSortTypeEnumMap = {
   AccessSortType.time: 'time',
 };
 
-_$WindowPropsImpl _$$WindowPropsImplFromJson(Map<String, dynamic> json) =>
-    _$WindowPropsImpl(
-      width: (json['width'] as num?)?.toDouble() ?? 450,
-      height: (json['height'] as num?)?.toDouble() ?? 900,
-      top: (json['top'] as num?)?.toDouble(),
-      left: (json['left'] as num?)?.toDouble(),
-    );
+_WindowProps _$WindowPropsFromJson(Map<String, dynamic> json) => _WindowProps(
+  width: (json['width'] as num?)?.toDouble() ?? 450,
+  height: (json['height'] as num?)?.toDouble() ?? 900,
+  top: (json['top'] as num?)?.toDouble(),
+  left: (json['left'] as num?)?.toDouble(),
+);
 
-Map<String, dynamic> _$$WindowPropsImplToJson(_$WindowPropsImpl instance) =>
+Map<String, dynamic> _$WindowPropsToJson(_WindowProps instance) =>
     <String, dynamic>{
       'width': instance.width,
       'height': instance.height,
@@ -139,44 +144,46 @@ Map<String, dynamic> _$$WindowPropsImplToJson(_$WindowPropsImpl instance) =>
       'left': instance.left,
     };
 
-_$VpnPropsImpl _$$VpnPropsImplFromJson(Map<String, dynamic> json) =>
-    _$VpnPropsImpl(
-      enable: json['enable'] as bool? ?? true,
-      systemProxy: json['systemProxy'] as bool? ?? false,
-      ipv6: json['ipv6'] as bool? ?? true,
-      allowBypass: json['allowBypass'] as bool? ?? false,
-      accessControl: json['accessControl'] == null
+_VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
+  enable: json['enable'] as bool? ?? true,
+  systemProxy: json['systemProxy'] as bool? ?? false,
+  ipv6: json['ipv6'] as bool? ?? true,
+  allowBypass: json['allowBypass'] as bool? ?? false,
+  accessControl:
+      json['accessControl'] == null
           ? defaultAccessControl
           : AccessControl.fromJson(
-              json['accessControl'] as Map<String, dynamic>),
-    );
+            json['accessControl'] as Map<String, dynamic>,
+          ),
+);
 
-Map<String, dynamic> _$$VpnPropsImplToJson(_$VpnPropsImpl instance) =>
-    <String, dynamic>{
-      'enable': instance.enable,
-      'systemProxy': instance.systemProxy,
-      'ipv6': instance.ipv6,
-      'allowBypass': instance.allowBypass,
-      'accessControl': instance.accessControl,
-    };
+Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
+  'enable': instance.enable,
+  'systemProxy': instance.systemProxy,
+  'ipv6': instance.ipv6,
+  'allowBypass': instance.allowBypass,
+  'accessControl': instance.accessControl,
+};
 
-_$NetworkPropsImpl _$$NetworkPropsImplFromJson(Map<String, dynamic> json) =>
-    _$NetworkPropsImpl(
+_NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
+    _NetworkProps(
       systemProxy: json['systemProxy'] as bool? ?? false,
-      bypassDomain: (json['bypassDomain'] as List<dynamic>?)
+      bypassDomain:
+          (json['bypassDomain'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           defaultBypassDomain,
-      routeMode: $enumDecodeNullable(_$RouteModeEnumMap, json['routeMode']) ??
+      routeMode:
+          $enumDecodeNullable(_$RouteModeEnumMap, json['routeMode']) ??
           RouteMode.config,
       autoSetSystemDns: json['autoSetSystemDns'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$$NetworkPropsImplToJson(_$NetworkPropsImpl instance) =>
+Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
     <String, dynamic>{
       'systemProxy': instance.systemProxy,
       'bypassDomain': instance.bypassDomain,
-      'routeMode': _$RouteModeEnumMap[instance.routeMode],
+      'routeMode': _$RouteModeEnumMap[instance.routeMode]!,
       'autoSetSystemDns': instance.autoSetSystemDns,
     };
 
@@ -185,41 +192,45 @@ const _$RouteModeEnumMap = {
   RouteMode.config: 'config',
 };
 
-_$ProxiesStyleImpl _$$ProxiesStyleImplFromJson(Map<String, dynamic> json) =>
-    _$ProxiesStyleImpl(
-      type: $enumDecodeNullable(_$ProxiesTypeEnumMap, json['type']) ??
+_ProxiesStyle _$ProxiesStyleFromJson(Map<String, dynamic> json) =>
+    _ProxiesStyle(
+      type:
+          $enumDecodeNullable(_$ProxiesTypeEnumMap, json['type']) ??
           ProxiesType.list,
       sortType:
           $enumDecodeNullable(_$ProxiesSortTypeEnumMap, json['sortType']) ??
-              ProxiesSortType.none,
-      layout: $enumDecodeNullable(_$ProxiesLayoutEnumMap, json['layout']) ??
+          ProxiesSortType.none,
+      layout:
+          $enumDecodeNullable(_$ProxiesLayoutEnumMap, json['layout']) ??
           ProxiesLayout.standard,
-      iconStyle: $enumDecodeNullable(
-              _$ProxiesIconStyleEnumMap, json['iconStyle'],
-              unknownValue: ProxiesIconStyle.icon) ??
+      iconStyle:
+          $enumDecodeNullable(
+            _$ProxiesIconStyleEnumMap,
+            json['iconStyle'],
+            unknownValue: ProxiesIconStyle.icon,
+          ) ??
           ProxiesIconStyle.icon,
-      cardType: $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
+      cardType:
+          $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
           ProxyCardType.expand,
-      iconMap: (json['iconMap'] as Map<String, dynamic>?)?.map(
+      iconMap:
+          (json['iconMap'] as Map<String, dynamic>?)?.map(
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
     );
 
-Map<String, dynamic> _$$ProxiesStyleImplToJson(_$ProxiesStyleImpl instance) =>
+Map<String, dynamic> _$ProxiesStyleToJson(_ProxiesStyle instance) =>
     <String, dynamic>{
-      'type': _$ProxiesTypeEnumMap[instance.type],
-      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType],
-      'layout': _$ProxiesLayoutEnumMap[instance.layout],
-      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle],
-      'cardType': _$ProxyCardTypeEnumMap[instance.cardType],
+      'type': _$ProxiesTypeEnumMap[instance.type]!,
+      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType]!,
+      'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
+      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
+      'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
       'iconMap': instance.iconMap,
     };
 
-const _$ProxiesTypeEnumMap = {
-  ProxiesType.tab: 'tab',
-  ProxiesType.list: 'list',
-};
+const _$ProxiesTypeEnumMap = {ProxiesType.tab: 'tab', ProxiesType.list: 'list'};
 
 const _$ProxiesSortTypeEnumMap = {
   ProxiesSortType.none: 'none',
@@ -245,42 +256,41 @@ const _$ProxyCardTypeEnumMap = {
   ProxyCardType.oneline: 'oneline',
 };
 
-_$TextScaleImpl _$$TextScaleImplFromJson(Map<String, dynamic> json) =>
-    _$TextScaleImpl(
-      enable: json['enable'] ?? false,
-      scale: json['scale'] ?? 1.0,
-    );
+_TextScale _$TextScaleFromJson(Map<String, dynamic> json) =>
+    _TextScale(enable: json['enable'] ?? false, scale: json['scale'] ?? 1.0);
 
-Map<String, dynamic> _$$TextScaleImplToJson(_$TextScaleImpl instance) =>
-    <String, dynamic>{
-      'enable': instance.enable,
-      'scale': instance.scale,
-    };
+Map<String, dynamic> _$TextScaleToJson(_TextScale instance) =>
+    <String, dynamic>{'enable': instance.enable, 'scale': instance.scale};
 
-_$ThemePropsImpl _$$ThemePropsImplFromJson(Map<String, dynamic> json) =>
-    _$ThemePropsImpl(
-      primaryColor: (json['primaryColor'] as num?)?.toInt(),
-      primaryColors: (json['primaryColors'] as List<dynamic>?)
-              ?.map((e) => (e as num).toInt())
-              .toList() ??
-          defaultPrimaryColors,
-      themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
-          ThemeMode.dark,
-      schemeVariant: $enumDecodeNullable(
-              _$DynamicSchemeVariantEnumMap, json['schemeVariant']) ??
-          DynamicSchemeVariant.content,
-      pureBlack: json['pureBlack'] as bool? ?? false,
-      textScale: json['textScale'] == null
+_ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
+  primaryColor: (json['primaryColor'] as num?)?.toInt(),
+  primaryColors:
+      (json['primaryColors'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      defaultPrimaryColors,
+  themeMode:
+      $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
+      ThemeMode.system,
+  schemeVariant:
+      $enumDecodeNullable(
+        _$DynamicSchemeVariantEnumMap,
+        json['schemeVariant'],
+      ) ??
+      DynamicSchemeVariant.content,
+  pureBlack: json['pureBlack'] as bool? ?? false,
+  textScale:
+      json['textScale'] == null
           ? const TextScale()
           : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
-    );
+);
 
-Map<String, dynamic> _$$ThemePropsImplToJson(_$ThemePropsImpl instance) =>
+Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
     <String, dynamic>{
       'primaryColor': instance.primaryColor,
       'primaryColors': instance.primaryColors,
-      'themeMode': _$ThemeModeEnumMap[instance.themeMode],
-      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant],
+      'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
+      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
       'pureBlack': instance.pureBlack,
       'textScale': instance.textScale,
     };
@@ -303,73 +313,86 @@ const _$DynamicSchemeVariantEnumMap = {
   DynamicSchemeVariant.fruitSalad: 'fruitSalad',
 };
 
-_$ScriptPropsImpl _$$ScriptPropsImplFromJson(Map<String, dynamic> json) =>
-    _$ScriptPropsImpl(
-      currentId: json['currentId'] as String?,
-      scripts: (json['scripts'] as List<dynamic>?)
-              ?.map((e) => Script.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-    );
+_ScriptProps _$ScriptPropsFromJson(Map<String, dynamic> json) => _ScriptProps(
+  currentId: json['currentId'] as String?,
+  scripts:
+      (json['scripts'] as List<dynamic>?)
+          ?.map((e) => Script.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
 
-Map<String, dynamic> _$$ScriptPropsImplToJson(_$ScriptPropsImpl instance) =>
+Map<String, dynamic> _$ScriptPropsToJson(_ScriptProps instance) =>
     <String, dynamic>{
       'currentId': instance.currentId,
       'scripts': instance.scripts,
     };
 
-_$ConfigImpl _$$ConfigImplFromJson(Map<String, dynamic> json) => _$ConfigImpl(
-      appSetting: json['appSetting'] == null
+_Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
+  appSetting:
+      json['appSetting'] == null
           ? defaultAppSettingProps
           : AppSettingProps.safeFromJson(
-              json['appSetting'] as Map<String, Object?>?),
-      profiles: (json['profiles'] as List<dynamic>?)
-              ?.map((e) => Profile.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      hotKeyActions: (json['hotKeyActions'] as List<dynamic>?)
-              ?.map((e) => HotKeyAction.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      currentProfileId: json['currentProfileId'] as String?,
-      overrideDns: json['overrideDns'] as bool? ?? false,
-      networkProps: json['networkProps'] == null
+            json['appSetting'] as Map<String, Object?>?,
+          ),
+  profiles:
+      (json['profiles'] as List<dynamic>?)
+          ?.map((e) => Profile.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  hotKeyActions:
+      (json['hotKeyActions'] as List<dynamic>?)
+          ?.map((e) => HotKeyAction.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  currentProfileId: json['currentProfileId'] as String?,
+  overrideDns: json['overrideDns'] as bool? ?? false,
+  networkProps:
+      json['networkProps'] == null
           ? defaultNetworkProps
           : NetworkProps.fromJson(
-              json['networkProps'] as Map<String, dynamic>?),
-      vpnProps: json['vpnProps'] == null
+            json['networkProps'] as Map<String, dynamic>?,
+          ),
+  vpnProps:
+      json['vpnProps'] == null
           ? defaultVpnProps
           : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>),
-      themeProps:
-          ThemeProps.safeFromJson(json['themeProps'] as Map<String, Object?>?),
-      proxiesStyle: json['proxiesStyle'] == null
+  themeProps: ThemeProps.safeFromJson(
+    json['themeProps'] as Map<String, Object?>?,
+  ),
+  proxiesStyle:
+      json['proxiesStyle'] == null
           ? defaultProxiesStyle
           : ProxiesStyle.fromJson(
-              json['proxiesStyle'] as Map<String, dynamic>?),
-      windowProps: json['windowProps'] == null
+            json['proxiesStyle'] as Map<String, dynamic>?,
+          ),
+  windowProps:
+      json['windowProps'] == null
           ? defaultWindowProps
           : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
-      patchMihomoConfig: json['patchMihomoConfig'] == null
+  patchMihomoConfig:
+      json['patchMihomoConfig'] == null
           ? defaultMihomoConfig
           : MihomoConfig.fromJson(
-              json['patchMihomoConfig'] as Map<String, dynamic>),
-      scriptProps: json['scriptProps'] == null
+            json['patchMihomoConfig'] as Map<String, dynamic>,
+          ),
+  scriptProps:
+      json['scriptProps'] == null
           ? const ScriptProps()
           : ScriptProps.fromJson(json['scriptProps'] as Map<String, dynamic>),
-    );
+);
 
-Map<String, dynamic> _$$ConfigImplToJson(_$ConfigImpl instance) =>
-    <String, dynamic>{
-      'appSetting': instance.appSetting,
-      'profiles': instance.profiles,
-      'hotKeyActions': instance.hotKeyActions,
-      'currentProfileId': instance.currentProfileId,
-      'overrideDns': instance.overrideDns,
-      'networkProps': instance.networkProps,
-      'vpnProps': instance.vpnProps,
-      'themeProps': instance.themeProps,
-      'proxiesStyle': instance.proxiesStyle,
-      'windowProps': instance.windowProps,
-      'patchMihomoConfig': instance.patchMihomoConfig,
-      'scriptProps': instance.scriptProps,
-    };
+Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
+  'appSetting': instance.appSetting,
+  'profiles': instance.profiles,
+  'hotKeyActions': instance.hotKeyActions,
+  'currentProfileId': instance.currentProfileId,
+  'overrideDns': instance.overrideDns,
+  'networkProps': instance.networkProps,
+  'vpnProps': instance.vpnProps,
+  'themeProps': instance.themeProps,
+  'proxiesStyle': instance.proxiesStyle,
+  'windowProps': instance.windowProps,
+  'patchMihomoConfig': instance.patchMihomoConfig,
+  'scriptProps': instance.scriptProps,
+};

@@ -137,13 +137,13 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   Widget _wrapController(EditingValueChangeBuilder builder) =>
       ValueListenableBuilder(
         valueListenable: _controller,
-        builder: (_, value, ___) => builder(value),
+        builder: (_, value, _) => builder(value),
       );
 
   Widget _wrapTitleController(TextEditingValueChangeBuilder builder) =>
       ValueListenableBuilder(
         valueListenable: _titleController,
-        builder: (_, value, ___) => builder(value),
+        builder: (_, value, _) => builder(value),
       );
 
   void _handleSearch() {
@@ -545,7 +545,7 @@ class ContextMenuControllerImpl implements SelectionToolbarController {
       builder: (context) => CodeEditorTapRegion(
         child: ValueListenableBuilder(
           valueListenable: controller,
-          builder: (_, __, ___) => _buildToolbar(controller, anchors),
+          builder: (_, _, _) => _buildToolbar(controller, anchors),
         ),
       ),
     );

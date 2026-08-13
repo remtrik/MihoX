@@ -12,7 +12,7 @@ import 'profile.dart';
 part 'generated/selector.freezed.dart';
 
 @freezed
-class VM2<A, B> with _$VM2<A, B> {
+abstract class VM2<A, B> with _$VM2<A, B> {
   const factory VM2({
     required A a,
     required B b,
@@ -20,7 +20,7 @@ class VM2<A, B> with _$VM2<A, B> {
 }
 
 @freezed
-class VM3<A, B, C> with _$VM3<A, B, C> {
+abstract class VM3<A, B, C> with _$VM3<A, B, C> {
   const factory VM3({
     required A a,
     required B b,
@@ -29,7 +29,7 @@ class VM3<A, B, C> with _$VM3<A, B, C> {
 }
 
 @freezed
-class VM4<A, B, C, D> with _$VM4<A, B, C, D> {
+abstract class VM4<A, B, C, D> with _$VM4<A, B, C, D> {
   const factory VM4({
     required A a,
     required B b,
@@ -39,7 +39,7 @@ class VM4<A, B, C, D> with _$VM4<A, B, C, D> {
 }
 
 @freezed
-class VM5<A, B, C, D, E> with _$VM5<A, B, C, D, E> {
+abstract class VM5<A, B, C, D, E> with _$VM5<A, B, C, D, E> {
   const factory VM5({
     required A a,
     required B b,
@@ -50,7 +50,7 @@ class VM5<A, B, C, D, E> with _$VM5<A, B, C, D, E> {
 }
 
 @freezed
-class StartButtonSelectorState with _$StartButtonSelectorState {
+abstract class StartButtonSelectorState with _$StartButtonSelectorState {
   const factory StartButtonSelectorState({
     required bool isInit,
     required bool hasProfile,
@@ -59,7 +59,7 @@ class StartButtonSelectorState with _$StartButtonSelectorState {
 }
 
 @freezed
-class ProfilesSelectorState with _$ProfilesSelectorState {
+abstract class ProfilesSelectorState with _$ProfilesSelectorState {
   const factory ProfilesSelectorState({
     required List<Profile> profiles,
     required String? currentProfileId,
@@ -68,7 +68,7 @@ class ProfilesSelectorState with _$ProfilesSelectorState {
 }
 
 @freezed
-class NetworkDetectionState with _$NetworkDetectionState {
+abstract class NetworkDetectionState with _$NetworkDetectionState {
   const factory NetworkDetectionState({
     required bool isLoading,
     required bool isTesting,
@@ -77,7 +77,7 @@ class NetworkDetectionState with _$NetworkDetectionState {
 }
 
 @freezed
-class TrayState with _$TrayState {
+abstract class TrayState with _$TrayState {
   const factory TrayState({
     required Mode mode,
     required int port,
@@ -94,7 +94,7 @@ class TrayState with _$TrayState {
 }
 
 @freezed
-class HomeState with _$HomeState {
+abstract class HomeState with _$HomeState {
   const factory HomeState({
     required PageLabel pageLabel,
     required List<NavigationItem> navigationItems,
@@ -104,7 +104,7 @@ class HomeState with _$HomeState {
 }
 
 @freezed
-class ProxiesSelectorState with _$ProxiesSelectorState {
+abstract class ProxiesSelectorState with _$ProxiesSelectorState {
   const factory ProxiesSelectorState({
     required List<String> groupNames,
     required String? currentGroupName,
@@ -112,28 +112,28 @@ class ProxiesSelectorState with _$ProxiesSelectorState {
 }
 
 @freezed
-class GroupNamesState with _$GroupNamesState {
+abstract class GroupNamesState with _$GroupNamesState {
   const factory GroupNamesState({
     required List<String> groupNames,
   }) = _GroupNamesState;
 }
 
 @freezed
-class GroupsState with _$GroupsState {
+abstract class GroupsState with _$GroupsState {
   const factory GroupsState({
     required List<Group> value,
   }) = _GroupsState;
 }
 
 @freezed
-class NavigationItemsState with _$NavigationItemsState {
+abstract class NavigationItemsState with _$NavigationItemsState {
   const factory NavigationItemsState({
     required List<NavigationItem> value,
   }) = _NavigationItemsState;
 }
 
 @freezed
-class ProxiesListSelectorState with _$ProxiesListSelectorState {
+abstract class ProxiesListSelectorState with _$ProxiesListSelectorState {
   const factory ProxiesListSelectorState({
     required List<String> groupNames,
     required Set<String> currentUnfoldSet,
@@ -146,7 +146,7 @@ class ProxiesListSelectorState with _$ProxiesListSelectorState {
 }
 
 @freezed
-class ProxyGroupSelectorState with _$ProxyGroupSelectorState {
+abstract class ProxyGroupSelectorState with _$ProxyGroupSelectorState {
   const factory ProxyGroupSelectorState({
     required String? testUrl,
     required ProxiesSortType proxiesSortType,
@@ -159,14 +159,14 @@ class ProxyGroupSelectorState with _$ProxyGroupSelectorState {
 }
 
 @freezed
-class MoreToolsSelectorState with _$MoreToolsSelectorState {
+abstract class MoreToolsSelectorState with _$MoreToolsSelectorState {
   const factory MoreToolsSelectorState({
     required List<NavigationItem> navigationItems,
   }) = _MoreToolsSelectorState;
 }
 
 @freezed
-class PackageListSelectorState with _$PackageListSelectorState {
+abstract class PackageListSelectorState with _$PackageListSelectorState {
   const factory PackageListSelectorState({
     required List<Package> packages,
     required AccessControl accessControl,
@@ -213,7 +213,7 @@ extension PackageListSelectorStateExt on PackageListSelectorState {
 }
 
 @freezed
-class ProxiesListHeaderSelectorState with _$ProxiesListHeaderSelectorState {
+abstract class ProxiesListHeaderSelectorState with _$ProxiesListHeaderSelectorState {
   const factory ProxiesListHeaderSelectorState({
     required double offset,
     required int currentIndex,
@@ -221,7 +221,7 @@ class ProxiesListHeaderSelectorState with _$ProxiesListHeaderSelectorState {
 }
 
 @freezed
-class ProxiesActionsState with _$ProxiesActionsState {
+abstract class ProxiesActionsState with _$ProxiesActionsState {
   const factory ProxiesActionsState({
     required PageLabel pageLabel,
     required ProxiesType type,
@@ -230,7 +230,7 @@ class ProxiesActionsState with _$ProxiesActionsState {
 }
 
 @freezed
-class ProxyState with _$ProxyState {
+abstract class ProxyState with _$ProxyState {
   const factory ProxyState({
     required bool isStart,
     required bool systemProxy,
@@ -240,7 +240,7 @@ class ProxyState with _$ProxyState {
 }
 
 @freezed
-class MihomoConfigState with _$MihomoConfigState {
+abstract class MihomoConfigState with _$MihomoConfigState {
   const factory MihomoConfigState({
     required bool overrideDns,
     required MihomoConfig mihomoConfig,
@@ -250,7 +250,7 @@ class MihomoConfigState with _$MihomoConfigState {
 }
 
 @freezed
-class DashboardState with _$DashboardState {
+abstract class DashboardState with _$DashboardState {
   const factory DashboardState({
     required List<DashboardWidget> dashboardWidgets,
     required double viewWidth,
@@ -258,7 +258,7 @@ class DashboardState with _$DashboardState {
 }
 
 @freezed
-class ProxyCardState with _$ProxyCardState {
+abstract class ProxyCardState with _$ProxyCardState {
   const factory ProxyCardState({
     required String proxyName,
     String? testUrl,
@@ -266,7 +266,7 @@ class ProxyCardState with _$ProxyCardState {
 }
 
 @freezed
-class VpnState with _$VpnState {
+abstract class VpnState with _$VpnState {
   const factory VpnState({
     required TunStack stack,
     required VpnProps vpnProps,
@@ -274,7 +274,7 @@ class VpnState with _$VpnState {
 }
 
 @freezed
-class ProfileOverrideStateModel with _$ProfileOverrideStateModel {
+abstract class ProfileOverrideStateModel with _$ProfileOverrideStateModel {
   const factory ProfileOverrideStateModel({
     MihomoConfigSnippet? snippet,
     required Set<String> selectedRules,

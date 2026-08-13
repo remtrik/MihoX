@@ -200,7 +200,7 @@ class _OverrideProfileViewState extends State<OverrideProfileView> {
             return child!;
           },
           child: Consumer(
-            builder: (_, ref, ___) {
+            builder: (_, ref, _) {
               final editCount = ref.watch(
                 profileOverrideStateProvider.select(
                   (state) => state.selectedRules.length,

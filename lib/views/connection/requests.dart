@@ -142,7 +142,7 @@ class _LogConnectionsBodyState extends ConsumerState<LogConnectionsBody> {
   Widget build(BuildContext context) => TextScaleNotification(
         child: ValueListenableBuilder<ConnectionsState>(
           valueListenable: _requestsStateNotifier,
-          builder: (_, state, __) {
+          builder: (_, state, _) {
             _preLoad();
             final connections = state.list;
             final items = connections

@@ -280,7 +280,7 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
   }
 
   Widget _buildSubtitle() => Consumer(
-        builder: (_, ref, __) => FutureBuilder<String?>(
+        builder: (_, ref, _) => FutureBuilder<String?>(
           future: _getActiveGeoUrl(ref),
           builder: (context, urlSnapshot) {
             final url = urlSnapshot.data;

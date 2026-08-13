@@ -111,7 +111,7 @@ class _ThemeModeItem extends ConsumerWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: themeModeItems.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (_, index) {
               final item = themeModeItems[index];
               return CommonCard(
@@ -514,7 +514,7 @@ class _PaletteDialogState extends State<_PaletteDialog> {
             const SizedBox(height: 24),
             ValueListenableBuilder(
               valueListenable: _controller,
-              builder: (_, color, __) => PrimaryColorBox(
+              builder: (_, color, _) => PrimaryColorBox(
                 primaryColor: color,
                 child: FilledButton(
                   onPressed: () {},

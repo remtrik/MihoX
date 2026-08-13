@@ -32,7 +32,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     ref.read(scriptStateProvider.notifier).del(label);
   }
 
-  Widget _buildContent() => Consumer(builder: (_, ref, __) {
+  Widget _buildContent() => Consumer(builder: (_, ref, _) {
         final vm2 = ref.watch(scriptStateProvider.select(
           (state) => VM2(a: state.currentId, b: state.scripts),
         ));

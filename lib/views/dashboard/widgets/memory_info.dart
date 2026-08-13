@@ -98,7 +98,7 @@ class _MemoryInfoState extends State<MemoryInfo> {
                   height: globalState.measure.bodyMediumHeight + 2,
                   child: ValueListenableBuilder(
                     valueListenable: _memoryInfoStateNotifier,
-                    builder: (_, trafficValue, __) => Row(
+                    builder: (_, trafficValue, _) => Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(

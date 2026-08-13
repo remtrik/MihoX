@@ -212,7 +212,7 @@ class _WindowHeaderState extends State<WindowHeader> {
         _buildWindowButton(
           icon: ValueListenableBuilder(
             valueListenable: isPinNotifier,
-            builder: (_, value, ___) => Icon(
+            builder: (_, value, _) => Icon(
               value ? Icons.push_pin : Icons.push_pin_outlined,
               size: 16,
               color: colorScheme.onSurface.withValues(alpha: 0.8),
@@ -233,7 +233,7 @@ class _WindowHeaderState extends State<WindowHeader> {
         _buildWindowButton(
           icon: ValueListenableBuilder(
             valueListenable: isMaximizedNotifier,
-            builder: (_, value, ___) => Icon(
+            builder: (_, value, _) => Icon(
               value ? Icons.filter_none : Icons.crop_square,
               size: value ? 14 : 16,
               color: colorScheme.onSurface.withValues(alpha: 0.8),

@@ -217,7 +217,7 @@ class FakeIpFilterItem extends StatelessWidget {
           blur: false,
           title: appLocalizations.fakeipFilter,
           widget: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final fakeIpFilter = ref.watch(
                 patchMihomoConfigProvider
                     .select((state) => state.dns.fakeIpFilter),
@@ -250,7 +250,7 @@ class DefaultNameserverItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: appLocalizations.defaultNameserver,
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final defaultNameserver = ref.watch(
               patchMihomoConfigProvider
                   .select((state) => state.dns.defaultNameserver),
@@ -282,7 +282,7 @@ class NameserverItem extends StatelessWidget {
         delegate: OpenDelegate(
           title: appLocalizations.nameserver,
           blur: false,
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final nameserver = ref.watch(
               patchMihomoConfigProvider.select((state) => state.dns.nameserver),
             );
@@ -359,7 +359,7 @@ class NameserverPolicyItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: appLocalizations.nameserverPolicy,
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final nameserverPolicy = ref.watch(
               patchMihomoConfigProvider
                   .select((state) => state.dns.nameserverPolicy),
@@ -393,7 +393,7 @@ class ProxyServerNameserverItem extends StatelessWidget {
           blur: false,
           title: appLocalizations.proxyNameserver,
           widget: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final proxyServerNameserver = ref.watch(
                 patchMihomoConfigProvider
                     .select((state) => state.dns.proxyServerNameserver),
@@ -426,7 +426,7 @@ class FallbackItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: appLocalizations.fallback,
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final fallback = ref.watch(
               patchMihomoConfigProvider.select((state) => state.dns.fallback),
             );
@@ -517,7 +517,7 @@ class GeositeItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: "Geosite",
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final geosite = ref.watch(
               patchMihomoConfigProvider
                   .select((state) => state.dns.fallbackFilter.geosite),
@@ -548,7 +548,7 @@ class IpcidrItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: appLocalizations.ipcidr,
-          widget: Consumer(builder: (_, ref, ___) {
+          widget: Consumer(builder: (_, ref, _) {
             final ipcidr = ref.watch(
               patchMihomoConfigProvider
                   .select((state) => state.dns.fallbackFilter.ipcidr),
@@ -579,7 +579,7 @@ class DomainItem extends StatelessWidget {
         delegate: OpenDelegate(
           blur: false,
           title: appLocalizations.domain,
-          widget: Consumer(builder: (_, ref, __) {
+          widget: Consumer(builder: (_, ref, _) {
             final domain = ref.watch(
               patchMihomoConfigProvider
                   .select((state) => state.dns.fallbackFilter.domain),

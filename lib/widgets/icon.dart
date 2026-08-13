@@ -30,7 +30,7 @@ class CommonTargetIcon extends StatelessWidget {
         gaplessPlayback: true,
         cacheWidth: (size * 2).toInt(),
         cacheHeight: (size * 2).toInt(),
-        errorBuilder: (_, error, ___) => _defaultIcon(),
+        errorBuilder: (_, error, _) => _defaultIcon(),
       );
     }
 
@@ -46,7 +46,7 @@ class CommonTargetIcon extends StatelessWidget {
             data,
             width: size,
             height: size,
-            errorBuilder: (_, __, ___) => _defaultIcon(),
+            errorBuilder: (_, _, _) => _defaultIcon(),
           );
         },
       );
@@ -59,8 +59,8 @@ class CommonTargetIcon extends StatelessWidget {
       fit: BoxFit.contain,
       memCacheWidth: (size * 2).toInt(),
       memCacheHeight: (size * 2).toInt(),
-      placeholder: (_, __) => const SizedBox(),
-      errorWidget: (_, __, ___) => _defaultIcon(),
+      placeholder: (_, _) => const SizedBox(),
+      errorWidget: (_, _, _) => _defaultIcon(),
     );
   }
 

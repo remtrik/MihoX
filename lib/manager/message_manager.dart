@@ -75,7 +75,7 @@ class MessageManagerState extends State<MessageManager> {
           widget.child,
           ValueListenableBuilder(
             valueListenable: _messagesNotifier,
-            builder: (_, messages, __) => FadeThroughBox(
+            builder: (_, messages, _) => FadeThroughBox(
               margin: const EdgeInsets.only(
                 top: kToolbarHeight + 8,
                 left: 12,

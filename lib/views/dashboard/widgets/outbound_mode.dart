@@ -16,7 +16,7 @@ class OutboundMode extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           final mode = ref.watch(
             patchMihomoConfigProvider.select(
               (state) => state.mode,
@@ -99,7 +99,7 @@ class OutboundModeV2 extends StatelessWidget {
       child: CommonCard(
         padding: EdgeInsets.zero,
         child: Consumer(
-          builder: (_, ref, __) {
+          builder: (_, ref, _) {
             final mode = ref.watch(
               patchMihomoConfigProvider.select(
                 (state) => state.mode,

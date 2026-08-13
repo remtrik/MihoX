@@ -129,7 +129,7 @@ class _PaletteState extends State<Palette> {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder(
         valueListenable: widget.controller,
-        builder: (_, __, ___) => GestureDetector(
+        builder: (_, _, _) => GestureDetector(
           dragStartBehavior: DragStartBehavior.down,
           onVerticalDragDown: (details) => onStart(details.globalPosition),
           onVerticalDragUpdate: (details) => onUpdate(details.globalPosition),

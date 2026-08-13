@@ -86,7 +86,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
     final appLocale = AppLocalizations.of(context);
     final items = [
       Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           final state = ref.watch(moreToolsSelectorStateProvider);
           if (state.navigationItems.isEmpty) {
             return Container();

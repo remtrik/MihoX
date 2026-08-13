@@ -29,7 +29,7 @@ class _ScrollOverBuilderState extends State<ScrollOverBuilder> {
         },
         child: ValueListenableBuilder<bool>(
           valueListenable: isOverNotifier,
-          builder: (_, isOver, __) => widget.builder(isOver: isOver),
+          builder: (_, isOver, _) => widget.builder(isOver: isOver),
         ),
       );
 }

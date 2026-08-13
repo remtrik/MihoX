@@ -320,7 +320,7 @@ class BypassDomainItem extends StatelessWidget {
           blur: false,
           title: appLocalizations.bypassDomain,
           widget: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               _initActions(context, ref);
               final bypassDomain = ref.watch(
                   networkSettingProvider.select((state) => state.bypassDomain));
@@ -392,7 +392,7 @@ class RouteAddressItem extends ConsumerWidget {
         maxWidth: 360,
         title: appLocalizations.routeAddress,
         widget: Consumer(
-          builder: (_, ref, __) {
+          builder: (_, ref, _) {
             final routeAddress = ref.watch(
               patchMihomoConfigProvider.select(
                 (state) => state.tun.routeAddress,

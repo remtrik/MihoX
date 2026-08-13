@@ -172,7 +172,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
 
   @override
   Widget build(BuildContext context) => Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           final state = ref.watch(proxiesListSelectorStateProvider);
           final groupsVersion = ref.watch(versionProvider);
 
@@ -311,7 +311,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
   }
 
   Widget _buildIcon() => Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           final iconStyle = ref.watch(
             proxiesStyleSettingProvider.select((s) => s.iconStyle),
           );
@@ -344,7 +344,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
     final colorScheme = context.colorScheme;
 
     return Consumer(
-      builder: (_, ref, __) {
+      builder: (_, ref, _) {
         final shouldExpand = ref.watch(
           unfoldSetProvider.select((s) => s.contains(_groupName)),
         );
@@ -398,7 +398,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
                                     ),
                                     const SizedBox(height: 4),
                                     Consumer(
-                                      builder: (_, ref, __) {
+                                      builder: (_, ref, _) {
                                         final proxyName = ref
                                             .watch(getSelectedProxyNameProvider(
                                                 _groupName))
@@ -425,7 +425,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
                             if (isExpanded) ...[
                               ValueListenableBuilder(
                                 valueListenable: _isLocked,
-                                builder: (_, locked, __) => IconButton(
+                                builder: (_, locked, _) => IconButton(
                                   onPressed: locked ? null : _delayTest,
                                   visualDensity: VisualDensity.standard,
                                   icon: const Icon(Icons.network_ping),
@@ -458,7 +458,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
                   ),
                 ),
               ),
-              expansibleBuilder: (_, header, body, __) =>
+              expansibleBuilder: (_, header, body, _) =>
                   Column(children: [header, body]),
             ),
           ),

@@ -63,7 +63,7 @@ class _LineChartState extends State<LineChart>
   Widget build(BuildContext context) => LayoutBuilder(
       builder: (_, container) => AnimatedBuilder(
             animation: _controller.view,
-            builder: (_, __) => CustomPaint(
+            builder: (_, _) => CustomPaint(
               painter: LineChartPainter(
                 prevPoints: prevPoints,
                 points: points,

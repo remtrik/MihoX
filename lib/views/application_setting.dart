@@ -331,7 +331,7 @@ class ApplicationSettingView extends StatelessWidget {
 
     return ListView.separated(
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(height: 0),
+      separatorBuilder: (_, _) => const Divider(height: 0),
       itemBuilder: (_, index) => items[index],
     );
   }

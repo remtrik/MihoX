@@ -78,7 +78,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
             ),
           ),
           Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final unfoldSet = ref.watch(unfoldSetProvider);
               final groupNames = ref.watch(
                 currentGroupsStateProvider.select(

@@ -441,7 +441,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     required int index,
   }) {
     final target = DragTarget<int>(
-      builder: (_, __, ___) => AbsorbPointer(
+      builder: (_, _, _) => AbsorbPointer(
         child: item,
       ),
       onWillAcceptWithDetails: (_) {
@@ -553,7 +553,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   Widget _buildFakeTransformWidget() => ValueListenableBuilder<bool>(
         valueListenable: _animating,
-        builder: (_, animating, __) {
+        builder: (_, animating, _) {
           final index = _dragIndexNotifier.value;
           if (!animating || _fakeDragWidgetAnimation == null || index == -1) {
             return Container();
@@ -593,7 +593,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
             _buildInactivate(
               ValueListenableBuilder(
                 valueListenable: _childrenNotifier,
-                builder: (_, children, __) {
+                builder: (_, children, _) {
                   _onChildrenChange();
                   return Grid(
                     axisDirection: AxisDirection.down,

@@ -379,7 +379,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             widget.appBar ??
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
-                  builder: (_, state, __) => _buildAppBarWrap(
+                  builder: (_, state, _) => _buildAppBarWrap(
                     AppBar(
                       backgroundColor:
                           isTransparent ? Colors.transparent : null,
@@ -400,7 +400,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                 ),
             ValueListenableBuilder(
               valueListenable: _loading,
-              builder: (_, value, __) =>
+              builder: (_, value, _) =>
                   value == true ? const LinearProgressIndicator() : Container(),
             ),
           ],
@@ -453,7 +453,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         children: [
           ValueListenableBuilder(
             valueListenable: _keywordsNotifier,
-            builder: (_, keywords, __) {
+            builder: (_, keywords, _) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (_onKeywordsUpdate != null) {
                   _onKeywordsUpdate!(keywords);
@@ -500,7 +500,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       floatingActionButton: widget.floatingActionButton ??
           ValueListenableBuilder<Widget?>(
             valueListenable: _floatingActionButton,
-            builder: (_, value, __) => IntrinsicWidth(
+            builder: (_, value, _) => IntrinsicWidth(
               child: IntrinsicHeight(
                 child: FadeScaleBox(
                   child: value ?? const SizedBox(),

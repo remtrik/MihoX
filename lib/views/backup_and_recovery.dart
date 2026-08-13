@@ -113,7 +113,7 @@ class BackupAndRecovery extends ConsumerWidget {
           subtitle: Text(appLocalizations.localRecoveryDesc),
         ),
         ListHeader(title: appLocalizations.options),
-        Consumer(builder: (_, ref, __) {
+        Consumer(builder: (_, ref, _) {
           final recoveryStrategy = ref.watch(appSettingProvider.select(
             (state) => state.recoveryStrategy,
           ));

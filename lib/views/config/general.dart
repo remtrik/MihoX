@@ -81,7 +81,7 @@ class LogLevelItem extends ConsumerWidget {
     final isEnabled = overrideNetworkSettings;
     return ValueListenableBuilder<String>(
       valueListenable: globalState.effectiveLogLevel,
-      builder: (_, effectiveName, __) {
+      builder: (_, effectiveName, _) {
         final effective = LogLevel.values.firstWhere(
           (lv) => lv.name == effectiveName,
           orElse: () => uiLogLevel,
@@ -166,7 +166,7 @@ class KeepAliveIntervalItem extends ConsumerWidget {
     final isEnabled = overrideNetworkSettings;
     return ValueListenableBuilder<int>(
       valueListenable: globalState.effectiveKeepAliveInterval,
-      builder: (_, effective, __) {
+      builder: (_, effective, _) {
         final display = isEnabled ? uiKeepAlive : effective;
         return AbsorbPointer(
           absorbing: !isEnabled,
@@ -315,7 +315,7 @@ class HostsItem extends StatelessWidget {
           blur: false,
           title: "Hosts",
           widget: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final hosts = ref.watch(
                   patchMihomoConfigProvider.select((state) => state.hosts));
               return MapInputPage(
@@ -470,7 +470,7 @@ class UnifiedDelayItem extends ConsumerWidget {
     final isEnabled = overrideNetworkSettings;
     return ValueListenableBuilder<bool>(
       valueListenable: globalState.effectiveUnifiedDelay,
-      builder: (_, effective, __) {
+      builder: (_, effective, _) {
         final display = isEnabled ? uiUnifiedDelay : effective;
         return AbsorbPointer(
           absorbing: !isEnabled,
@@ -564,7 +564,7 @@ class TcpConcurrentItem extends ConsumerWidget {
     final isEnabled = overrideNetworkSettings;
     return ValueListenableBuilder<bool>(
       valueListenable: globalState.effectiveTcpConcurrent,
-      builder: (_, effective, __) {
+      builder: (_, effective, _) {
         final display = isEnabled ? uiTcpConcurrent : effective;
         return AbsorbPointer(
           absorbing: !isEnabled,
@@ -632,7 +632,7 @@ class ExternalControllerItem extends ConsumerWidget {
     final isEnabled = overrideNetworkSettings;
     return ValueListenableBuilder<String>(
       valueListenable: globalState.effectiveExternalController,
-      builder: (_, effective, __) {
+      builder: (_, effective, _) {
         final isEffective = effective.isNotEmpty;
         final displayAddress =
             isEffective ? effective : ExternalControllerStatus.open.value;
