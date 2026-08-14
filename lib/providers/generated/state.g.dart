@@ -1961,7 +1961,7 @@ final class ProfileOverrideStateProvider
         argument: null,
         retry: null,
         name: r'profileOverrideStateProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -1983,7 +1983,7 @@ final class ProfileOverrideStateProvider
 }
 
 String _$profileOverrideStateHash() =>
-    r'8d01dc59a6aa899d2865536fa45a4acb78aacb4c';
+    r'f9227c8abbf571fb08cad72b2c20dcbf9db279db';
 
 abstract class _$ProfileOverrideState
     extends $Notifier<ProfileOverrideStateModel> {

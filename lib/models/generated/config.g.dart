@@ -10,10 +10,9 @@ _AppSettingProps _$AppSettingPropsFromJson(
   Map<String, dynamic> json,
 ) => _AppSettingProps(
   locale: json['locale'] as String?,
-  dashboardWidgets:
-      json['dashboardWidgets'] == null
-          ? defaultDashboardWidgets
-          : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
+  dashboardWidgets: json['dashboardWidgets'] == null
+      ? defaultDashboardWidgets
+      : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
   autoLaunch: json['autoLaunch'] as bool? ?? false,
   silentLaunch: json['silentLaunch'] as bool? ?? false,
@@ -40,10 +39,9 @@ _AppSettingProps _$AppSettingPropsFromJson(
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
-      'dashboardWidgets':
-          instance.dashboardWidgets
-              .map((e) => _$DashboardWidgetEnumMap[e]!)
-              .toList(),
+      'dashboardWidgets': instance.dashboardWidgets
+          .map((e) => _$DashboardWidgetEnumMap[e]!)
+          .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'autoLaunch': instance.autoLaunch,
       'silentLaunch': instance.silentLaunch,
@@ -149,12 +147,9 @@ _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
   systemProxy: json['systemProxy'] as bool? ?? false,
   ipv6: json['ipv6'] as bool? ?? true,
   allowBypass: json['allowBypass'] as bool? ?? false,
-  accessControl:
-      json['accessControl'] == null
-          ? defaultAccessControl
-          : AccessControl.fromJson(
-            json['accessControl'] as Map<String, dynamic>,
-          ),
+  accessControl: json['accessControl'] == null
+      ? defaultAccessControl
+      : AccessControl.fromJson(json['accessControl'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
@@ -279,10 +274,9 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
       ) ??
       DynamicSchemeVariant.content,
   pureBlack: json['pureBlack'] as bool? ?? false,
-  textScale:
-      json['textScale'] == null
-          ? const TextScale()
-          : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
+  textScale: json['textScale'] == null
+      ? const TextScale()
+      : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
@@ -329,12 +323,11 @@ Map<String, dynamic> _$ScriptPropsToJson(_ScriptProps instance) =>
     };
 
 _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
-  appSetting:
-      json['appSetting'] == null
-          ? defaultAppSettingProps
-          : AppSettingProps.safeFromJson(
-            json['appSetting'] as Map<String, Object?>?,
-          ),
+  appSetting: json['appSetting'] == null
+      ? defaultAppSettingProps
+      : AppSettingProps.safeFromJson(
+          json['appSetting'] as Map<String, Object?>?,
+        ),
   profiles:
       (json['profiles'] as List<dynamic>?)
           ?.map((e) => Profile.fromJson(e as Map<String, dynamic>))
@@ -347,39 +340,29 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       const [],
   currentProfileId: json['currentProfileId'] as String?,
   overrideDns: json['overrideDns'] as bool? ?? false,
-  networkProps:
-      json['networkProps'] == null
-          ? defaultNetworkProps
-          : NetworkProps.fromJson(
-            json['networkProps'] as Map<String, dynamic>?,
-          ),
-  vpnProps:
-      json['vpnProps'] == null
-          ? defaultVpnProps
-          : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>),
+  networkProps: json['networkProps'] == null
+      ? defaultNetworkProps
+      : NetworkProps.fromJson(json['networkProps'] as Map<String, dynamic>?),
+  vpnProps: json['vpnProps'] == null
+      ? defaultVpnProps
+      : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>),
   themeProps: ThemeProps.safeFromJson(
     json['themeProps'] as Map<String, Object?>?,
   ),
-  proxiesStyle:
-      json['proxiesStyle'] == null
-          ? defaultProxiesStyle
-          : ProxiesStyle.fromJson(
-            json['proxiesStyle'] as Map<String, dynamic>?,
-          ),
-  windowProps:
-      json['windowProps'] == null
-          ? defaultWindowProps
-          : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
-  patchMihomoConfig:
-      json['patchMihomoConfig'] == null
-          ? defaultMihomoConfig
-          : MihomoConfig.fromJson(
-            json['patchMihomoConfig'] as Map<String, dynamic>,
-          ),
-  scriptProps:
-      json['scriptProps'] == null
-          ? const ScriptProps()
-          : ScriptProps.fromJson(json['scriptProps'] as Map<String, dynamic>),
+  proxiesStyle: json['proxiesStyle'] == null
+      ? defaultProxiesStyle
+      : ProxiesStyle.fromJson(json['proxiesStyle'] as Map<String, dynamic>?),
+  windowProps: json['windowProps'] == null
+      ? defaultWindowProps
+      : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
+  patchMihomoConfig: json['patchMihomoConfig'] == null
+      ? defaultMihomoConfig
+      : MihomoConfig.fromJson(
+          json['patchMihomoConfig'] as Map<String, dynamic>,
+        ),
+  scriptProps: json['scriptProps'] == null
+      ? const ScriptProps()
+      : ScriptProps.fromJson(json['scriptProps'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{

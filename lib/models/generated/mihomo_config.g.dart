@@ -9,8 +9,9 @@ part of '../mihomo_config.dart';
 _ProxyGroup _$ProxyGroupFromJson(Map<String, dynamic> json) => _ProxyGroup(
   name: json['name'] as String,
   type: GroupType.parseProfileType(json['type'] as String),
-  proxies:
-      (json['proxies'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  proxies: (json['proxies'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   use: (json['use'] as List<dynamic>?)?.map((e) => e as String).toList(),
   interval: (json['interval'] as num?)?.toInt(),
   lazy: json['lazy'] as bool?,
@@ -115,10 +116,9 @@ Map<String, dynamic> _$SnifferToJson(_Sniffer instance) => <String, dynamic>{
 
 _SnifferConfig _$SnifferConfigFromJson(Map<String, dynamic> json) =>
     _SnifferConfig(
-      ports:
-          json['ports'] == null
-              ? const []
-              : _formJsonPorts(json['ports'] as List?),
+      ports: json['ports'] == null
+          ? const []
+          : _formJsonPorts(json['ports'] as List?),
       overrideDest: json['override-destination'] as bool?,
     );
 
@@ -230,12 +230,11 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
           ?.map((e) => e as String)
           .toList() ??
       const ["https://doh.pub/dns-query"],
-  fallbackFilter:
-      json['fallback-filter'] == null
-          ? const FallbackFilter()
-          : FallbackFilter.fromJson(
-            json['fallback-filter'] as Map<String, dynamic>,
-          ),
+  fallbackFilter: json['fallback-filter'] == null
+      ? const FallbackFilter()
+      : FallbackFilter.fromJson(
+          json['fallback-filter'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$DnsToJson(_Dns instance) => <String, dynamic>{
@@ -309,16 +308,12 @@ _MihomoConfigSnippet _$MihomoConfigSnippetFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       rule: json['rules'] == null ? const [] : _genRule(json['rules'] as List?),
-      ruleProvider:
-          json['rule-providers'] == null
-              ? const []
-              : _genRuleProviders(
-                json['rule-providers'] as Map<String, dynamic>,
-              ),
-      subRules:
-          json['sub-rules'] == null
-              ? const []
-              : _genSubRules(json['sub-rules'] as Map<String, dynamic>),
+      ruleProvider: json['rule-providers'] == null
+          ? const []
+          : _genRuleProviders(json['rule-providers'] as Map<String, dynamic>),
+      subRules: json['sub-rules'] == null
+          ? const []
+          : _genSubRules(json['sub-rules'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MihomoConfigSnippetToJson(
@@ -355,18 +350,15 @@ _MihomoConfig _$MihomoConfigFromJson(Map<String, dynamic> json) =>
           defaultKeepAliveInterval,
       unifiedDelay: json['unified-delay'] as bool? ?? true,
       tcpConcurrent: json['tcp-concurrent'] as bool? ?? true,
-      tun:
-          json['tun'] == null
-              ? defaultTun
-              : Tun.safeFormJson(json['tun'] as Map<String, Object?>?),
-      dns:
-          json['dns'] == null
-              ? defaultDns
-              : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
-      geoXUrl:
-          json['geox-url'] == null
-              ? defaultGeoXUrl
-              : GeoXUrl.safeFormJson(json['geox-url'] as Map<String, Object?>?),
+      tun: json['tun'] == null
+          ? defaultTun
+          : Tun.safeFormJson(json['tun'] as Map<String, Object?>?),
+      dns: json['dns'] == null
+          ? defaultDns
+          : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
+      geoXUrl: json['geox-url'] == null
+          ? defaultGeoXUrl
+          : GeoXUrl.safeFormJson(json['geox-url'] as Map<String, Object?>?),
       geodataLoader:
           $enumDecodeNullable(_$GeodataLoaderEnumMap, json['geodata-loader']) ??
           GeodataLoader.memconservative,

@@ -20,7 +20,7 @@ final class AppSettingProvider
         argument: null,
         retry: null,
         name: r'appSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class AppSettingProvider
   }
 }
 
-String _$appSettingHash() => r'bdfb909f056bf7aec165ceffd218254c33f91aaa';
+String _$appSettingHash() => r'2c5d95a4ea406fcda73c723601d8b1e04d944e70';
 
 abstract class _$AppSetting extends $Notifier<AppSettingProps> {
   AppSettingProps build();
@@ -72,7 +72,7 @@ final class WindowSettingProvider
         argument: null,
         retry: null,
         name: r'windowSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -93,7 +93,7 @@ final class WindowSettingProvider
   }
 }
 
-String _$windowSettingHash() => r'20cadc0c1b26ede68fb38a74699b1753ed997dbf';
+String _$windowSettingHash() => r'164086eeeac7607adfdff63b712eaf41945ccdcc';
 
 abstract class _$WindowSetting extends $Notifier<WindowProps> {
   WindowProps build();
@@ -123,7 +123,7 @@ final class VpnSettingProvider extends $NotifierProvider<VpnSetting, VpnProps> {
         argument: null,
         retry: null,
         name: r'vpnSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -144,7 +144,7 @@ final class VpnSettingProvider extends $NotifierProvider<VpnSetting, VpnProps> {
   }
 }
 
-String _$vpnSettingHash() => r'63758e196c3d31cebaac87d82998f3c9566a4656';
+String _$vpnSettingHash() => r'b02c41ef1d053c3ce713857e25ce8c463a00a21f';
 
 abstract class _$VpnSetting extends $Notifier<VpnProps> {
   VpnProps build();
@@ -175,7 +175,7 @@ final class NetworkSettingProvider
         argument: null,
         retry: null,
         name: r'networkSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -196,7 +196,7 @@ final class NetworkSettingProvider
   }
 }
 
-String _$networkSettingHash() => r'2ff25bb6f4bc2050c0ac1aa07dcd3c78ee6325bd';
+String _$networkSettingHash() => r'9b38a9c4b31c2a900185ed4025dc3506e41384c8';
 
 abstract class _$NetworkSetting extends $Notifier<NetworkProps> {
   NetworkProps build();
@@ -227,7 +227,7 @@ final class ThemeSettingProvider
         argument: null,
         retry: null,
         name: r'themeSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -248,7 +248,7 @@ final class ThemeSettingProvider
   }
 }
 
-String _$themeSettingHash() => r'122de0c801a77ffdd08a0a4fbda7c27e9aa824ce';
+String _$themeSettingHash() => r'1219120f91dd9a4f43e8f6646992c6eff37e16bf';
 
 abstract class _$ThemeSetting extends $Notifier<ThemeProps> {
   ThemeProps build();
@@ -279,7 +279,7 @@ final class ProfilesProvider
         argument: null,
         retry: null,
         name: r'profilesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -300,7 +300,7 @@ final class ProfilesProvider
   }
 }
 
-String _$profilesHash() => r'1c1f51b953964b13df442c5789a4217313defed7';
+String _$profilesHash() => r'13ef5ad858780d728d1d2196f16099c5dbe65c73';
 
 abstract class _$Profiles extends $Notifier<List<Profile>> {
   List<Profile> build();
@@ -331,7 +331,7 @@ final class CurrentProfileIdProvider
         argument: null,
         retry: null,
         name: r'currentProfileIdProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -352,7 +352,7 @@ final class CurrentProfileIdProvider
   }
 }
 
-String _$currentProfileIdHash() => r'ca7c9bdcaa1a7166049f51c3661470c42288814a';
+String _$currentProfileIdHash() => r'6bf8b45821e642d5be7a5446967cfa38dcdd3bb4';
 
 abstract class _$CurrentProfileId extends $Notifier<String?> {
   String? build();
@@ -382,7 +382,7 @@ final class OverrideDnsProvider extends $NotifierProvider<OverrideDns, bool> {
         argument: null,
         retry: null,
         name: r'overrideDnsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -403,7 +403,7 @@ final class OverrideDnsProvider extends $NotifierProvider<OverrideDns, bool> {
   }
 }
 
-String _$overrideDnsHash() => r'fa005b753247745d5fbeb5f3a78c3bd904da3c74';
+String _$overrideDnsHash() => r'403149bbf7b862f129c66a0971be762870c2e52d';
 
 abstract class _$OverrideDns extends $Notifier<bool> {
   bool build();
@@ -434,7 +434,7 @@ final class HotKeyActionsProvider
         argument: null,
         retry: null,
         name: r'hotKeyActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -455,7 +455,7 @@ final class HotKeyActionsProvider
   }
 }
 
-String _$hotKeyActionsHash() => r'7665ae5f39621a7adbc407dd3ff4c6bfd77cab25';
+String _$hotKeyActionsHash() => r'c8b16bef7506300acb85e95a0584094658c378e9';
 
 abstract class _$HotKeyActions extends $Notifier<List<HotKeyAction>> {
   List<HotKeyAction> build();
@@ -486,7 +486,7 @@ final class ProxiesStyleSettingProvider
         argument: null,
         retry: null,
         name: r'proxiesStyleSettingProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -508,7 +508,7 @@ final class ProxiesStyleSettingProvider
 }
 
 String _$proxiesStyleSettingHash() =>
-    r'f5be490206fac5ae452b5c3ec1f1091b1519772c';
+    r'abf98ad5027474cb3acc0e6dfa387613fa6d0615';
 
 abstract class _$ProxiesStyleSetting extends $Notifier<ProxiesStyle> {
   ProxiesStyle build();
@@ -539,7 +539,7 @@ final class ScriptStateProvider
         argument: null,
         retry: null,
         name: r'scriptStateProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -560,7 +560,7 @@ final class ScriptStateProvider
   }
 }
 
-String _$scriptStateHash() => r'1f3b6a22cc4011c5084244220e512f6c226b2129';
+String _$scriptStateHash() => r'd3ab74b05653519eea96bc2e2f0f8396d9f85a17';
 
 abstract class _$ScriptState extends $Notifier<ScriptProps> {
   ScriptProps build();
@@ -591,7 +591,7 @@ final class PatchMihomoConfigProvider
         argument: null,
         retry: null,
         name: r'patchMihomoConfigProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -612,7 +612,7 @@ final class PatchMihomoConfigProvider
   }
 }
 
-String _$patchMihomoConfigHash() => r'2834c4843e49e22713f355d50a5d759772385d26';
+String _$patchMihomoConfigHash() => r'a02b2e2431cb124980d7a32a14857cdcb80c726e';
 
 abstract class _$PatchMihomoConfig extends $Notifier<MihomoConfig> {
   MihomoConfig build();

@@ -161,8 +161,9 @@ Map<String, dynamic> _$HotKeyActionToJson(_HotKeyAction instance) =>
     <String, dynamic>{
       'action': _$HotActionEnumMap[instance.action]!,
       'key': instance.key,
-      'modifiers':
-          instance.modifiers.map((e) => _$KeyboardModifierEnumMap[e]!).toList(),
+      'modifiers': instance.modifiers
+          .map((e) => _$KeyboardModifierEnumMap[e]!)
+          .toList(),
     };
 
 const _$HotActionEnumMap = {

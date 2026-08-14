@@ -27,19 +27,17 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   label: json['label'] as String?,
   currentGroupName: json['currentGroupName'] as String?,
   url: json['url'] as String? ?? "",
-  lastUpdateDate:
-      json['lastUpdateDate'] == null
-          ? null
-          : DateTime.parse(json['lastUpdateDate'] as String),
+  lastUpdateDate: json['lastUpdateDate'] == null
+      ? null
+      : DateTime.parse(json['lastUpdateDate'] as String),
   autoUpdateDuration: Duration(
     microseconds: (json['autoUpdateDuration'] as num).toInt(),
   ),
-  subscriptionInfo:
-      json['subscriptionInfo'] == null
-          ? null
-          : SubscriptionInfo.fromJson(
-            json['subscriptionInfo'] as Map<String, dynamic>,
-          ),
+  subscriptionInfo: json['subscriptionInfo'] == null
+      ? null
+      : SubscriptionInfo.fromJson(
+          json['subscriptionInfo'] as Map<String, dynamic>,
+        ),
   autoUpdate: json['autoUpdate'] as bool? ?? true,
   selectedMap:
       (json['selectedMap'] as Map<String, dynamic>?)?.map(
@@ -49,10 +47,9 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   unfoldSet:
       (json['unfoldSet'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
       const {},
-  overrideData:
-      json['overrideData'] == null
-          ? const OverrideData()
-          : OverrideData.fromJson(json['overrideData'] as Map<String, dynamic>),
+  overrideData: json['overrideData'] == null
+      ? const OverrideData()
+      : OverrideData.fromJson(json['overrideData'] as Map<String, dynamic>),
   providerHeaders:
       (json['providerHeaders'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
@@ -78,10 +75,9 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
 _OverrideData _$OverrideDataFromJson(Map<String, dynamic> json) =>
     _OverrideData(
       enable: json['enable'] as bool? ?? false,
-      rule:
-          json['rule'] == null
-              ? const OverrideRule()
-              : OverrideRule.fromJson(json['rule'] as Map<String, dynamic>),
+      rule: json['rule'] == null
+          ? const OverrideRule()
+          : OverrideRule.fromJson(json['rule'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$OverrideDataToJson(_OverrideData instance) =>

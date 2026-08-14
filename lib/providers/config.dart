@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/config.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AppSetting extends _$AppSetting with AutoDisposeNotifierMixin {
   @override
   AppSettingProps build() => globalState.config.appSetting;
@@ -23,7 +23,7 @@ class AppSetting extends _$AppSetting with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class WindowSetting extends _$WindowSetting with AutoDisposeNotifierMixin {
   @override
   WindowProps build() => globalState.config.windowProps;
@@ -40,7 +40,7 @@ class WindowSetting extends _$WindowSetting with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class VpnSetting extends _$VpnSetting with AutoDisposeNotifierMixin {
   @override
   VpnProps build() => globalState.config.vpnProps;
@@ -57,7 +57,7 @@ class VpnSetting extends _$VpnSetting with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   @override
   NetworkProps build() => globalState.config.networkProps;
@@ -74,7 +74,7 @@ class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ThemeSetting extends _$ThemeSetting with AutoDisposeNotifierMixin {
   @override
   ThemeProps build() => globalState.config.themeProps;
@@ -91,7 +91,7 @@ class ThemeSetting extends _$ThemeSetting with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Profiles extends _$Profiles with AutoDisposeNotifierMixin {
   @override
   List<Profile> build() => globalState.config.profiles;
@@ -145,7 +145,7 @@ class Profiles extends _$Profiles with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class CurrentProfileId extends _$CurrentProfileId
     with AutoDisposeNotifierMixin {
   @override
@@ -162,7 +162,7 @@ class CurrentProfileId extends _$CurrentProfileId
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class OverrideDns extends _$OverrideDns with AutoDisposeNotifierMixin {
   @override
   bool build() => globalState.config.overrideDns;
@@ -175,7 +175,7 @@ class OverrideDns extends _$OverrideDns with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class HotKeyActions extends _$HotKeyActions with AutoDisposeNotifierMixin {
   @override
   List<HotKeyAction> build() => globalState.config.hotKeyActions;
@@ -188,7 +188,7 @@ class HotKeyActions extends _$HotKeyActions with AutoDisposeNotifierMixin {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ProxiesStyleSetting extends _$ProxiesStyleSetting
     with AutoDisposeNotifierMixin {
   @override
@@ -206,7 +206,7 @@ class ProxiesStyleSetting extends _$ProxiesStyleSetting
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ScriptState extends _$ScriptState with AutoDisposeNotifierMixin {
   @override
   ScriptProps build() => globalState.config.scriptProps;
@@ -254,7 +254,7 @@ class ScriptState extends _$ScriptState with AutoDisposeNotifierMixin {
       state.scripts.indexWhere((item) => item.label == label) != -1;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PatchMihomoConfig extends _$PatchMihomoConfig
     with AutoDisposeNotifierMixin {
   @override

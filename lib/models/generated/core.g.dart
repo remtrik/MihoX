@@ -103,18 +103,16 @@ _AndroidVpnOptions _$AndroidVpnOptionsFromJson(Map<String, dynamic> json) =>
     _AndroidVpnOptions(
       enable: json['enable'] as bool,
       port: (json['port'] as num).toInt(),
-      accessControl:
-          json['accessControl'] == null
-              ? null
-              : AccessControl.fromJson(
-                json['accessControl'] as Map<String, dynamic>,
-              ),
+      accessControl: json['accessControl'] == null
+          ? null
+          : AccessControl.fromJson(
+              json['accessControl'] as Map<String, dynamic>,
+            ),
       allowBypass: json['allowBypass'] as bool,
       systemProxy: json['systemProxy'] as bool,
-      bypassDomain:
-          (json['bypassDomain'] as List<dynamic>)
-              .map((e) => e as String)
-              .toList(),
+      bypassDomain: (json['bypassDomain'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       ipv4Address: json['ipv4Address'] as String,
       ipv6Address: json['ipv6Address'] as String,
       routeAddress:

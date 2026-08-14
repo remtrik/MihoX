@@ -139,7 +139,7 @@
   "compatible": "Compatibility mode",
   "compatibleDesc": "Opening it will lose part of its application ability and gain the support of full amount of Mihomo.",
   "notSelectedTip": "The current proxy group cannot be selected.",
-  "tip": "tip",
+  "tip": "Tip",
   "backupAndRecovery": "Backup and Recovery",
   "backupAndRecoveryDesc": "Sync data file",
   "account": "Account",

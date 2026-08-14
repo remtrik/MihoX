@@ -604,7 +604,7 @@ String getProxyDesc(Ref ref, Proxy proxy) {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ProfileOverrideState extends _$ProfileOverrideState {
   @override
   ProfileOverrideStateModel build() => const ProfileOverrideStateModel(
