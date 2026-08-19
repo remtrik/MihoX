@@ -38,7 +38,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
     ("GeoIp", "GeoIP.dat"),
     ("MMDB", "geoip.metadb"),
     ("GeoSite", "GeoSite.dat"),
-    ("ASN", "GeoLite2-ASN.mmdb"),
+    ("ASN", "ASN.mmdb"),
   ];
 
   bool _isUpdatingAll = false;
