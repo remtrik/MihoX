@@ -381,12 +381,10 @@ void _handleMainIpc(MihomoLibHandler mihomoLibHandler) {
 @immutable
 class _TileListenerWithService with TileListener {
   const _TileListenerWithService({
-    required Function() onStart,
-    required Function() onStop,
-    required Function(String mode) onChangeMode,
-  })  : _onStart = onStart,
-        _onStop = onStop,
-        _onChangeMode = onChangeMode;
+    required this._onStart,
+    required this._onStop,
+    required this._onChangeMode,
+  });
 
   final Function() _onStart;
   final Function() _onStop;
@@ -411,8 +409,8 @@ class _TileListenerWithService with TileListener {
 @immutable
 class _VpnListenerWithService with VpnListener {
   const _VpnListenerWithService({
-    required Function(String dns) onDnsChanged,
-  }) : _onDnsChanged = onDnsChanged;
+    required this._onDnsChanged,
+  });
   final Function(String dns) _onDnsChanged;
 
   @override

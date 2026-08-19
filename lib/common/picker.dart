@@ -21,10 +21,10 @@ class Picker {
       bytes: bytes,
     );
     if (!Platform.isAndroid && path != null) {
-      final file = await File(path).create(recursive: true);
+      final file = await File(path.toFilePath()).create(recursive: true);
       await file.writeAsBytes(bytes);
     }
-    return path;
+    return path?.toFilePath();
   }
 
   Future<String?> pickerConfigQRCode() async {

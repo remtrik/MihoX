@@ -73,7 +73,7 @@ _Log _$LogFromJson(Map<String, dynamic> json) => _Log(
 );
 
 Map<String, dynamic> _$LogToJson(_Log instance) => <String, dynamic>{
-  'LogLevel': _$LogLevelEnumMap[instance.logLevel]!,
+  'LogLevel': _$LogLevelEnumMap[instance.logLevel],
   'Payload': instance.payload,
   'dateTime': instance.dateTime,
 };
@@ -129,7 +129,7 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
 );
 
 Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
-  'type': _$GroupTypeEnumMap[instance.type]!,
+  'type': _$GroupTypeEnumMap[instance.type],
   'all': instance.all,
   'now': instance.now,
   'hidden': instance.hidden,
@@ -159,7 +159,7 @@ _HotKeyAction _$HotKeyActionFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$HotKeyActionToJson(_HotKeyAction instance) =>
     <String, dynamic>{
-      'action': _$HotActionEnumMap[instance.action]!,
+      'action': _$HotActionEnumMap[instance.action],
       'key': instance.key,
       'modifiers': instance.modifiers
           .map((e) => _$KeyboardModifierEnumMap[e]!)

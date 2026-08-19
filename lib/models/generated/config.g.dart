@@ -57,7 +57,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'developerMode': instance.developerMode,
       'overrideProviderSettings': instance.overrideProviderSettings,
       'overrideNetworkSettings': instance.overrideNetworkSettings,
-      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy]!,
+      'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy],
     };
 
 const _$RecoveryStrategyEnumMap = {
@@ -108,10 +108,10 @@ _AccessControl _$AccessControlFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AccessControlToJson(_AccessControl instance) =>
     <String, dynamic>{
       'enable': instance.enable,
-      'mode': _$AccessControlModeEnumMap[instance.mode]!,
+      'mode': _$AccessControlModeEnumMap[instance.mode],
       'acceptList': instance.acceptList,
       'rejectList': instance.rejectList,
-      'sort': _$AccessSortTypeEnumMap[instance.sort]!,
+      'sort': _$AccessSortTypeEnumMap[instance.sort],
       'isFilterSystemApp': instance.isFilterSystemApp,
       'isFilterNonInternetApp': instance.isFilterNonInternetApp,
     };
@@ -178,7 +178,7 @@ Map<String, dynamic> _$NetworkPropsToJson(_NetworkProps instance) =>
     <String, dynamic>{
       'systemProxy': instance.systemProxy,
       'bypassDomain': instance.bypassDomain,
-      'routeMode': _$RouteModeEnumMap[instance.routeMode]!,
+      'routeMode': _$RouteModeEnumMap[instance.routeMode],
       'autoSetSystemDns': instance.autoSetSystemDns,
     };
 
@@ -217,11 +217,11 @@ _ProxiesStyle _$ProxiesStyleFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ProxiesStyleToJson(_ProxiesStyle instance) =>
     <String, dynamic>{
-      'type': _$ProxiesTypeEnumMap[instance.type]!,
-      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType]!,
-      'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
-      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
-      'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
+      'type': _$ProxiesTypeEnumMap[instance.type],
+      'sortType': _$ProxiesSortTypeEnumMap[instance.sortType],
+      'layout': _$ProxiesLayoutEnumMap[instance.layout],
+      'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle],
+      'cardType': _$ProxyCardTypeEnumMap[instance.cardType],
       'iconMap': instance.iconMap,
     };
 
@@ -283,8 +283,8 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
     <String, dynamic>{
       'primaryColor': instance.primaryColor,
       'primaryColors': instance.primaryColors,
-      'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
-      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
+      'themeMode': _$ThemeModeEnumMap[instance.themeMode],
+      'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant],
       'pureBlack': instance.pureBlack,
       'textScale': instance.textScale,
     };

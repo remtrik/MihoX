@@ -152,16 +152,11 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
   _RenderSideSheetLayoutWithSizeListener({
     RenderBox? child,
-    required _SizeChangeCallback<Size> onChildSizeChanged,
-    required double animationValue,
-    required bool isScrollControlled,
-    required double scrollControlDisabledMaxHeightRatio,
-  })  : _onChildSizeChanged = onChildSizeChanged,
-        _animationValue = animationValue,
-        _isScrollControlled = isScrollControlled,
-        _scrollControlDisabledMaxHeightRatio =
-            scrollControlDisabledMaxHeightRatio,
-        super(child);
+    required this._onChildSizeChanged,
+    required this._animationValue,
+    required this._isScrollControlled,
+    required this._scrollControlDisabledMaxHeightRatio,
+  })  : super(child);
 
   Size _lastSize = Size.zero;
 

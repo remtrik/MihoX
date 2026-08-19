@@ -627,15 +627,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox,
             ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
-    required int? highlightedIndex,
-    required Color thumbColor,
-    required double thumbScale,
-    required bool proportionalWidth,
+    required this._highlightedIndex,
+    required this._thumbColor,
+    required this._thumbScale,
+    required this._proportionalWidth,
     required this.state,
-  })  : _highlightedIndex = highlightedIndex,
-        _thumbColor = thumbColor,
-        _thumbScale = thumbScale,
-        _proportionalWidth = proportionalWidth;
+  });
 
   final _CommonTabBarState<T> state;
 
