@@ -43,7 +43,7 @@ class MihoXHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     // ignore: cascade_invocations
-    client.badCertificateCallback = (_, _, _) => true;
+    client.badCertificateCallback = (cert, host, port) => host == "localhost" ? true : false;
     // ignore: cascade_invocations
     client.findProxy = handleFindProxy;
     return client;
