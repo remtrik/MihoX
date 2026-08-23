@@ -161,6 +161,7 @@ abstract class ProxiesStyle with _$ProxiesStyle {
   const factory ProxiesStyle({
     @Default(ProxiesType.list) ProxiesType type,
     @Default(ProxiesSortType.none) ProxiesSortType sortType,
+    @Default({}) Map<String, ProxiesSortType> groupSortTypes,
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
     @JsonKey(unknownEnumValue: ProxiesIconStyle.icon)
     @Default(ProxiesIconStyle.icon)

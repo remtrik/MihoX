@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
 import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
@@ -53,6 +54,77 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       currentState?.proxies ?? [],
       currentState?.testUrl,
     );
+  }
+
+  void _showSortMenu(
+      BuildContext context, String groupName, Offset tapPosition) {
+    final style = ref.read(proxiesStyleSettingProvider);
+    final currentSortType =
+        style.groupSortTypes[groupName] ?? style.sortType;
+
+    final items = <PopupMenuEntry<ProxiesSortType?>>[
+      for (final item in ProxiesSortType.values)
+        PopupMenuItem<ProxiesSortType>(
+          value: item,
+          child: Row(
+            children: [
+              Icon(
+                switch (item) {
+                  ProxiesSortType.none => Icons.sort,
+                  ProxiesSortType.delay => Icons.network_ping,
+                  ProxiesSortType.name => Icons.sort_by_alpha,
+                },
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(switch (item) {
+                ProxiesSortType.none => appLocalizations.defaultText,
+                ProxiesSortType.delay => appLocalizations.delay,
+                ProxiesSortType.name => appLocalizations.name,
+              }),
+              if (item == currentSortType) ...[
+                const Spacer(),
+                const Icon(Icons.check, size: 18),
+              ],
+            ],
+          ),
+        ),
+      /*const PopupMenuDivider(),
+      PopupMenuItem<ProxiesSortType?>(
+        value: null,
+        child: Row(
+          children: [
+            const Icon(Icons.refresh, size: 20),
+            const SizedBox(width: 12),
+            Text('Reset to default'),
+          ],
+        ),
+      ),*/
+    ];
+
+    showMenu<ProxiesSortType?>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        tapPosition.dx,
+        tapPosition.dy,
+        tapPosition.dx,
+        tapPosition.dy,
+      ),
+      items: items,
+    ).then((value) {
+      if (!context.mounted) return;
+      ref.read(proxiesStyleSettingProvider.notifier).updateState((state) {
+        final newGroupSortTypes = Map<String, ProxiesSortType>.from(
+          state.groupSortTypes,
+        );
+        if (value == null) {
+          newGroupSortTypes.remove(groupName);
+        } else {
+          newGroupSortTypes[groupName] = value;
+        }
+        return state.copyWith(groupSortTypes: newGroupSortTypes);
+      });
+    });
   }
 
   Consumer _buildMoreButton() => Consumer(
@@ -246,8 +318,12 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                       const WidgetStatePropertyAll(Colors.transparent),
                   tabs: [
                     for (final groupName in groupNames)
-                      Tab(
-                        text: groupName,
+                      GestureDetector(
+                        onLongPressStart: (details) =>
+                            _showSortMenu(context, groupName, details.globalPosition),
+                        child: Tab(
+                          text: groupName,
+                        ),
                       ),
                   ],
                 ),
@@ -338,7 +414,11 @@ class ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     if (identical(proxies, _cachedInputProxies) && testUrl == _cachedTestUrl) {
       return _cachedSortedProxies;
     }
-    final sorted = globalState.appController.getSortProxies(proxies, testUrl);
+    final sorted = globalState.appController.getSortProxies(
+      proxies,
+      url: testUrl,
+      groupName: groupName,
+    );
     _cachedInputProxies = proxies;
     _cachedTestUrl = testUrl;
     _cachedSortedProxies = sorted;

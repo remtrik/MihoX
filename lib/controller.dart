@@ -1370,15 +1370,22 @@ class AppController {
           },
         );
 
-  List<Proxy> getSortProxies(List<Proxy> proxies, [String? url]) =>
-      switch (_ref.read(proxiesStyleSettingProvider).sortType) {
-        ProxiesSortType.none => proxies,
-        ProxiesSortType.delay => _sortOfDelay(
-            proxies: proxies,
-            testUrl: url,
-          ),
-        ProxiesSortType.name => _sortOfName(proxies),
-      };
+  List<Proxy> getSortProxies(List<Proxy> proxies,
+      {String? url, String? groupName}) {
+    final style = _ref.read(proxiesStyleSettingProvider);
+    final sortType =
+        (groupName != null && style.groupSortTypes.containsKey(groupName))
+            ? style.groupSortTypes[groupName]!
+            : style.sortType;
+    return switch (sortType) {
+      ProxiesSortType.none => proxies,
+      ProxiesSortType.delay => _sortOfDelay(
+          proxies: proxies,
+          testUrl: url,
+        ),
+      ProxiesSortType.name => _sortOfName(proxies),
+    };
+  }
 
   Future<Null> clearEffect(String profileId) async {
     final profilePath = await appPath.getProfilePath(profileId);

@@ -34,7 +34,7 @@
   "themeDesc": "Set dark mode,adjust the color",
   "override": "Override",
   "overrideDesc": "Override Proxy related config",
-  "allowLan": "AllowLan",
+  "allowLan": "Allow Lan",
   "allowLanDesc": "Allow access proxy through the LAN",
   "tun": "TUN",
   "tunDesc": "only effective in administrator mode",

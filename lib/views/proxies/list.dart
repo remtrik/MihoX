@@ -91,26 +91,34 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     final proxiesLists = <List<Proxy>>[];
     final groupNameProxiesMap = <String, List<Proxy>>{};
 
+    final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
+
     for (final groupName in groupNames) {
       final group = ref.watch(
         groupsProvider.select((state) => state.getGroup(groupName)),
       );
       if (group == null) continue;
 
+      final effectiveSortType =
+          proxiesStyle.groupSortTypes[groupName] ?? proxiesStyle.sortType;
+
       final cached = _sortCache[groupName];
       final List<Proxy> sortedProxies;
       if (cached != null &&
           identical(cached.group, group) &&
-          cached.query == query) {
+          cached.query == query &&
+          cached.sortType == effectiveSortType) {
         sortedProxies = cached.sorted;
       } else {
         sortedProxies = globalState.appController.getSortProxies(
           group.all
               .where((item) => item.name.toLowerCase().contains(query))
               .toList(),
-          group.testUrl,
+          url: group.testUrl,
+          groupName: groupName,
         );
-        _sortCache[groupName] = _SortCacheEntry(group, query, sortedProxies);
+        _sortCache[groupName] =
+            _SortCacheEntry(group, query, effectiveSortType, sortedProxies);
       }
 
       groups.add(group);
@@ -227,10 +235,11 @@ class _ProxiesListViewState extends State<ProxiesListView> {
 }
 
 class _SortCacheEntry {
-  const _SortCacheEntry(this.group, this.query, this.sorted);
+  const _SortCacheEntry(this.group, this.query, this.sortType, this.sorted);
 
   final Group group;
   final String query;
+  final ProxiesSortType sortType;
   final List<Proxy> sorted;
 }
 
@@ -250,6 +259,7 @@ class ProxyGroupCard extends StatefulWidget {
 
 class _ProxyGroupCardState extends State<ProxyGroupCard> {
   final _expansibleController = ExpansibleController();
+  final _sortButtonKey = GlobalKey();
 
   final _isLocked = ValueNotifier<bool>(false);
 
@@ -289,6 +299,86 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
     } finally {
       _isLocked.value = false;
     }
+  }
+
+  RelativeRect _menuPosition(BuildContext context) {
+    final renderBox =
+        _sortButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    return RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy + renderBox.size.height,
+      offset.dx + renderBox.size.width,
+      offset.dy + renderBox.size.height,
+    );
+  }
+
+  void _showSortMenu(BuildContext context) {
+    final styleNotifier =
+        ProviderScope.containerOf(context).read(proxiesStyleSettingProvider);
+    final currentSortType =
+        styleNotifier.groupSortTypes[_groupName] ?? styleNotifier.sortType;
+
+    final items = <PopupMenuEntry<ProxiesSortType?>>[
+      for (final item in ProxiesSortType.values)
+        PopupMenuItem<ProxiesSortType>(
+          value: item,
+          child: Row(
+            children: [
+              Icon(
+                switch (item) {
+                  ProxiesSortType.none => Icons.sort,
+                  ProxiesSortType.delay => Icons.network_ping,
+                  ProxiesSortType.name => Icons.sort_by_alpha,
+                },
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(switch (item) {
+                ProxiesSortType.none => appLocalizations.defaultText,
+                ProxiesSortType.delay => appLocalizations.delay,
+                ProxiesSortType.name => appLocalizations.name,
+              }),
+              if (item == currentSortType) ...[
+                const Spacer(),
+                const Icon(Icons.check, size: 18),
+              ],
+            ],
+          ),
+        ),
+      /*const PopupMenuDivider(),
+      PopupMenuItem<ProxiesSortType?>(
+        value: null,
+        child: Row(
+          children: [
+            const Icon(Icons.refresh, size: 20),
+            const SizedBox(width: 12),
+            Text('Reset to default'),
+          ],
+        ),
+      ),*/
+    ];
+
+    showMenu<ProxiesSortType?>(
+      context: context,
+      position: _menuPosition(context),
+      items: items,
+    ).then((value) {
+      if (!context.mounted) return;
+      ProviderScope.containerOf(context)
+          .read(proxiesStyleSettingProvider.notifier)
+          .updateState((state) {
+        final newGroupSortTypes = Map<String, ProxiesSortType>.from(
+          state.groupSortTypes,
+        );
+        if (value == null) {
+          newGroupSortTypes.remove(_groupName);
+        } else {
+          newGroupSortTypes[_groupName] = value;
+        }
+        return state.copyWith(groupSortTypes: newGroupSortTypes);
+      });
+    });
   }
 
   List<MapEntry<RegExp?, String>> _compiledMatchers(
@@ -430,6 +520,38 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
                                   visualDensity: VisualDensity.standard,
                                   icon: const Icon(Icons.network_ping),
                                 ),
+                              ),
+                              const SizedBox(width: 6),
+                              Consumer(
+                                builder: (_, ref, _) {
+                                  final sortType = ref.watch(
+                                    proxiesStyleSettingProvider.select((s) =>
+                                        s.groupSortTypes[_groupName] ??
+                                        s.sortType),
+                                  );
+                                  return IconButton(
+                                    key: _sortButtonKey,
+                                    onPressed: () => _showSortMenu(context),
+                                    visualDensity: VisualDensity.standard,
+                                    icon: Icon(
+                                      switch (sortType) {
+                                        ProxiesSortType.none => Icons.sort,
+                                        ProxiesSortType.delay =>
+                                          Icons.network_ping,
+                                        ProxiesSortType.name =>
+                                          Icons.sort_by_alpha,
+                                      },
+                                    ),
+                                    tooltip: switch (sortType) {
+                                      ProxiesSortType.none =>
+                                        appLocalizations.defaultText,
+                                      ProxiesSortType.delay =>
+                                        appLocalizations.delay,
+                                      ProxiesSortType.name =>
+                                        appLocalizations.name,
+                                    },
+                                  );
+                                },
                               ),
                               const SizedBox(width: 6),
                             ] else

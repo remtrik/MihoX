@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unnecessary_null_checks
+
 part of '../mihomo_config.dart';
 
 // **************************************************************************
@@ -29,7 +31,7 @@ _ProxyGroup _$ProxyGroupFromJson(Map<String, dynamic> json) => _ProxyGroup(
 Map<String, dynamic> _$ProxyGroupToJson(_ProxyGroup instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'type': _$GroupTypeEnumMap[instance.type],
+      'type': _$GroupTypeEnumMap[instance.type]!,
       'proxies': instance.proxies,
       'use': instance.use,
       'interval': instance.interval,
@@ -150,7 +152,7 @@ Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'enable': instance.enable,
   'device': instance.device,
   'auto-route': instance.autoRoute,
-  'stack': _$TunStackEnumMap[instance.stack],
+  'stack': _$TunStackEnumMap[instance.stack]!,
   'dns-hijack': instance.dnsHijack,
   'route-address': instance.routeAddress,
 };
@@ -246,7 +248,7 @@ Map<String, dynamic> _$DnsToJson(_Dns instance) => <String, dynamic>{
   'respect-rules': instance.respectRules,
   'ipv6': instance.ipv6,
   'default-nameserver': instance.defaultNameserver,
-  'enhanced-mode': _$DnsModeEnumMap[instance.enhancedMode],
+  'enhanced-mode': _$DnsModeEnumMap[instance.enhancedMode]!,
   'fake-ip-range': instance.fakeIpRange,
   'fake-ip-filter': instance.fakeIpFilter,
   'nameserver-policy': instance.nameserverPolicy,
@@ -391,23 +393,23 @@ Map<String, dynamic> _$MihomoConfigToJson(_MihomoConfig instance) =>
       'port': instance.port,
       'redir-port': instance.redirPort,
       'tproxy-port': instance.tproxyPort,
-      'mode': _$ModeEnumMap[instance.mode],
+      'mode': _$ModeEnumMap[instance.mode]!,
       'allow-lan': instance.allowLan,
-      'log-level': _$LogLevelEnumMap[instance.logLevel],
+      'log-level': _$LogLevelEnumMap[instance.logLevel]!,
       'ipv6': instance.ipv6,
-      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode],
+      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode]!,
       'keep-alive-interval': instance.keepAliveInterval,
       'unified-delay': instance.unifiedDelay,
       'tcp-concurrent': instance.tcpConcurrent,
       'tun': instance.tun,
       'dns': instance.dns,
       'geox-url': instance.geoXUrl,
-      'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader],
+      'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
       'proxy-groups': instance.proxyGroups,
       'rule': instance.rule,
       'global-ua': instance.globalUa,
       'external-controller':
-          _$ExternalControllerStatusEnumMap[instance.externalController],
+          _$ExternalControllerStatusEnumMap[instance.externalController]!,
       'hosts': instance.hosts,
     };
 

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unnecessary_null_checks
+
 part of '../core.dart';
 
 // **************************************************************************
@@ -44,13 +46,13 @@ Map<String, dynamic> _$UpdateParamsToJson(_UpdateParams instance) =>
       'tun': instance.tun,
       'mixed-port': instance.mixedPort,
       'allow-lan': instance.allowLan,
-      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode],
-      'mode': _$ModeEnumMap[instance.mode],
-      'log-level': _$LogLevelEnumMap[instance.logLevel],
+      'find-process-mode': _$FindProcessModeEnumMap[instance.findProcessMode]!,
+      'mode': _$ModeEnumMap[instance.mode]!,
+      'log-level': _$LogLevelEnumMap[instance.logLevel]!,
       'ipv6': instance.ipv6,
       'tcp-concurrent': instance.tcpConcurrent,
       'external-controller':
-          _$ExternalControllerStatusEnumMap[instance.externalController],
+          _$ExternalControllerStatusEnumMap[instance.externalController]!,
       'unified-delay': instance.unifiedDelay,
     };
 
@@ -180,7 +182,7 @@ _AppMessage _$AppMessageFromJson(Map<String, dynamic> json) => _AppMessage(
 
 Map<String, dynamic> _$AppMessageToJson(_AppMessage instance) =>
     <String, dynamic>{
-      'type': _$AppMessageTypeEnumMap[instance.type],
+      'type': _$AppMessageTypeEnumMap[instance.type]!,
       'data': instance.data,
     };
 
@@ -199,7 +201,7 @@ _InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$InvokeMessageToJson(_InvokeMessage instance) =>
     <String, dynamic>{
-      'type': _$InvokeMessageTypeEnumMap[instance.type],
+      'type': _$InvokeMessageTypeEnumMap[instance.type]!,
       'data': instance.data,
     };
 
@@ -279,7 +281,7 @@ _Action _$ActionFromJson(Map<String, dynamic> json) => _Action(
 );
 
 Map<String, dynamic> _$ActionToJson(_Action instance) => <String, dynamic>{
-  'method': _$ActionMethodEnumMap[instance.method],
+  'method': _$ActionMethodEnumMap[instance.method]!,
   'data': instance.data,
   'id': instance.id,
 };
@@ -339,10 +341,10 @@ _ActionResult _$ActionResultFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ActionResultToJson(_ActionResult instance) =>
     <String, dynamic>{
-      'method': _$ActionMethodEnumMap[instance.method],
+      'method': _$ActionMethodEnumMap[instance.method]!,
       'data': instance.data,
       'id': instance.id,
-      'code': _$ResultTypeEnumMap[instance.code],
+      'code': _$ResultTypeEnumMap[instance.code]!,
     };
 
 const _$ResultTypeEnumMap = {ResultType.success: 0, ResultType.error: -1};
