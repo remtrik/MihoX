@@ -184,8 +184,6 @@ class Build {
     throw "Unable to determine Android NDK prebuilt host directory. Found: $hostNames";
   }
 
-  static String get tags => "with_gvisor,cmfa";
-
   static Future<void> exec(
     List<String> executable, {
     String? name,
@@ -295,6 +293,8 @@ class Build {
       } else {
         env["CGO_ENABLED"] = "0";
       }
+
+      final tags = (target == Target.android ? "with_gvisor,cmfa" : "with_gvisor");
 
       final execLines = [
         "go",
