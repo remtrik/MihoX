@@ -277,7 +277,7 @@ class _ProfileItemState extends State<ProfileItem> {
           profile: widget.profile,
           context: context,
         ),
-        title: "${appLocalizations.edit}${appLocalizations.profile}",
+        title: "${appLocalizations.edit} ${appLocalizations.profile.toLowerCase()}",
       ),
     );
   }
@@ -344,6 +344,14 @@ class _ProfileItemState extends State<ProfileItem> {
           );
         }),
       const SizedBox(height: 6),
+      const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircleAvatar(
+                foregroundImage: AssetImage("assets/images/icon.png"),
+                backgroundColor: Colors.transparent,
+              ),
+            ),
       Text(
         expireDate != "N/A"
             ? '${appLocalizations.expiresOn} $expireDate'

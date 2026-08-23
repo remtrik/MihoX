@@ -165,7 +165,7 @@ class _LogConnectionsBodyState extends ConsumerState<LogConnectionsBody> {
             final content = connections.isEmpty
                 ? NullStatus(
                     label: appLocalizations
-                        .nullTip(appLocalizations.connectionsLog),
+                        .nullTip(appLocalizations.connectionsLog.toLowerCase()),
                   )
                 : Align(
                     alignment: Alignment.topCenter,

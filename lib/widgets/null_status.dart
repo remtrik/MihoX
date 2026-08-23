@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../common/common.dart';
 
 class NullStatus extends StatelessWidget {
-  const NullStatus({super.key, required this.label});
+  NullStatus({super.key, required this.label});
   final String label;
 
   @override

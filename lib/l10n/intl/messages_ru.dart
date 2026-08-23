@@ -195,9 +195,11 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "connections": MessageLookupByLibrary.simpleMessage("Соединения"),
+        "connectionsActive": MessageLookupByLibrary.simpleMessage("Активные"),
         "connectionsDesc": MessageLookupByLibrary.simpleMessage(
           "Просмотр текущих данных о соединениях",
         ),
+        "connectionsLog": MessageLookupByLibrary.simpleMessage("Журнал"),
         "connectivity": MessageLookupByLibrary.simpleMessage("Связь："),
         "contactMe": MessageLookupByLibrary.simpleMessage("Свяжитесь со мной"),
         "content": MessageLookupByLibrary.simpleMessage("Содержание"),

@@ -186,9 +186,11 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "connections": MessageLookupByLibrary.simpleMessage("Connections"),
+        "connectionsActive": MessageLookupByLibrary.simpleMessage("Active"),
         "connectionsDesc": MessageLookupByLibrary.simpleMessage(
           "View current connections data",
         ),
+        "connectionsLog": MessageLookupByLibrary.simpleMessage("Log"),
         "connectivity": MessageLookupByLibrary.simpleMessage("Connectivity："),
         "contactMe": MessageLookupByLibrary.simpleMessage("Contact me"),
         "content": MessageLookupByLibrary.simpleMessage("Content"),

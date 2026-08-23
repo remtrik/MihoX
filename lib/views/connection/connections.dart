@@ -336,7 +336,7 @@ class _ActiveConnectionsBodyState extends ConsumerState<ActiveConnectionsBody>
           if (connections.isEmpty) {
             return NullStatus(
               label:
-                  appLocalizations.nullTip(appLocalizations.connectionsActive),
+                  appLocalizations.nullTip(appLocalizations.connectionsActive.toLowerCase()),
             );
           }
           return CommonScrollBar(
