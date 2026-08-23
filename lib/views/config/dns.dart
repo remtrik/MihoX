@@ -11,15 +11,48 @@ class OverrideItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final override = ref.watch(overrideDnsProvider);
-    return ListItem.switchItem(
-      title: Text(appLocalizations.overrideDns),
-      subtitle: Text(appLocalizations.overrideDnsDesc),
-      delegate: SwitchDelegate(
-        value: override,
-        onChanged: (value) async {
-          ref.read(overrideDnsProvider.notifier).value = value;
-        },
-      ),
+    return Column( 
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListItem.switchItem(
+          title: Text(appLocalizations.overrideDns),
+          subtitle: Text(appLocalizations.overrideDnsDesc),
+          delegate: SwitchDelegate(
+            value: override,
+            onChanged: (value) async {
+              ref.read(overrideDnsProvider.notifier).value = value;
+            },
+          ),
+        ),
+        if (!override)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.5),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    appLocalizations.managedByProvider,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
@@ -601,50 +634,68 @@ class DomainItem extends StatelessWidget {
       );
 }
 
-class DnsOptions extends StatelessWidget {
+class DnsOptions extends ConsumerWidget {
   const DnsOptions({super.key});
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: generateSection(
-          title: appLocalizations.options,
-          items: [
-            const StatusItem(),
-            const ListenItem(),
-            const UseHostsItem(),
-            const UseSystemHostsItem(),
-            const IPv6Item(),
-            const RespectRulesItem(),
-            const PreferH3Item(),
-            const DnsModeItem(),
-            const FakeIpRangeItem(),
-            const FakeIpFilterItem(),
-            const DefaultNameserverItem(),
-            const NameserverPolicyItem(),
-            const NameserverItem(),
-            const FallbackItem(),
-            const ProxyServerNameserverItem(),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final override = ref.watch(overrideDnsProvider);
+    return AbsorbPointer(
+      absorbing: !override,
+      child: Opacity(
+        opacity: override ? 1.0 : 0.5,
+        child: Column(
+          children: generateSection(
+            title: appLocalizations.options,
+            items: [
+              const StatusItem(),
+              const ListenItem(),
+              const UseHostsItem(),
+              const UseSystemHostsItem(),
+              const IPv6Item(),
+              const RespectRulesItem(),
+              const PreferH3Item(),
+              const DnsModeItem(),
+              const FakeIpRangeItem(),
+              const FakeIpFilterItem(),
+              const DefaultNameserverItem(),
+              const NameserverPolicyItem(),
+              const NameserverItem(),
+              const FallbackItem(),
+              const ProxyServerNameserverItem(),
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
-class FallbackFilterOptions extends StatelessWidget {
+class FallbackFilterOptions extends ConsumerWidget {
   const FallbackFilterOptions({super.key});
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: generateSection(
-          title: appLocalizations.fallbackFilter,
-          items: [
-            const GeoipItem(),
-            const GeoipCodeItem(),
-            const GeositeItem(),
-            const IpcidrItem(),
-            const DomainItem(),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final override = ref.watch(overrideDnsProvider);
+    return AbsorbPointer(
+      absorbing: !override,
+      child: Opacity(
+        opacity: override ? 1.0 : 0.5,
+        child: Column(
+          children: generateSection(
+            title: appLocalizations.fallbackFilter,
+            items: [
+              const GeoipItem(),
+              const GeoipCodeItem(),
+              const GeositeItem(),
+              const IpcidrItem(),
+              const DomainItem(),
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 const dnsItems = <Widget>[

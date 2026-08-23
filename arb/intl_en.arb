@@ -262,7 +262,7 @@
   "providers": "Providers",
   "proxyProviders": "Proxy providers",
   "ruleProviders": "Rule providers",
-  "overrideDns": "Override Dns",
+  "overrideDns": "Override DNS",
   "overrideDnsDesc": "Turning it on will override the DNS options in the profile",
   "status": "Status",
   "statusDesc": "System DNS will be used when turned off",
