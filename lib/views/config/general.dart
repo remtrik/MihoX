@@ -337,14 +337,14 @@ class HostsItem extends StatelessWidget {
       );
 }
 
-class SendHeadersToggle extends StatefulWidget {
+class SendHeadersToggle extends ConsumerStatefulWidget {
   const SendHeadersToggle({super.key});
 
   @override
-  State<SendHeadersToggle> createState() => _SendHeadersToggleState();
+  ConsumerState<SendHeadersToggle> createState() => _SendHeadersToggleState();
 }
 
-class _SendHeadersToggleState extends State<SendHeadersToggle> {
+class _SendHeadersToggleState extends ConsumerState<SendHeadersToggle> {
   static const _preferenceKey = 'sendDeviceHeaders';
   bool _sendHeaders = true;
 
@@ -372,15 +372,28 @@ class _SendHeadersToggleState extends State<SendHeadersToggle> {
   }
 
   @override
-  Widget build(BuildContext context) => ListItem.switchItem(
-        leading: const Icon(Icons.perm_device_information_outlined),
-        title: Text(appLocalizations.settingsSendDeviceDataTitle),
-        subtitle: Text(appLocalizations.settingsSendDeviceDataSubtitle),
-        delegate: SwitchDelegate(
+  Widget build(BuildContext context) {
+    final overrideNetworkSettings = ref.watch(
+      appSettingProvider.select((state) => state.overrideNetworkSettings),
+    );
+    final isEnabled = overrideNetworkSettings;
+
+    return AbsorbPointer(
+      absorbing: !isEnabled,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: ListItem.switchItem(
+          leading: const Icon(Icons.perm_device_information_outlined),
+          title: Text(appLocalizations.settingsSendDeviceDataTitle),
+          subtitle: Text(appLocalizations.settingsSendDeviceDataSubtitle),
+          delegate: SwitchDelegate(
           value: _sendHeaders,
           onChanged: _updatePreference,
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class Ipv6Item extends ConsumerWidget {
