@@ -11,30 +11,37 @@ A fork of FlClashX built on Mihomo, simple and easy to use, open source and ad-f
 ## Features
 
 ### 🛠️ Better default settings
+
 - process search mode on
 - TUN mode on, system proxy mode off
 - proxy list display mode set to 'list'
 - changed camera behavior when adding a subscription via QR
 
 ### 📱 Android High Refresh Rate Support
+
 - Added support for high refresh rate displays (90Hz+) on Android devices for smoother animations and scrolling
 
 ### 🗑️ Clear Application Data
+
 - Added "Clear Data" button in Application Settings that removes all profiles from the profiles folder. Useful for troubleshooting or resetting the application
 
-### ✈️ Transmit HWID to the panel 
+### ✈️ Transmit HWID to the panel
+
 - Works only with <a href="https://github.com/remnawave/panel">Remnawave</a>
 
 ### 💻 Added a new "Announcements" widget
+
 - It transmits announcements from the panel to the widget
 - Works only with <a href="https://github.com/remnawave/panel">Remnawave</a>
 
 ### 📺 Optimized controls for Android TV
+
 - Added a "Paste" button to the menu for adding a subscription via a link
 - Added a profile selection button
 - Added the ability to transfer a profile from the mobile app via a QR code
 
-### 🪪 Redesigned the profile card:
+### 🪪 Redesigned the profile card
+
 - Uses a traffic volume indicator with color change (not displayed if traffic is unlimited)
 - Displays subscription expiration date (if the year is 2099, it displays "Your subscription is permanent")
 - Added a new "Support" button in the profile, which pulls the supportUrl from the panel
@@ -44,6 +51,7 @@ A fork of FlClashX built on Mihomo, simple and easy to use, open source and ad-f
 - Added "changeServerButton" widget. Clicking redirects to the proxy page
 
 ### 🌐 Added parsing of custom headers from the subscription page
+
 <details>
 <summary><strong>mihox-widgets</strong></summary>
 Arranges widgets in the order received from the subscription.
@@ -70,6 +78,7 @@ Usage:
 ```bash
     mihox-widgets: announce,metainfo,outboundModeV2,networkDetection
 ```
+
 </details>
 
 <details>
@@ -89,6 +98,7 @@ Usage:
 ```bash
     mihox-view: type:list; sort:delay; layout:tight; icon:icon; card:shrink
 ```
+
 </details>
 
 <details>
@@ -105,6 +115,7 @@ Usage:
 ```bash
     mihox-custom: update
 ```
+
 </details>
 
 <details>
@@ -116,6 +127,7 @@ Usage:
 ```bash
     mihox-denywidgets: true
 ```
+
 </details>
 
 <details>
@@ -127,6 +139,7 @@ Usage:
 ```bash
     mihox-servicename: MihoX
 ```
+
 </details>
 
 <details>
@@ -138,6 +151,7 @@ Usage:
 ```bash
     mihox-servicelogo: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/remnawave.svg
 ```
+
 </details>
 
 <details>
@@ -145,34 +159,41 @@ Usage:
 Proxy group name to display in the ChangeServerButton widget. The widget shows the active server from the specified group with country flag, ping, and a quick switch button.
 
 **Displayed elements:**
-  - Country flag (automatically extracted from serverDescription or proxy name)
-  - Active server name
-  - Current ping with color indication (green < 600ms, orange >= 600ms, red - timeout)
-  - Quick navigation button to proxy page
+
+- Country flag (automatically extracted from serverDescription or proxy name)
+- Active server name
+- Current ping with color indication (green < 600ms, orange >= 600ms, red - timeout)
+- Quick navigation button to proxy page
 
 Usage:
 
 ```bash
     mihox-serverinfo: Proxy
 ```
+
 </details>
 
 <details>
 <summary><strong>mihox-background</strong></summary>
-Sets a custom background image for the application. Provide a direct link to an image.
+
+flclashx-background: Sets a custom background image for the application. Provide a direct link to an image. Optionally append a comma and a transparency (visibility) value from 1 to 100 (higher = more visible image; omit it for the default dimmed look).
 
 **Image Recommendations:**
-  - Format: PNG, JPG, or WebP
-  - Resolution: 1920x1080 or higher for desktop, 1080x1920 for mobile
-  - File size: Keep under 2MB for better performance
-  - Content: Use images with subtle patterns or gradients; avoid too bright or busy images
-  - Contrast: Ensure good readability of text over the background
+
+- Format: PNG, JPG, or WebP
+- Resolution: 1920x1080 or higher for desktop, 1080x1920 for mobile
+- File size: Keep under 2MB for better performance
+- Content: Use images with subtle patterns or gradients; avoid too bright or busy images
+- Contrast: Ensure good readability of text over the background
 
 Usage:
 
 ```bash
-    mihox-background: https://example.com/background.jpg
+mihox-background: https://example.com/background.jpg
+# with transparency (1-100, higher = more visible background):
+mihox-background: https://example.com/background.jpg,30
 ```
+
 </details>
 
 <details>
@@ -194,6 +215,7 @@ Usage:
 ```bash
     mihox-settings: minimize, autorun, shadowstart, autostart, autoupdate
 ```
+
 </details>
 
 ## Configuration Settings Override
@@ -207,4 +229,5 @@ By default, the following configuration parameters received from the subscriptio
 - `mixed-port` - Mixed port for HTTP/SOCKS proxy
 
 ### Client-side override
+
 - Users can enable "Override provider settings" or "Override network settings" in Application Settings to apply their local configuration instead of subscription settings. Useful when you need custom network settings.

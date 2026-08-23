@@ -499,10 +499,35 @@ bool hasServerInfoData(Ref ref) {
   return value != null && value.isNotEmpty;
 }
 
+// `mihox-background` is "<url>" or "<url>,<opacity 1-100>" (opacity = how visible
+// the background image is; higher = more visible; absent = the default dimmed look).
+String? backgroundUrlFromHeader(String? raw) {
+  if (raw == null || raw.isEmpty) return null;
+  final i = raw.indexOf(',');
+  final url = (i >= 0 ? raw.substring(0, i) : raw).trim();
+  return url.isEmpty ? null : url;
+}
+
+int? backgroundOpacityFromHeader(String? raw) {
+  if (raw == null) return null;
+  final i = raw.indexOf(',');
+  if (i < 0) return null;
+  final v = int.tryParse(raw.substring(i + 1).trim());
+  return v?.clamp(1, 100);
+}
+
 @riverpod
 String? backgroundUrl(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
-  return profile?.providerHeaders['mihox-background'];
+  return backgroundUrlFromHeader(profile?.providerHeaders['mihox-background']);
+}
+
+/// Background image opacity (1-100, higher = more visible) parsed from the optional
+/// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
+@riverpod
+int? backgroundOpacity(Ref ref) {
+  final profile = ref.watch(currentProfileProvider);
+  return backgroundOpacityFromHeader(profile?.providerHeaders['mihox-background']);
 }
 
 @riverpod

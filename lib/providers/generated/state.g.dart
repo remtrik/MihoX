@@ -1599,7 +1599,56 @@ final class BackgroundUrlProvider
   }
 }
 
-String _$backgroundUrlHash() => r'a11e42b1ac926fa18ad5473a934a5a9141be5049';
+String _$backgroundUrlHash() => r'92a2286b0fa616e0e3286a2a6eb77b8723ff5b40';
+
+/// Background image opacity (1-100, higher = more visible) parsed from the optional
+/// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
+
+@ProviderFor(backgroundOpacity)
+final backgroundOpacityProvider = BackgroundOpacityProvider._();
+
+/// Background image opacity (1-100, higher = more visible) parsed from the optional
+/// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
+
+final class BackgroundOpacityProvider
+    extends $FunctionalProvider<int?, int?, int?>
+    with $Provider<int?> {
+  /// Background image opacity (1-100, higher = more visible) parsed from the optional
+  /// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
+  BackgroundOpacityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backgroundOpacityProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backgroundOpacityHash();
+
+  @$internal
+  @override
+  $ProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int? create(Ref ref) {
+    return backgroundOpacity(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int?>(value),
+    );
+  }
+}
+
+String _$backgroundOpacityHash() => r'440a01719f04d572a44842b4f92a117d8dff73b3';
 
 @ProviderFor(getProxiesColumns)
 final getProxiesColumnsProvider = GetProxiesColumnsProvider._();
