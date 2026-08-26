@@ -310,16 +310,18 @@ class _EditProfileViewState extends State<EditProfileView> {
                         runSpacing: 6,
                         spacing: 12,
                         children: [
-                          CommonChip(
-                            avatar: const Icon(Icons.edit),
-                            label: appLocalizations.edit,
-                            onPressed: _editProfileFile,
-                          ),
-                          CommonChip(
-                            avatar: const Icon(Icons.upload),
-                            label: appLocalizations.upload,
-                            onPressed: _uploadProfileFile,
-                          ),
+                          if (widget.profile.providerHeaders['mihox-restrictprofile']?.toLowerCase() != 'true') ...[
+                            CommonChip(
+                              avatar: const Icon(Icons.edit),
+                              label: appLocalizations.edit,
+                              onPressed: _editProfileFile,
+                            ),
+                            CommonChip(
+                              avatar: const Icon(Icons.upload),
+                              label: appLocalizations.upload,
+                              onPressed: _uploadProfileFile,
+                            ),
+                          ],
                         ],
                       ),
                     ],
