@@ -11,10 +11,7 @@ import 'package:nativeapi/nativeapi.dart';
 import 'package:win32/win32.dart';
 
 class TrayManager extends ConsumerStatefulWidget {
-  const TrayManager({
-    super.key,
-    required this.child,
-  });
+  const TrayManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -22,7 +19,7 @@ class TrayManager extends ConsumerStatefulWidget {
 }
 
 class _TrayContainerState extends ConsumerState<TrayManager> {
-  final List<int> _listenerIds = [];
+  final List<ListenerId> _listenerIds = [];
 
   void _applyWindowsMenuDarkMode() {
     if (!Platform.isWindows) return;
@@ -42,38 +39,41 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
   void initState() {
     super.initState();
 
-    trayIcon.contextMenuTrigger = ContextMenuTrigger.rightClicked;
+    trayIcon.setContextMenuTrigger(ContextMenuTrigger.rightClicked);
 
     _listenerIds
       ..add(
-        trayIcon.contextMenu?.on<MenuOpenedEvent>((event) {
-              _applyWindowsMenuDarkMode();
+        trayIcon.getContextMenu()?.addListener((event) {
+              if (event is MenuOpenedEvent) {
+                _applyWindowsMenuDarkMode();
+              }
             }) ??
             -1,
       )
       ..add(
-        trayIcon.contextMenu?.on<MenuItemClickedEvent>((event) {
-              render?.active();
+        trayIcon.getContextMenu()?.addListener((event) {
+              if (event is MenuItemClickedEvent) {
+                render?.active();
+              }
             }) ??
             -1,
       )
       ..add(
-        trayIcon.on<TrayIconClickedEvent>((event) {
-          trayIcon.closeContextMenu();
-          if (!Platform.isLinux) {
-            window?.show();
+        trayIcon.addListener((event) {
+          if (event is TrayIconClickedEvent) {
+            trayIcon.closeContextMenu();
+            if (!Platform.isLinux) {
+              window?.show();
+            }
           }
         }),
       );
 
-    ref.listenManual(
-      trayStateProvider,
-      (prev, next) {
-        if (prev != next) {
-          globalState.appController.updateTray();
-        }
-      },
-    );
+    ref.listenManual(trayStateProvider, (prev, next) {
+      if (prev != next) {
+        globalState.appController.updateTray();
+      }
+    });
   }
 
   @override
@@ -83,7 +83,7 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
   void dispose() {
     for (final id in _listenerIds) {
       if (id >= 0) {
-        trayIcon.contextMenu?.removeListener(id);
+        trayIcon.getContextMenu()?.removeListener(id);
         trayIcon.removeListener(id);
       }
     }

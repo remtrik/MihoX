@@ -9,12 +9,34 @@ import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart';
 import 'package:mihox/state.dart';
 import 'package:nativeapi/nativeapi.dart';
+import 'package:path/path.dart' as p;
 
 import 'app_localizations.dart';
 import 'constant.dart';
 import 'window.dart';
 
-final trayIcon = TrayIcon();
+final trayIcon = TrayIcon.create()!;
+
+Image? _loadTrayImage(String assetName) {
+  final executablePath = Platform.resolvedExecutable;
+  var assetPath = p.joinAll([
+    p.dirname(executablePath),
+    'data',
+    'flutter_assets',
+    assetName,
+  ]);
+  if (Platform.isMacOS) {
+    assetPath = p.join(
+      p.dirname(p.dirname(executablePath)),
+      'Frameworks',
+      'App.framework',
+      'Resources',
+      'flutter_assets',
+      assetName,
+    );
+  }
+  return Image.fromFile(assetPath);
+}
 
 class Tray {
   Future _updateSystemTray({
@@ -24,26 +46,26 @@ class Tray {
   }) async {
     if (Platform.isAndroid) return;
 
-    trayIcon.icon = Image.fromAsset(
+    trayIcon.icon = _loadTrayImage(
       utils.getTrayIconPath(
-        brightness: brightness ??
+        brightness:
+            brightness ??
             WidgetsBinding.instance.platformDispatcher.platformBrightness,
         isRunning: isRunning,
       ),
     );
-    trayIcon.isVisible = true;
+    trayIcon.setVisible(true);
 
     if (!Platform.isLinux) {
-      trayIcon.tooltip = appName;
+      trayIcon.setTooltip(appName);
     }
   }
 
-  void _addItem(
-    Menu menu,
-    String label,
-    FutureOr<void> Function() onClick,
-  ) {
-    final item = MenuItem(label)..on<MenuItemClickedEvent>((_) => onClick());
+  void _addItem(Menu menu, String label, FutureOr<void> Function() onClick) {
+    final item = MenuItem.createWithLabelAndType(label, MenuItemType.normal)!
+      ..addListener((event) {
+        if (event is MenuItemClickedEvent) onClick();
+      });
     menu.addItem(item);
   }
 
@@ -53,9 +75,11 @@ class Tray {
     FutureOr<void> Function() onClick, {
     required bool checked,
   }) {
-    final item = MenuItem(label, MenuItemType.checkbox)
+    final item = MenuItem.createWithLabelAndType(label, MenuItemType.checkbox)!
       ..state = checked ? MenuItemState.checked : MenuItemState.unchecked
-      ..on<MenuItemClickedEvent>((_) => onClick());
+      ..addListener((event) {
+        if (event is MenuItemClickedEvent) onClick();
+      });
     menu.addItem(item);
   }
 
@@ -75,7 +99,7 @@ class Tray {
       );
     }
 
-    final menu = Menu();
+    final menu = Menu.create()!;
 
     _addItem(menu, appLocalizations.show, () {
       window?.show();
@@ -93,47 +117,27 @@ class Tray {
     if (trayState.globalModeEnabled) {
       menu.addSeparator();
       for (final mode in Mode.values) {
-        _addCheckboxItem(
-          menu,
-          Intl.message(mode.name),
-          () {
-            globalState.appController.changeMode(mode);
-          },
-          checked: mode == trayState.mode,
-        );
+        _addCheckboxItem(menu, Intl.message(mode.name), () {
+          globalState.appController.changeMode(mode);
+        }, checked: mode == trayState.mode);
       }
     }
 
     menu.addSeparator();
 
     if (trayState.isStart) {
-      _addCheckboxItem(
-        menu,
-        appLocalizations.tun,
-        () {
-          globalState.appController.updateTun();
-        },
-        checked: trayState.tunEnable,
-      );
-      _addCheckboxItem(
-        menu,
-        appLocalizations.systemProxy,
-        () {
-          globalState.appController.updateSystemProxy();
-        },
-        checked: trayState.systemProxy,
-      );
+      _addCheckboxItem(menu, appLocalizations.tun, () {
+        globalState.appController.updateTun();
+      }, checked: trayState.tunEnable);
+      _addCheckboxItem(menu, appLocalizations.systemProxy, () {
+        globalState.appController.updateSystemProxy();
+      }, checked: trayState.systemProxy);
       menu.addSeparator();
     }
 
-    _addCheckboxItem(
-      menu,
-      appLocalizations.autoLaunch,
-      () {
-        globalState.appController.updateAutoLaunch();
-      },
-      checked: trayState.autoLaunch,
-    );
+    _addCheckboxItem(menu, appLocalizations.autoLaunch, () {
+      globalState.appController.updateAutoLaunch();
+    }, checked: trayState.autoLaunch);
 
     _addItem(menu, appLocalizations.copyEnvVar, () async {
       await _copyEnv(trayState.port);
@@ -149,15 +153,18 @@ class Tray {
       await globalState.appController.handleExit();
     });
 
-    trayIcon.contextMenu = menu;
-    trayIcon.contextMenuTrigger = ContextMenuTrigger.rightClicked;
+    trayIcon
+      ..setContextMenu(menu)
+      ..setContextMenuTrigger(ContextMenuTrigger.rightClicked);
 
     if (Platform.isLinux) {
-      unawaited(_updateSystemTray(
-        brightness: trayState.brightness,
-        isRunning: trayState.isStart,
-        force: focus,
-      ));
+      unawaited(
+        _updateSystemTray(
+          brightness: trayState.brightness,
+          isRunning: trayState.isStart,
+          force: focus,
+        ),
+      );
     }
   }
 
