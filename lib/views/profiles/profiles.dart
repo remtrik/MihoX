@@ -344,14 +344,6 @@ class _ProfileItemState extends State<ProfileItem> {
           );
         }),
       const SizedBox(height: 6),
-      const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircleAvatar(
-                foregroundImage: AssetImage("assets/images/icon.png"),
-                backgroundColor: Colors.transparent,
-              ),
-            ),
       Text(
         expireDate != "N/A"
             ? '${appLocalizations.expiresOn} $expireDate'
