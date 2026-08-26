@@ -50,29 +50,34 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   final appController = globalState.appController;
   final proxyNames = proxies.map((proxy) => proxy.name).toSet().toList();
 
-  final results = <(String, String, int?)>[];
+  final loadingDelays = <Delay>[];
+  final proxyData = <({String url, String name})>[];
 
-  final delayProxies = proxyNames.map<Future>((proxyName) async {
+  for (final proxyName in proxyNames) {
     final state = appController.getProxyCardState(proxyName);
     final url = state.testUrl.getSafeValue(
       appController.getRealTestUrl(testUrl),
     );
     final name = state.proxyName;
-    if (name.isEmpty) return;
-    final delay = await mihomoCore.getDelay(url, name);
-    results.add((url, name, delay.value));
-  }).toList();
-
-  final batchesDelayProxies = delayProxies.batch(100);
-  for (final batchDelayProxies in batchesDelayProxies) {
-    await Future.wait(batchDelayProxies);
+    if (name.isEmpty) continue;
+    loadingDelays.add(Delay(url: url, name: name, value: 0));
+    proxyData.add((url: url, name: name));
   }
 
-  final delays = results
-      .map((r) => Delay(url: r.$1, name: r.$2, value: r.$3))
-      .toList();
+  appController.setDelays(loadingDelays);
+
+  final resultDelays = <Delay>[];
+  final batches = proxyData.batch(15);
+  for (final batch in batches) {
+    final batchResults = batch.map<Future<Delay>>((data) async {
+      final delay = await mihomoCore.getDelay(data.url, data.name);
+      return Delay(url: data.url, name: data.name, value: delay.value);
+    }).toList();
+    resultDelays.addAll(await Future.wait(batchResults));
+  }
+
   appController
-    ..setDelays(delays)
+    ..setDelays(resultDelays)
     ..addSortNum();
 }
 
