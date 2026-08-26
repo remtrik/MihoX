@@ -102,11 +102,15 @@ CoreState coreState(Ref ref) {
   if (mixedPort == 0 && vpnProps.systemProxy) {
     vpnProps = vpnProps.copyWith(systemProxy: false);
   }
-  final currentProfile = ref.watch(currentProfileProvider);
+  final currentProfileName = ref.watch(
+    currentProfileProvider.select(
+      (state) => state?.label ?? state?.id ?? "",
+    ),
+  );
   return CoreState(
     vpnProps: vpnProps,
     onlyStatisticsProxy: false,
-    currentProfileName: currentProfile?.label ?? currentProfile?.id ?? "",
+    currentProfileName: currentProfileName,
   );
 }
 
@@ -162,12 +166,23 @@ ProxyState proxyState(Ref ref) {
 @riverpod
 TrayState trayState(Ref ref) {
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
-  final networkProps = ref.watch(networkSettingProvider);
-  final mihomoConfig = ref.watch(
-    patchMihomoConfigProvider,
+  final networkSystemProxy = ref.watch(
+    networkSettingProvider.select((s) => s.systemProxy),
   );
-  final appSetting = ref.watch(
-    appSettingProvider,
+  final mode = ref.watch(
+    patchMihomoConfigProvider.select((s) => s.mode),
+  );
+  final mixedPort = ref.watch(
+    patchMihomoConfigProvider.select((s) => s.mixedPort),
+  );
+  final tunEnable = ref.watch(
+    patchMihomoConfigProvider.select((s) => s.tun.enable),
+  );
+  final autoLaunch = ref.watch(
+    appSettingProvider.select((s) => s.autoLaunch),
+  );
+  final locale = ref.watch(
+    appSettingProvider.select((s) => s.locale),
   );
   final groups = ref
       .watch(
@@ -182,13 +197,13 @@ TrayState trayState(Ref ref) {
   final globalModeEnabled = ref.watch(globalModeEnabledProvider);
 
   return TrayState(
-    mode: mihomoConfig.mode,
-    port: mihomoConfig.mixedPort,
-    autoLaunch: appSetting.autoLaunch,
-    systemProxy: networkProps.systemProxy,
-    tunEnable: mihomoConfig.tun.enable,
+    mode: mode,
+    port: mixedPort,
+    autoLaunch: autoLaunch,
+    systemProxy: networkSystemProxy,
+    tunEnable: tunEnable,
     isStart: isStart,
-    locale: appSetting.locale,
+    locale: locale,
     brightness: brightness,
     groups: groups,
     selectedMap: selectedMap,
@@ -473,29 +488,41 @@ Profile? currentProfile(Ref ref) {
 
 @riverpod
 bool globalModeEnabled(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['mihox-globalmode'];
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['mihox-globalmode'],
+    ),
+  );
   return value?.toLowerCase() != 'false';
 }
 
 @riverpod
 bool hasAnnounceData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['announce'];
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['announce'],
+    ),
+  );
   return value != null && value.isNotEmpty;
 }
 
 @riverpod
 bool hasServiceInfoData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['mihox-servicename'];
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['mihox-servicename'],
+    ),
+  );
   return value != null && value.isNotEmpty;
 }
 
 @riverpod
 bool hasServerInfoData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['mihox-serverinfo'];
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['mihox-serverinfo'],
+    ),
+  );
   return value != null && value.isNotEmpty;
 }
 
@@ -518,16 +545,24 @@ int? backgroundOpacityFromHeader(String? raw) {
 
 @riverpod
 String? backgroundUrl(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  return backgroundUrlFromHeader(profile?.providerHeaders['mihox-background']);
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['mihox-background'],
+    ),
+  );
+  return backgroundUrlFromHeader(value);
 }
 
 /// Background image opacity (1-100, higher = more visible) parsed from the optional
 /// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
 @riverpod
 int? backgroundOpacity(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  return backgroundOpacityFromHeader(profile?.providerHeaders['mihox-background']);
+  final value = ref.watch(
+    currentProfileProvider.select(
+      (p) => p?.providerHeaders['mihox-background'],
+    ),
+  );
+  return backgroundOpacityFromHeader(value);
 }
 
 @riverpod

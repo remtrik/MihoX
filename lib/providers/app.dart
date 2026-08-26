@@ -321,6 +321,19 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
       state = newDelayMap;
     }
   }
+
+  void setDelays(List<Delay> delays) {
+    if (delays.isEmpty) return;
+    var changed = false;
+    final newDelayMap = Map<String, Map<String, int?>>.from(state);
+    for (final delay in delays) {
+      if (newDelayMap[delay.url]?[delay.name] == delay.value) continue;
+      newDelayMap[delay.url] ??= <String, int?>{};
+      newDelayMap[delay.url]![delay.name] = delay.value;
+      changed = true;
+    }
+    if (changed) state = newDelayMap;
+  }
 }
 
 @Riverpod(keepAlive: true)

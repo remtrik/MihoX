@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mihox/common/common.dart';
@@ -25,6 +27,38 @@ class ProfilesView extends StatefulWidget {
 
 class _ProfilesViewState extends State<ProfilesView> with PageMixin {
   Function? applyConfigDebounce;
+  final _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  bool _isDesktopPaste(KeyEvent e) {
+    if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) {
+      return false;
+    }
+    final ctrl = Platform.isMacOS
+        ? HardwareKeyboard.instance.isMetaPressed
+        : HardwareKeyboard.instance.isControlPressed;
+    return ctrl && e.logicalKey == LogicalKeyboardKey.keyV;
+  }
+
+  @override
+  void initPageState() {
+    super.initPageState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
+
+  Future<void> _handlePaste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty || !text.isUrl) return;
+    await globalState.appController.addProfileFormURL(text);
+  }
 
   void _handleShowAddExtendPage() {
     showExtend(
@@ -130,57 +164,68 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
 );
 
   @override
-  Widget build(BuildContext context) => Consumer(
-        builder: (_, ref, _) {
-          ref.listenManual(
-            isCurrentPageProvider(PageLabel.profiles),
-            (prev, next) {
-              if (prev != next && next == true) {
-                initPageState();
-              }
-            },
-            fireImmediately: true,
-          );
-          final profilesSelectorState =
-              ref.watch(profilesSelectorStateProvider);
-          if (profilesSelectorState.profiles.isEmpty) {
-            return NullStatus(
-              label: appLocalizations.nullProfileDesc,
-            );
+  Widget build(BuildContext context) => Focus(
+        focusNode: _focusNode,
+        autofocus: true,
+        onKeyEvent: (node, event) {
+          if (event is KeyDownEvent && _isDesktopPaste(event)) {
+            _handlePaste();
+            return KeyEventResult.handled;
           }
-          return Align(
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: 88,
-              ),
-              child: Grid(
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                crossAxisCount: profilesSelectorState.columns,
-                children: [
-                  for (int i = 0;
-                      i < profilesSelectorState.profiles.length;
-                      i++)
-                    GridItem(
-                      child: ProfileItem(
-                        key: Key(profilesSelectorState.profiles[i].id),
-                        profile: profilesSelectorState.profiles[i],
-                        groupValue: profilesSelectorState.currentProfileId,
-                        onChanged: (profileId) {
-                          ref.read(currentProfileIdProvider.notifier).value =
-                              profileId;
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
+          return KeyEventResult.ignored;
         },
+        child: Consumer(
+          builder: (_, ref, _) {
+            ref.listenManual(
+              isCurrentPageProvider(PageLabel.profiles),
+              (prev, next) {
+                if (prev != next && next == true) {
+                  initPageState();
+                }
+              },
+              fireImmediately: true,
+            );
+            final profilesSelectorState =
+                ref.watch(profilesSelectorStateProvider);
+            if (profilesSelectorState.profiles.isEmpty) {
+              return NullStatus(
+                label: appLocalizations.nullProfileDesc,
+              );
+            }
+            return Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 88,
+                ),
+                child: Grid(
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  crossAxisCount: profilesSelectorState.columns,
+                  children: [
+                    for (int i = 0;
+                        i < profilesSelectorState.profiles.length;
+                        i++)
+                      GridItem(
+                        child: ProfileItem(
+                          key: Key(profilesSelectorState.profiles[i].id),
+                          profile: profilesSelectorState.profiles[i],
+                          groupValue: profilesSelectorState.currentProfileId,
+                          onChanged: (profileId) {
+                            ref.read(currentProfileIdProvider.notifier).value =
+                                profileId;
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       );
 }
 

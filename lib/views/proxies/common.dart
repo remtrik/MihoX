@@ -50,36 +50,30 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   final appController = globalState.appController;
   final proxyNames = proxies.map((proxy) => proxy.name).toSet().toList();
 
+  final results = <(String, String, int?)>[];
+
   final delayProxies = proxyNames.map<Future>((proxyName) async {
     final state = appController.getProxyCardState(proxyName);
     final url = state.testUrl.getSafeValue(
       appController.getRealTestUrl(testUrl),
     );
     final name = state.proxyName;
-    if (name.isEmpty) {
-      return;
-    }
-    appController
-      ..setDelay(
-        Delay(
-          url: url,
-          name: name,
-          value: 0,
-        ),
-      )
-      ..setDelay(
-        await mihomoCore.getDelay(
-          url,
-          name,
-        ),
-      );
+    if (name.isEmpty) return;
+    final delay = await mihomoCore.getDelay(url, name);
+    results.add((url, name, delay.value));
   }).toList();
 
   final batchesDelayProxies = delayProxies.batch(100);
   for (final batchDelayProxies in batchesDelayProxies) {
     await Future.wait(batchDelayProxies);
   }
-  appController.addSortNum();
+
+  final delays = results
+      .map((r) => Delay(url: r.$1, name: r.$2, value: r.$3))
+      .toList();
+  appController
+    ..setDelays(delays)
+    ..addSortNum();
 }
 
 double getScrollToSelectedOffset({

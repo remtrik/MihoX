@@ -55,8 +55,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="mihomo" />
-                <data android:scheme="miho" />
                 <data android:scheme="mihox" />
 
                 <data android:host="install-config" />

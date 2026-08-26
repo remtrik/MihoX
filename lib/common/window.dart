@@ -15,9 +15,7 @@ class Window {
     }
 
     if (Platform.isWindows) {
-      protocol
-        ..register("mihox")
-        ..register("miho");
+      protocol.register("mihox");
     }
 
     await windowManager.ensureInitialized();

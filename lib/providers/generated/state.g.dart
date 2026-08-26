@@ -226,7 +226,7 @@ final class CoreStateProvider
   }
 }
 
-String _$coreStateHash() => r'b6f470f8b5558f4329a71be10f8dad6e1836a46a';
+String _$coreStateHash() => r'80d8fdabacab1b7fbcfc49119e8d3e96e6e151e8';
 
 @ProviderFor(updateParams)
 final updateParamsProvider = UpdateParamsProvider._();
@@ -349,7 +349,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'c1207916d396b35d57bb4bcd034e19803c168961';
+String _$trayStateHash() => r'73b2500990e1e298f83c14a55ca1df252462833f';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -1434,7 +1434,7 @@ final class GlobalModeEnabledProvider
   }
 }
 
-String _$globalModeEnabledHash() => r'82689b2282af0cf3202f8a62efc92d7d49a62132';
+String _$globalModeEnabledHash() => r'8072182e3f22b7b647134f270b8f7091982464b9';
 
 @ProviderFor(hasAnnounceData)
 final hasAnnounceDataProvider = HasAnnounceDataProvider._();
@@ -1475,7 +1475,7 @@ final class HasAnnounceDataProvider
   }
 }
 
-String _$hasAnnounceDataHash() => r'518399bf6581fbf003d0fe26afbe9db97e6c0322';
+String _$hasAnnounceDataHash() => r'0be6fcf9e99f16adbb69d9003f47210a1652c1fe';
 
 @ProviderFor(hasServiceInfoData)
 final hasServiceInfoDataProvider = HasServiceInfoDataProvider._();
@@ -1517,7 +1517,7 @@ final class HasServiceInfoDataProvider
 }
 
 String _$hasServiceInfoDataHash() =>
-    r'8fc05e7a1f4ff985c0afbee963e56a061cf58119';
+    r'd4b38f1ee6fe83b52a751ee586334ce1e7fd7a27';
 
 @ProviderFor(hasServerInfoData)
 final hasServerInfoDataProvider = HasServerInfoDataProvider._();
@@ -1558,7 +1558,7 @@ final class HasServerInfoDataProvider
   }
 }
 
-String _$hasServerInfoDataHash() => r'20547594683605ab0ce86343be3c4f71f5d5bd35';
+String _$hasServerInfoDataHash() => r'1093015c6e4356899d82c0b82566de092a2c83aa';
 
 @ProviderFor(backgroundUrl)
 final backgroundUrlProvider = BackgroundUrlProvider._();
@@ -1599,7 +1599,7 @@ final class BackgroundUrlProvider
   }
 }
 
-String _$backgroundUrlHash() => r'92a2286b0fa616e0e3286a2a6eb77b8723ff5b40';
+String _$backgroundUrlHash() => r'd6db0984f66eff4e667047c24503fd2e2a0df364';
 
 /// Background image opacity (1-100, higher = more visible) parsed from the optional
 /// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
@@ -1648,7 +1648,7 @@ final class BackgroundOpacityProvider
   }
 }
 
-String _$backgroundOpacityHash() => r'440a01719f04d572a44842b4f92a117d8dff73b3';
+String _$backgroundOpacityHash() => r'4b1793635eef383e480d5e5a875271fd969a3e3a';
 
 @ProviderFor(getProxiesColumns)
 final getProxiesColumnsProvider = GetProxiesColumnsProvider._();

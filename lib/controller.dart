@@ -797,7 +797,6 @@ class AppController {
   }
 
   Future _applyProfile() async {
-    mihomoCore.requestGc();
     await setupMihomoConfig();
     await updateGroups();
     await updateProviders();
@@ -923,6 +922,8 @@ class AppController {
       );
 
       if (newGroups.isNotEmpty) {
+        final oldGroups = _ref.read(groupsProvider);
+        if (listEquals(oldGroups, newGroups)) return;
         _ref.read(groupsProvider.notifier).value = newGroups;
         _ref.read(versionProvider.notifier).value =
             _ref.read(versionProvider) + 1;
@@ -1220,6 +1221,10 @@ class AppController {
     _ref.read(delayDataSourceProvider.notifier).setDelay(delay);
   }
 
+  void setDelays(List<Delay> delays) {
+    _ref.read(delayDataSourceProvider.notifier).setDelays(delays);
+  }
+
   set page(PageLabel value) {
     _ref.read(currentPageLabelProvider.notifier).value = value;
   }
@@ -1332,13 +1337,15 @@ class AppController {
     _ref.read(providersProvider.notifier).setProvider(provider);
   }
 
-  List<Proxy> _sortOfName(List<Proxy> proxies) => List.of(proxies)
-    ..sort(
-      (a, b) => utils.sortByChar(
-        utils.getPinyin(a.name),
-        utils.getPinyin(b.name),
-      ),
-    );
+  List<Proxy> _sortOfName(List<Proxy> proxies) {
+    final pinyinMap = <String, String>{
+      for (final p in proxies) p.name: utils.getPinyin(p.name)
+    };
+    return List.of(proxies)
+      ..sort(
+        (a, b) => utils.sortByChar(pinyinMap[a.name]!, pinyinMap[b.name]!),
+      );
+  }
 
   List<Proxy> _sortOfDelay({
     required List<Proxy> proxies,
