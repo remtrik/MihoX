@@ -12,7 +12,7 @@ class Protocol {
   static Protocol? _instance;
 
   void register(String scheme) {
-    final root = CURRENT_USER.create(r'Software\Classes\$scheme');
+    final root = CURRENT_USER.create('Software\\Classes\\$scheme');
 
     try {
       root.setValue('URL Protocol', const RegistryValue.string(''));
