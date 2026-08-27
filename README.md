@@ -71,7 +71,7 @@ Arranges widgets in the order received from the subscription.
   |     `memoryInfo`     | Memory usage                                                |
   |      `metainfo`      | Profile information                                         |
   | `changeServerButton` | Change server button                                        |
-  |    `serviceInfo`     | Service information (only with header mihox-servicename) |
+  |    `serviceInfo`     | Service information (only with header mihox-servicename)    |
 
 Usage:
 
