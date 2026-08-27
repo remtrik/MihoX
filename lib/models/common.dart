@@ -15,7 +15,7 @@ abstract class NavigationItem with _$NavigationItem {
   const factory NavigationItem({
     required Icon icon,
     required PageLabel label,
-    final String? description,
+    String? description,
     required Widget view,
     @Default(true) bool keep,
     String? path,

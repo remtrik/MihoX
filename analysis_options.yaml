@@ -20,6 +20,12 @@ analyzer:
     - lib/mihomo/generated/**
     - lib/l10n/**
     - plugins/flutter_distributor/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

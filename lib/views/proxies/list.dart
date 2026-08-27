@@ -303,7 +303,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
 
   RelativeRect _menuPosition(BuildContext context) {
     final renderBox =
-        _sortButtonKey.currentContext!.findRenderObject() as RenderBox;
+        _sortButtonKey.currentContext!.findRenderObject()! as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
     return RelativeRect.fromLTRB(
       offset.dx,

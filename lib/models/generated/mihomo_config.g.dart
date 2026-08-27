@@ -266,18 +266,10 @@ const _$DnsModeEnumMap = {
 };
 
 _GeoXUrl _$GeoXUrlFromJson(Map<String, dynamic> json) => _GeoXUrl(
-  mmdb:
-      json['mmdb'] as String? ??
-      "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb",
-  asn:
-      json['asn'] as String? ??
-      "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb",
-  geoip:
-      json['geoip'] as String? ??
-      "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat",
-  geosite:
-      json['geosite'] as String? ??
-      "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat",
+  mmdb: json['mmdb'] as String? ?? "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb",
+  asn: json['asn'] as String? ?? "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb",
+  geoip: json['geoip'] as String? ?? "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat",
+  geosite: json['geosite'] as String? ?? "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat",
 );
 
 Map<String, dynamic> _$GeoXUrlToJson(_GeoXUrl instance) => <String, dynamic>{

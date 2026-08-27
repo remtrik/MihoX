@@ -1599,7 +1599,7 @@ final class BackgroundUrlProvider
   }
 }
 
-String _$backgroundUrlHash() => r'd6db0984f66eff4e667047c24503fd2e2a0df364';
+String _$backgroundUrlHash() => r'5779ee5bc9a7682907397a64f0037eebf97176c4';
 
 /// Background image opacity (1-100, higher = more visible) parsed from the optional
 /// `,<opacity>` suffix of `mihox-background`. Null = not specified (default look).
@@ -1648,7 +1648,7 @@ final class BackgroundOpacityProvider
   }
 }
 
-String _$backgroundOpacityHash() => r'4b1793635eef383e480d5e5a875271fd969a3e3a';
+String _$backgroundOpacityHash() => r'1653fecda98700510a743357e00221c04051fea3';
 
 @ProviderFor(getProxiesColumns)
 final getProxiesColumnsProvider = GetProxiesColumnsProvider._();

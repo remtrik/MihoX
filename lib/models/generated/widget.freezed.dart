@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../widget.dart';
@@ -9,6 +9,7 @@ part of '../widget.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -63,7 +64,7 @@ class _$ActivateStateCopyWithImpl<$Res>
 /// Create a copy of ActivateState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? active = null,}) {
-  return _then(_self.copyWith(
+  return _then(ActivateState(
 active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -320,7 +321,7 @@ class _$CommonMessageCopyWithImpl<$Res>
 /// Create a copy of CommonMessage
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? text = null,Object? duration = null,}) {
-  return _then(_self.copyWith(
+  return _then(CommonMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
@@ -583,7 +584,7 @@ class _$AppBarStateCopyWithImpl<$Res>
 /// Create a copy of AppBarState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? actions = null,Object? searchState = freezed,Object? editState = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarState(
 actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
 as List<Widget>,searchState: freezed == searchState ? _self.searchState : searchState // ignore: cast_nullable_to_non_nullable
 as AppBarSearchState?,editState: freezed == editState ? _self.editState : editState // ignore: cast_nullable_to_non_nullable
@@ -752,7 +753,7 @@ return $default(_that.actions,_that.searchState,_that.editState);case _:
 
 
 class _AppBarState implements AppBarState {
-  const _AppBarState({final  List<Widget> actions = const [], this.searchState, this.editState}): _actions = actions;
+  const _AppBarState({ List<Widget> actions = const [], this.searchState, this.editState}): _actions = actions;
   
 
  final  List<Widget> _actions;
@@ -851,7 +852,7 @@ $AppBarEditStateCopyWith<$Res>? get editState {
 /// @nodoc
 mixin _$AppBarSearchState {
 
-  Function(String) get onSearch; bool get isSearch;
+ dynamic Function(String) get onSearch; bool get isSearch;
 /// Create a copy of AppBarSearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -882,7 +883,7 @@ abstract mixin class $AppBarSearchStateCopyWith<$Res>  {
   factory $AppBarSearchStateCopyWith(AppBarSearchState value, $Res Function(AppBarSearchState) _then) = _$AppBarSearchStateCopyWithImpl;
 @useResult
 $Res call({
-  Function(String) onSearch, bool isSearch
+ dynamic Function(String) onSearch, bool isSearch
 });
 
 
@@ -900,9 +901,9 @@ class _$AppBarSearchStateCopyWithImpl<$Res>
 /// Create a copy of AppBarSearchState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? onSearch = null,Object? isSearch = null,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarSearchState(
 onSearch: null == onSearch ? _self.onSearch : onSearch // ignore: cast_nullable_to_non_nullable
-as  Function(String),isSearch: null == isSearch ? _self.isSearch : isSearch // ignore: cast_nullable_to_non_nullable
+as dynamic Function(String),isSearch: null == isSearch ? _self.isSearch : isSearch // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -988,7 +989,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(  Function(String) onSearch,  bool isSearch)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( dynamic Function(String) onSearch,  bool isSearch)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppBarSearchState() when $default != null:
 return $default(_that.onSearch,_that.isSearch);case _:
@@ -1009,7 +1010,7 @@ return $default(_that.onSearch,_that.isSearch);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(  Function(String) onSearch,  bool isSearch)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( dynamic Function(String) onSearch,  bool isSearch)  $default,) {final _that = this;
 switch (_that) {
 case _AppBarSearchState():
 return $default(_that.onSearch,_that.isSearch);case _:
@@ -1029,7 +1030,7 @@ return $default(_that.onSearch,_that.isSearch);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(  Function(String) onSearch,  bool isSearch)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( dynamic Function(String) onSearch,  bool isSearch)?  $default,) {final _that = this;
 switch (_that) {
 case _AppBarSearchState() when $default != null:
 return $default(_that.onSearch,_that.isSearch);case _:
@@ -1047,7 +1048,7 @@ class _AppBarSearchState implements AppBarSearchState {
   const _AppBarSearchState({required this.onSearch, this.isSearch = false});
   
 
-@override final   Function(String) onSearch;
+@override final  dynamic Function(String) onSearch;
 @override@JsonKey() final  bool isSearch;
 
 /// Create a copy of AppBarSearchState
@@ -1080,7 +1081,7 @@ abstract mixin class _$AppBarSearchStateCopyWith<$Res> implements $AppBarSearchS
   factory _$AppBarSearchStateCopyWith(_AppBarSearchState value, $Res Function(_AppBarSearchState) _then) = __$AppBarSearchStateCopyWithImpl;
 @override @useResult
 $Res call({
-  Function(String) onSearch, bool isSearch
+ dynamic Function(String) onSearch, bool isSearch
 });
 
 
@@ -1100,7 +1101,7 @@ class __$AppBarSearchStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? onSearch = null,Object? isSearch = null,}) {
   return _then(_AppBarSearchState(
 onSearch: null == onSearch ? _self.onSearch : onSearch // ignore: cast_nullable_to_non_nullable
-as  Function(String),isSearch: null == isSearch ? _self.isSearch : isSearch // ignore: cast_nullable_to_non_nullable
+as dynamic Function(String),isSearch: null == isSearch ? _self.isSearch : isSearch // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -1111,7 +1112,7 @@ as bool,
 /// @nodoc
 mixin _$AppBarEditState {
 
- dynamic get editCount; bool get isEdit;  Function() get onExit;
+ dynamic get editCount; bool get isEdit; dynamic Function() get onExit;
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1142,7 +1143,7 @@ abstract mixin class $AppBarEditStateCopyWith<$Res>  {
   factory $AppBarEditStateCopyWith(AppBarEditState value, $Res Function(AppBarEditState) _then) = _$AppBarEditStateCopyWithImpl;
 @useResult
 $Res call({
- dynamic editCount, bool isEdit,  Function() onExit
+ dynamic editCount, bool isEdit, dynamic Function() onExit
 });
 
 
@@ -1160,11 +1161,11 @@ class _$AppBarEditStateCopyWithImpl<$Res>
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? editCount = freezed,Object? isEdit = null,Object? onExit = null,}) {
-  return _then(_self.copyWith(
+  return _then(AppBarEditState(
 editCount: freezed == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
 as dynamic,isEdit: null == isEdit ? _self.isEdit : isEdit // ignore: cast_nullable_to_non_nullable
 as bool,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
-as  Function(),
+as dynamic Function(),
   ));
 }
 
@@ -1249,7 +1250,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( dynamic editCount,  bool isEdit,   Function() onExit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( dynamic editCount,  bool isEdit,  dynamic Function() onExit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppBarEditState() when $default != null:
 return $default(_that.editCount,_that.isEdit,_that.onExit);case _:
@@ -1270,7 +1271,7 @@ return $default(_that.editCount,_that.isEdit,_that.onExit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( dynamic editCount,  bool isEdit,   Function() onExit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( dynamic editCount,  bool isEdit,  dynamic Function() onExit)  $default,) {final _that = this;
 switch (_that) {
 case _AppBarEditState():
 return $default(_that.editCount,_that.isEdit,_that.onExit);case _:
@@ -1290,7 +1291,7 @@ return $default(_that.editCount,_that.isEdit,_that.onExit);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( dynamic editCount,  bool isEdit,   Function() onExit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( dynamic editCount,  bool isEdit,  dynamic Function() onExit)?  $default,) {final _that = this;
 switch (_that) {
 case _AppBarEditState() when $default != null:
 return $default(_that.editCount,_that.isEdit,_that.onExit);case _:
@@ -1310,7 +1311,7 @@ class _AppBarEditState implements AppBarEditState {
 
 @override@JsonKey() final  dynamic editCount;
 @override@JsonKey() final  bool isEdit;
-@override final   Function() onExit;
+@override final  dynamic Function() onExit;
 
 /// Create a copy of AppBarEditState
 /// with the given fields replaced by the non-null parameter values.
@@ -1342,7 +1343,7 @@ abstract mixin class _$AppBarEditStateCopyWith<$Res> implements $AppBarEditState
   factory _$AppBarEditStateCopyWith(_AppBarEditState value, $Res Function(_AppBarEditState) _then) = __$AppBarEditStateCopyWithImpl;
 @override @useResult
 $Res call({
- dynamic editCount, bool isEdit,  Function() onExit
+ dynamic editCount, bool isEdit, dynamic Function() onExit
 });
 
 
@@ -1364,7 +1365,7 @@ class __$AppBarEditStateCopyWithImpl<$Res>
 editCount: freezed == editCount ? _self.editCount : editCount // ignore: cast_nullable_to_non_nullable
 as dynamic,isEdit: null == isEdit ? _self.isEdit : isEdit // ignore: cast_nullable_to_non_nullable
 as bool,onExit: null == onExit ? _self.onExit : onExit // ignore: cast_nullable_to_non_nullable
-as  Function(),
+as dynamic Function(),
   ));
 }
 

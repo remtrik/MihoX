@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of '../mihomo_config.dart';
@@ -9,6 +9,7 @@ part of '../mihomo_config.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$ProxyGroupCopyWithImpl<$Res>
 /// Create a copy of ProxyGroup
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? type = null,Object? proxies = freezed,Object? use = freezed,Object? interval = freezed,Object? lazy = freezed,Object? url = freezed,Object? timeout = freezed,Object? maxFailedTimes = freezed,Object? filter = freezed,Object? excludeFilter = freezed,Object? excludeType = freezed,Object? expectedStatus = freezed,Object? hidden = freezed,Object? icon = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(ProxyGroup(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as GroupType,proxies: freezed == proxies ? _self.proxies : proxies // ignore: cast_nullable_to_non_nullable
@@ -223,7 +224,7 @@ return $default(_that.name,_that.type,_that.proxies,_that.use,_that.interval,_th
 @JsonSerializable()
 
 class _ProxyGroup implements ProxyGroup {
-  const _ProxyGroup({required this.name, @JsonKey(fromJson: GroupType.parseProfileType) required this.type, final  List<String>? proxies, final  List<String>? use, this.interval, this.lazy, this.url, this.timeout, @JsonKey(name: "max-failed-times") this.maxFailedTimes, this.filter, @JsonKey(name: "expected-filter") this.excludeFilter, @JsonKey(name: "exclude-type") this.excludeType, @JsonKey(name: "expected-status") this.expectedStatus, this.hidden, this.icon}): _proxies = proxies,_use = use;
+  const _ProxyGroup({required this.name, @JsonKey(fromJson: GroupType.parseProfileType) required this.type,  List<String>? proxies,  List<String>? use, this.interval, this.lazy, this.url, this.timeout, @JsonKey(name: "max-failed-times") this.maxFailedTimes, this.filter, @JsonKey(name: "expected-filter") this.excludeFilter, @JsonKey(name: "exclude-type") this.excludeType, @JsonKey(name: "expected-status") this.expectedStatus, this.hidden, this.icon}): _proxies = proxies,_use = use;
   factory _ProxyGroup.fromJson(Map<String, dynamic> json) => _$ProxyGroupFromJson(json);
 
 @override final  String name;
@@ -387,7 +388,7 @@ class _$RuleProviderCopyWithImpl<$Res>
 /// Create a copy of RuleProvider
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = null,}) {
-  return _then(_self.copyWith(
+  return _then(RuleProvider(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -650,7 +651,7 @@ class _$SnifferCopyWithImpl<$Res>
 /// Create a copy of Sniffer
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? overrideDest = null,Object? sniffing = null,Object? forceDomain = null,Object? skipSrcAddress = null,Object? skipDstAddress = null,Object? skipDomain = null,Object? port = null,Object? forceDnsMapping = null,Object? parsePureIp = null,Object? sniff = null,}) {
-  return _then(_self.copyWith(
+  return _then(Sniffer(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,overrideDest: null == overrideDest ? _self.overrideDest : overrideDest // ignore: cast_nullable_to_non_nullable
 as bool,sniffing: null == sniffing ? _self.sniffing : sniffing // ignore: cast_nullable_to_non_nullable
@@ -803,7 +804,7 @@ return $default(_that.enable,_that.overrideDest,_that.sniffing,_that.forceDomain
 @JsonSerializable()
 
 class _Sniffer implements Sniffer {
-  const _Sniffer({this.enable = false, @JsonKey(name: "override-destination") this.overrideDest = true, final  List<String> sniffing = const [], @JsonKey(name: "force-domain") final  List<String> forceDomain = const [], @JsonKey(name: "skip-src-address") final  List<String> skipSrcAddress = const [], @JsonKey(name: "skip-dst-address") final  List<String> skipDstAddress = const [], @JsonKey(name: "skip-domain") final  List<String> skipDomain = const [], @JsonKey(name: "port-whitelist") final  List<String> port = const [], @JsonKey(name: "force-dns-mapping") this.forceDnsMapping = true, @JsonKey(name: "parse-pure-ip") this.parsePureIp = true, final  Map<String, SnifferConfig> sniff = const {}}): _sniffing = sniffing,_forceDomain = forceDomain,_skipSrcAddress = skipSrcAddress,_skipDstAddress = skipDstAddress,_skipDomain = skipDomain,_port = port,_sniff = sniff;
+  const _Sniffer({this.enable = false, @JsonKey(name: "override-destination") this.overrideDest = true,  List<String> sniffing = const [], @JsonKey(name: "force-domain")  List<String> forceDomain = const [], @JsonKey(name: "skip-src-address")  List<String> skipSrcAddress = const [], @JsonKey(name: "skip-dst-address")  List<String> skipDstAddress = const [], @JsonKey(name: "skip-domain")  List<String> skipDomain = const [], @JsonKey(name: "port-whitelist")  List<String> port = const [], @JsonKey(name: "force-dns-mapping") this.forceDnsMapping = true, @JsonKey(name: "parse-pure-ip") this.parsePureIp = true,  Map<String, SnifferConfig> sniff = const {}}): _sniffing = sniffing,_forceDomain = forceDomain,_skipSrcAddress = skipSrcAddress,_skipDstAddress = skipDstAddress,_skipDomain = skipDomain,_port = port,_sniff = sniff;
   factory _Sniffer.fromJson(Map<String, dynamic> json) => _$SnifferFromJson(json);
 
 @override@JsonKey() final  bool enable;
@@ -985,7 +986,7 @@ class _$SnifferConfigCopyWithImpl<$Res>
 /// Create a copy of SnifferConfig
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? ports = null,Object? overrideDest = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(SnifferConfig(
 ports: null == ports ? _self.ports : ports // ignore: cast_nullable_to_non_nullable
 as List<String>,overrideDest: freezed == overrideDest ? _self.overrideDest : overrideDest // ignore: cast_nullable_to_non_nullable
 as bool?,
@@ -1129,7 +1130,7 @@ return $default(_that.ports,_that.overrideDest);case _:
 @JsonSerializable()
 
 class _SnifferConfig implements SnifferConfig {
-  const _SnifferConfig({@JsonKey(fromJson: _formJsonPorts) final  List<String> ports = const [], @JsonKey(name: "override-destination") this.overrideDest}): _ports = ports;
+  const _SnifferConfig({@JsonKey(fromJson: _formJsonPorts)  List<String> ports = const [], @JsonKey(name: "override-destination") this.overrideDest}): _ports = ports;
   factory _SnifferConfig.fromJson(Map<String, dynamic> json) => _$SnifferConfigFromJson(json);
 
  final  List<String> _ports;
@@ -1257,7 +1258,7 @@ class _$TunCopyWithImpl<$Res>
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? device = null,Object? autoRoute = null,Object? stack = null,Object? dnsHijack = null,Object? routeAddress = null,}) {
-  return _then(_self.copyWith(
+  return _then(Tun(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as String,autoRoute: null == autoRoute ? _self.autoRoute : autoRoute // ignore: cast_nullable_to_non_nullable
@@ -1405,7 +1406,7 @@ return $default(_that.enable,_that.device,_that.autoRoute,_that.stack,_that.dnsH
 @JsonSerializable()
 
 class _Tun implements Tun {
-  const _Tun({this.enable = true, this.device = appName, @JsonKey(name: "auto-route") this.autoRoute = false, this.stack = TunStack.mixed, @JsonKey(name: "dns-hijack") final  List<String> dnsHijack = const ["any:53"], @JsonKey(name: "route-address") final  List<String> routeAddress = const []}): _dnsHijack = dnsHijack,_routeAddress = routeAddress;
+  const _Tun({this.enable = true, this.device = appName, @JsonKey(name: "auto-route") this.autoRoute = false, this.stack = TunStack.mixed, @JsonKey(name: "dns-hijack")  List<String> dnsHijack = const ["any:53"], @JsonKey(name: "route-address")  List<String> routeAddress = const []}): _dnsHijack = dnsHijack,_routeAddress = routeAddress;
   factory _Tun.fromJson(Map<String, dynamic> json) => _$TunFromJson(json);
 
 @override@JsonKey() final  bool enable;
@@ -1547,7 +1548,7 @@ class _$FallbackFilterCopyWithImpl<$Res>
 /// Create a copy of FallbackFilter
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? geoip = null,Object? geoipCode = null,Object? geosite = null,Object? ipcidr = null,Object? domain = null,}) {
-  return _then(_self.copyWith(
+  return _then(FallbackFilter(
 geoip: null == geoip ? _self.geoip : geoip // ignore: cast_nullable_to_non_nullable
 as bool,geoipCode: null == geoipCode ? _self.geoipCode : geoipCode // ignore: cast_nullable_to_non_nullable
 as String,geosite: null == geosite ? _self.geosite : geosite // ignore: cast_nullable_to_non_nullable
@@ -1694,7 +1695,7 @@ return $default(_that.geoip,_that.geoipCode,_that.geosite,_that.ipcidr,_that.dom
 @JsonSerializable()
 
 class _FallbackFilter implements FallbackFilter {
-  const _FallbackFilter({this.geoip = true, @JsonKey(name: "geoip-code") this.geoipCode = "CN", final  List<String> geosite = const ["gfw"], final  List<String> ipcidr = const ["240.0.0.0/4"], final  List<String> domain = const ["+.google.com", "+.facebook.com", "+.youtube.com"]}): _geosite = geosite,_ipcidr = ipcidr,_domain = domain;
+  const _FallbackFilter({this.geoip = true, @JsonKey(name: "geoip-code") this.geoipCode = "CN",  List<String> geosite = const ["gfw"],  List<String> ipcidr = const ["240.0.0.0/4"],  List<String> domain = const ["+.google.com", "+.facebook.com", "+.youtube.com"]}): _geosite = geosite,_ipcidr = ipcidr,_domain = domain;
   factory _FallbackFilter.fromJson(Map<String, dynamic> json) => _$FallbackFilterFromJson(json);
 
 @override@JsonKey() final  bool geoip;
@@ -1840,7 +1841,7 @@ class _$DnsCopyWithImpl<$Res>
 /// Create a copy of Dns
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? listen = null,Object? preferH3 = null,Object? useHosts = null,Object? useSystemHosts = null,Object? respectRules = null,Object? ipv6 = null,Object? defaultNameserver = null,Object? enhancedMode = null,Object? fakeIpRange = null,Object? fakeIpFilter = null,Object? nameserverPolicy = null,Object? nameserver = null,Object? fallback = null,Object? proxyServerNameserver = null,Object? fallbackFilter = null,}) {
-  return _then(_self.copyWith(
+  return _then(Dns(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,listen: null == listen ? _self.listen : listen // ignore: cast_nullable_to_non_nullable
 as String,preferH3: null == preferH3 ? _self.preferH3 : preferH3 // ignore: cast_nullable_to_non_nullable
@@ -2007,7 +2008,7 @@ return $default(_that.enable,_that.listen,_that.preferH3,_that.useHosts,_that.us
 @JsonSerializable()
 
 class _Dns implements Dns {
-  const _Dns({this.enable = true, this.listen = "0.0.0.0:1053", @JsonKey(name: "prefer-h3") this.preferH3 = false, @JsonKey(name: "use-hosts") this.useHosts = true, @JsonKey(name: "use-system-hosts") this.useSystemHosts = true, @JsonKey(name: "respect-rules") this.respectRules = false, this.ipv6 = true, @JsonKey(name: "default-nameserver") final  List<String> defaultNameserver = const ["223.5.5.5"], @JsonKey(name: "enhanced-mode") this.enhancedMode = DnsMode.fakeIp, @JsonKey(name: "fake-ip-range") this.fakeIpRange = "198.18.0.1/16", @JsonKey(name: "fake-ip-filter") final  List<String> fakeIpFilter = const ["*.lan", "localhost.ptlogin2.qq.com"], @JsonKey(name: "nameserver-policy") final  Map<String, String> nameserverPolicy = const {"www.baidu.com" : "114.114.114.114", "+.internal.crop.com" : "10.0.0.1", "geosite:cn" : "https://doh.pub/dns-query"}, final  List<String> nameserver = const ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"], final  List<String> fallback = const ["tls://8.8.4.4", "tls://1.1.1.1"], @JsonKey(name: "proxy-server-nameserver") final  List<String> proxyServerNameserver = const ["https://doh.pub/dns-query"], @JsonKey(name: "fallback-filter") this.fallbackFilter = const FallbackFilter()}): _defaultNameserver = defaultNameserver,_fakeIpFilter = fakeIpFilter,_nameserverPolicy = nameserverPolicy,_nameserver = nameserver,_fallback = fallback,_proxyServerNameserver = proxyServerNameserver;
+  const _Dns({this.enable = true, this.listen = "0.0.0.0:1053", @JsonKey(name: "prefer-h3") this.preferH3 = false, @JsonKey(name: "use-hosts") this.useHosts = true, @JsonKey(name: "use-system-hosts") this.useSystemHosts = true, @JsonKey(name: "respect-rules") this.respectRules = false, this.ipv6 = true, @JsonKey(name: "default-nameserver")  List<String> defaultNameserver = const ["223.5.5.5"], @JsonKey(name: "enhanced-mode") this.enhancedMode = DnsMode.fakeIp, @JsonKey(name: "fake-ip-range") this.fakeIpRange = "198.18.0.1/16", @JsonKey(name: "fake-ip-filter")  List<String> fakeIpFilter = const ["*.lan", "localhost.ptlogin2.qq.com"], @JsonKey(name: "nameserver-policy")  Map<String, String> nameserverPolicy = const {"www.baidu.com" : "114.114.114.114", "+.internal.crop.com" : "10.0.0.1", "geosite:cn" : "https://doh.pub/dns-query"},  List<String> nameserver = const ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],  List<String> fallback = const ["tls://8.8.4.4", "tls://1.1.1.1"], @JsonKey(name: "proxy-server-nameserver")  List<String> proxyServerNameserver = const ["https://doh.pub/dns-query"], @JsonKey(name: "fallback-filter") this.fallbackFilter = const FallbackFilter()}): _defaultNameserver = defaultNameserver,_fakeIpFilter = fakeIpFilter,_nameserverPolicy = nameserverPolicy,_nameserver = nameserver,_fallback = fallback,_proxyServerNameserver = proxyServerNameserver;
   factory _Dns.fromJson(Map<String, dynamic> json) => _$DnsFromJson(json);
 
 @override@JsonKey() final  bool enable;
@@ -2202,7 +2203,7 @@ class _$GeoXUrlCopyWithImpl<$Res>
 /// Create a copy of GeoXUrl
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? mmdb = null,Object? asn = null,Object? geoip = null,Object? geosite = null,}) {
-  return _then(_self.copyWith(
+  return _then(GeoXUrl(
 mmdb: null == mmdb ? _self.mmdb : mmdb // ignore: cast_nullable_to_non_nullable
 as String,asn: null == asn ? _self.asn : asn // ignore: cast_nullable_to_non_nullable
 as String,geoip: null == geoip ? _self.geoip : geoip // ignore: cast_nullable_to_non_nullable
@@ -2471,7 +2472,7 @@ class _$ParsedRuleCopyWithImpl<$Res>
 /// Create a copy of ParsedRule
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? ruleAction = null,Object? content = freezed,Object? ruleTarget = freezed,Object? ruleProvider = freezed,Object? subRule = freezed,Object? noResolve = null,Object? src = null,}) {
-  return _then(_self.copyWith(
+  return _then(ParsedRule(
 ruleAction: null == ruleAction ? _self.ruleAction : ruleAction // ignore: cast_nullable_to_non_nullable
 as RuleAction,content: freezed == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
 as String?,ruleTarget: freezed == ruleTarget ? _self.ruleTarget : ruleTarget // ignore: cast_nullable_to_non_nullable
@@ -2749,7 +2750,7 @@ class _$RuleCopyWithImpl<$Res>
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? value = null,}) {
-  return _then(_self.copyWith(
+  return _then(Rule(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String,
@@ -3015,7 +3016,7 @@ class _$SubRuleCopyWithImpl<$Res>
 /// Create a copy of SubRule
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = null,}) {
-  return _then(_self.copyWith(
+  return _then(SubRule(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -3278,7 +3279,7 @@ class _$MihomoConfigSnippetCopyWithImpl<$Res>
 /// Create a copy of MihomoConfigSnippet
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? proxyGroups = null,Object? rule = null,Object? ruleProvider = null,Object? subRules = null,}) {
-  return _then(_self.copyWith(
+  return _then(MihomoConfigSnippet(
 proxyGroups: null == proxyGroups ? _self.proxyGroups : proxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,rule: null == rule ? _self.rule : rule // ignore: cast_nullable_to_non_nullable
 as List<Rule>,ruleProvider: null == ruleProvider ? _self.ruleProvider : ruleProvider // ignore: cast_nullable_to_non_nullable
@@ -3424,7 +3425,7 @@ return $default(_that.proxyGroups,_that.rule,_that.ruleProvider,_that.subRules);
 @JsonSerializable()
 
 class _MihomoConfigSnippet implements MihomoConfigSnippet {
-  const _MihomoConfigSnippet({@JsonKey(name: "proxy-groups") final  List<ProxyGroup> proxyGroups = const [], @JsonKey(fromJson: _genRule, name: "rules") final  List<Rule> rule = const [], @JsonKey(name: "rule-providers", fromJson: _genRuleProviders) final  List<RuleProvider> ruleProvider = const [], @JsonKey(name: "sub-rules", fromJson: _genSubRules) final  List<SubRule> subRules = const []}): _proxyGroups = proxyGroups,_rule = rule,_ruleProvider = ruleProvider,_subRules = subRules;
+  const _MihomoConfigSnippet({@JsonKey(name: "proxy-groups")  List<ProxyGroup> proxyGroups = const [], @JsonKey(fromJson: _genRule, name: "rules")  List<Rule> rule = const [], @JsonKey(name: "rule-providers", fromJson: _genRuleProviders)  List<RuleProvider> ruleProvider = const [], @JsonKey(name: "sub-rules", fromJson: _genSubRules)  List<SubRule> subRules = const []}): _proxyGroups = proxyGroups,_rule = rule,_ruleProvider = ruleProvider,_subRules = subRules;
   factory _MihomoConfigSnippet.fromJson(Map<String, dynamic> json) => _$MihomoConfigSnippetFromJson(json);
 
  final  List<ProxyGroup> _proxyGroups;
@@ -3574,7 +3575,7 @@ class _$MihomoConfigCopyWithImpl<$Res>
 /// Create a copy of MihomoConfig
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? mixedPort = null,Object? socksPort = null,Object? port = null,Object? redirPort = null,Object? tproxyPort = null,Object? mode = null,Object? allowLan = null,Object? logLevel = null,Object? ipv6 = null,Object? findProcessMode = null,Object? keepAliveInterval = null,Object? unifiedDelay = null,Object? tcpConcurrent = null,Object? tun = null,Object? dns = null,Object? geoXUrl = null,Object? geodataLoader = null,Object? proxyGroups = null,Object? rule = null,Object? globalUa = freezed,Object? externalController = null,Object? hosts = null,}) {
-  return _then(_self.copyWith(
+  return _then(MihomoConfig(
 mixedPort: null == mixedPort ? _self.mixedPort : mixedPort // ignore: cast_nullable_to_non_nullable
 as int,socksPort: null == socksPort ? _self.socksPort : socksPort // ignore: cast_nullable_to_non_nullable
 as int,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
@@ -3765,7 +3766,7 @@ return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that
 @JsonSerializable()
 
 class _MihomoConfig implements MihomoConfig {
-  const _MihomoConfig({@JsonKey(name: "mixed-port") this.mixedPort = defaultMixedPort, @JsonKey(name: "socks-port") this.socksPort = 0, @JsonKey(name: "port") this.port = 0, @JsonKey(name: "redir-port") this.redirPort = 0, @JsonKey(name: "tproxy-port") this.tproxyPort = 0, this.mode = Mode.rule, @JsonKey(name: "allow-lan") this.allowLan = false, @JsonKey(name: "log-level") this.logLevel = LogLevel.error, this.ipv6 = true, @JsonKey(name: "find-process-mode", unknownEnumValue: FindProcessMode.always) this.findProcessMode = FindProcessMode.always, @JsonKey(name: "keep-alive-interval") this.keepAliveInterval = defaultKeepAliveInterval, @JsonKey(name: "unified-delay") this.unifiedDelay = true, @JsonKey(name: "tcp-concurrent") this.tcpConcurrent = true, @JsonKey(fromJson: Tun.safeFormJson) this.tun = defaultTun, @JsonKey(fromJson: Dns.safeDnsFromJson) this.dns = defaultDns, @JsonKey(name: "geox-url", fromJson: GeoXUrl.safeFormJson) this.geoXUrl = defaultGeoXUrl, @JsonKey(name: "geodata-loader") this.geodataLoader = GeodataLoader.memconservative, @JsonKey(name: "proxy-groups") final  List<ProxyGroup> proxyGroups = const [], final  List<String> rule = const [], @JsonKey(name: "global-ua") this.globalUa, @JsonKey(name: "external-controller") this.externalController = ExternalControllerStatus.close, final  HostsMap hosts = const {}}): _proxyGroups = proxyGroups,_rule = rule,_hosts = hosts;
+  const _MihomoConfig({@JsonKey(name: "mixed-port") this.mixedPort = defaultMixedPort, @JsonKey(name: "socks-port") this.socksPort = 0, @JsonKey(name: "port") this.port = 0, @JsonKey(name: "redir-port") this.redirPort = 0, @JsonKey(name: "tproxy-port") this.tproxyPort = 0, this.mode = Mode.rule, @JsonKey(name: "allow-lan") this.allowLan = false, @JsonKey(name: "log-level") this.logLevel = LogLevel.error, this.ipv6 = true, @JsonKey(name: "find-process-mode", unknownEnumValue: FindProcessMode.always) this.findProcessMode = FindProcessMode.always, @JsonKey(name: "keep-alive-interval") this.keepAliveInterval = defaultKeepAliveInterval, @JsonKey(name: "unified-delay") this.unifiedDelay = true, @JsonKey(name: "tcp-concurrent") this.tcpConcurrent = true, @JsonKey(fromJson: Tun.safeFormJson) this.tun = defaultTun, @JsonKey(fromJson: Dns.safeDnsFromJson) this.dns = defaultDns, @JsonKey(name: "geox-url", fromJson: GeoXUrl.safeFormJson) this.geoXUrl = defaultGeoXUrl, @JsonKey(name: "geodata-loader") this.geodataLoader = GeodataLoader.memconservative, @JsonKey(name: "proxy-groups")  List<ProxyGroup> proxyGroups = const [],  List<String> rule = const [], @JsonKey(name: "global-ua") this.globalUa, @JsonKey(name: "external-controller") this.externalController = ExternalControllerStatus.close,  HostsMap hosts = const {}}): _proxyGroups = proxyGroups,_rule = rule,_hosts = hosts;
   factory _MihomoConfig.fromJson(Map<String, dynamic> json) => _$MihomoConfigFromJson(json);
 
 @override@JsonKey(name: "mixed-port") final  int mixedPort;
