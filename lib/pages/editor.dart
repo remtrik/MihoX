@@ -387,11 +387,13 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
             spacing: 8,
             children: [
               _buildIconButton(
+                context: context,
                 onPressed:
                     value.result == null ? null : controller.previousMatch,
                 icon: Icons.arrow_upward,
               ),
               _buildIconButton(
+                context: context,
                 onPressed: value.result == null ? null : controller.nextMatch,
                 icon: Icons.arrow_downward,
               ),
@@ -506,6 +508,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildIconButton({
+    required BuildContext context,
     required IconData icon,
     VoidCallback? onPressed,
   }) =>
@@ -514,7 +517,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
         onPressed: onPressed,
         style:
             const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.zero)),
-        icon: Icon(icon, size: 16),
+        icon: Icon(icon, size: 16, color: context.colorScheme.onSurface),
       );
 }
 
