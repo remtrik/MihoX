@@ -13,6 +13,9 @@ require (
 // `client-fingerprint: firefox` / `safari` resolve to the new specs.
 replace github.com/metacubex/utls => github.com/metacubex/utls v0.0.0-20260726054410-2aa631698733
 
+// i want to fucking use my stuff so rprx can go fuck himself with his crybaby behaviour
+replace github.com/metacubex/mihomo => ./mihomo
+
 require (
 	github.com/RyuaNerin/go-krypto v1.3.0 // indirect
 	github.com/Yawning/aez v0.0.0-20211027044916-e49e68abd344 // indirect
