@@ -15,14 +15,14 @@ class CommonScrollBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scrollbar(
-        controller: controller,
-        thumbVisibility: true,
-        trackVisibility: true,
-        thickness: 8,
-        radius: const Radius.circular(8),
-        interactive: true,
-        child: child,
-      );
+    controller: controller,
+    thumbVisibility: true,
+    trackVisibility: true,
+    thickness: 8,
+    radius: const Radius.circular(8),
+    interactive: true,
+    child: child,
+  );
 }
 
 class CommonAutoHiddenScrollBar extends StatelessWidget {
@@ -36,12 +36,12 @@ class CommonAutoHiddenScrollBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scrollbar(
-        controller: controller,
-        thickness: 8,
-        radius: const Radius.circular(8),
-        interactive: true,
-        child: child,
-      );
+    controller: controller,
+    thickness: 8,
+    radius: const Radius.circular(8),
+    interactive: true,
+    child: child,
+  );
 }
 
 class ScrollToEndBox<T> extends StatefulWidget {
@@ -91,8 +91,8 @@ class _ScrollToEndBoxState<T> extends State<ScrollToEndBox<T>> {
         onNotification: (details) {
           globalState.cacheScrollPosition[widget.tag] =
               details.metrics.pixels == details.metrics.maxScrollExtent
-                  ? -1
-                  : details.metrics.pixels;
+              ? -1
+              : details.metrics.pixels;
           return false;
         },
         child: widget.child,
@@ -141,20 +141,20 @@ class CacheItemExtentListViewState extends State<CacheItemExtentListView> {
 
   @override
   Widget build(BuildContext context) => ListView.builder(
-        itemBuilder: widget.itemBuilder,
-        itemCount: widget.itemCount,
-        physics: widget.physics,
-        reverse: widget.reverse,
-        shrinkWrap: widget.shrinkWrap,
-        controller: widget.controller,
-        itemExtentBuilder: (index, _) {
-          _updateCacheHeightMap();
-          return globalState.cacheHeightMap[widget.tag]?.updateCacheValue(
-            widget.keyBuilder(index),
-            () => widget.itemExtentBuilder(index),
-          );
-        },
+    itemBuilder: widget.itemBuilder,
+    itemCount: widget.itemCount,
+    physics: widget.physics,
+    reverse: widget.reverse,
+    shrinkWrap: widget.shrinkWrap,
+    controller: widget.controller,
+    itemExtentBuilder: (index, _) {
+      _updateCacheHeightMap();
+      return globalState.cacheHeightMap[widget.tag]?.updateCacheValue(
+        widget.keyBuilder(index),
+        () => widget.itemExtentBuilder(index),
       );
+    },
+  );
 }
 
 class CacheItemExtentSliverReorderableList extends StatefulWidget {
@@ -198,9 +198,9 @@ class CacheItemExtentSliverReorderableListState
       itemCount: widget.itemCount,
       itemExtentBuilder: (index, _) =>
           globalState.cacheHeightMap[widget.tag]?.updateCacheValue(
-        widget.keyBuilder(index),
-        () => widget.itemExtentBuilder(index),
-      ),
+            widget.keyBuilder(index),
+            () => widget.itemExtentBuilder(index),
+          ),
       onReorderItem: widget.onReorder,
       proxyDecorator: widget.proxyDecorator,
     );

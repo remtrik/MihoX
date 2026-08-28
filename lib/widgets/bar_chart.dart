@@ -6,10 +6,7 @@ import 'package:mihox/common/constant.dart';
 
 @immutable
 class BarChartData {
-  const BarChartData({
-    required this.value,
-    required this.label,
-  });
+  const BarChartData({required this.value, required this.label});
   final double value;
   final String label;
 }
@@ -60,17 +57,18 @@ class _BarChartState extends State<BarChart>
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-      builder: (_, container) => AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) => CustomPaint(
-              painter: BarChartPainter(
-                _oldData,
-                widget.data,
-                _animationController.value,
-              ),
-              size: Size(container.maxWidth, container.maxHeight),
-            ),
-          ));
+    builder: (_, container) => AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) => CustomPaint(
+        painter: BarChartPainter(
+          _oldData,
+          widget.data,
+          _animationController.value,
+        ),
+        size: Size(container.maxWidth, container.maxHeight),
+      ),
+    ),
+  );
 }
 
 class BarChartPainter extends CustomPainter {
@@ -84,15 +82,18 @@ class BarChartPainter extends CustomPainter {
     const maxBarWidth = 30;
     final barWidth =
         (size.width - spacing * (dataList.length - 1)) / dataList.length;
-    final maxValue =
-        dataList.fold(0.0, (max, item) => max > item.value ? max : item.value);
+    final maxValue = dataList.fold(
+      0.0,
+      (max, item) => max > item.value ? max : item.value,
+    );
     final rects = <String, Rect>{};
     for (var i = 0; i < dataList.length; i++) {
       final data = dataList[i];
       final barHeight = (data.value / maxValue) * size.height;
 
-      final adjustLeft =
-          barWidth > maxBarWidth ? (barWidth - maxBarWidth) / 2 : 0;
+      final adjustLeft = barWidth > maxBarWidth
+          ? (barWidth - maxBarWidth) / 2
+          : 0;
       final left = i * (barWidth + spacing) + adjustLeft;
       final top = size.height - barHeight;
       rects[data.label] = Rect.fromLTWH(
@@ -117,7 +118,8 @@ class BarChartPainter extends CustomPainter {
     for (var i = 0; i < newRectEntries.length; i++) {
       final newRectEntry = newRectEntries[i];
       final newRect = newRectEntry.value;
-      final oldRect = oldRectMap[newRectEntry.key] ??
+      final oldRect =
+          oldRectMap[newRectEntry.key] ??
           newRect.translate(newRect.left * (progress - 1), 0);
 
       final interpolatedRect = Rect.fromLTRB(

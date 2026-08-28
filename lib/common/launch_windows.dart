@@ -23,10 +23,7 @@ class WindowsAutoLaunch implements AutoLaunch {
   Future<bool> enable() async {
     final key = CURRENT_USER.create(_runKey);
     try {
-      key.setValue(
-        appName,
-        RegistryValue.string(Platform.resolvedExecutable),
-      );
+      key.setValue(appName, RegistryValue.string(Platform.resolvedExecutable));
 
       return true;
     } finally {
@@ -49,9 +46,7 @@ class WindowsAutoLaunch implements AutoLaunch {
   }
 
   @override
-  Future<void> updateStatus({
-    required bool isAutoLaunch,
-  }) async {
+  Future<void> updateStatus({required bool isAutoLaunch}) async {
     if (await isEnable == isAutoLaunch) return;
 
     if (isAutoLaunch) {

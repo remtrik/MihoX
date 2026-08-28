@@ -10,55 +10,48 @@ class IntranetIP extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: getWidgetHeight(1),
-        child: CommonCard(
-          info: Info(
-            label: appLocalizations.intranetIP,
-            iconData: Icons.devices,
-          ),
-          onPressed: () {},
-          child: Padding(
-            padding: baseInfoEdgeInsets.copyWith(
-              top: 0,
+    height: getWidgetHeight(1),
+    child: CommonCard(
+      info: Info(label: appLocalizations.intranetIP, iconData: Icons.devices),
+      onPressed: () {},
+      child: Padding(
+        padding: baseInfoEdgeInsets.copyWith(top: 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              height: globalState.measure.bodyMediumHeight + 2,
+              child: Consumer(
+                builder: (_, ref, _) {
+                  final localIp = ref.watch(localIpProvider);
+                  return FadeThroughBox(
+                    child: localIp != null
+                        ? TooltipText(
+                            text: Text(
+                              localIp.isNotEmpty
+                                  ? localIp
+                                  : appLocalizations.noNetwork,
+                              style: context.textTheme.bodyMedium?.toLight
+                                  .adjustSize(1),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        : const Padding(
+                            padding: EdgeInsets.all(2),
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                  );
+                },
+              ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: globalState.measure.bodyMediumHeight + 2,
-                  child: Consumer(
-                    builder: (_, ref, _) {
-                      final localIp = ref.watch(localIpProvider);
-                      return FadeThroughBox(
-                        child: localIp != null
-                            ? TooltipText(
-                                text: Text(
-                                  localIp.isNotEmpty
-                                      ? localIp
-                                      : appLocalizations.noNetwork,
-                                  style: context.textTheme.bodyMedium?.toLight
-                                      .adjustSize(1),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            : const Padding(
-                                padding: EdgeInsets.all(2),
-                                child: AspectRatio(
-                                  aspectRatio: 1,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

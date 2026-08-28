@@ -90,7 +90,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'0875d163f4c2c8ff890fd49aaf8a2cdd97951bf4';
+    r'3a8f3c59e1ad5417b22f3f688812d4db61953a70';
 
 @ProviderFor(navigationsState)
 final navigationsStateProvider = NavigationsStateProvider._();
@@ -1436,6 +1436,68 @@ final class GlobalModeEnabledProvider
 
 String _$globalModeEnabledHash() => r'8072182e3f22b7b647134f270b8f7091982464b9';
 
+/// Single source of truth for whether the "new look" (hero) dashboard is shown.
+/// Just the `newDashboard` setting — the toggle is never locked. The
+/// `mihox-newboard` header writes this setting via _applyCustomViewSettings under
+/// the standard `mihox-custom` policy (`update` re-applies on every profile apply,
+/// `add` only when the subscription is first added), so the provider can switch the
+/// board on/off through the normal header pipeline rather than overriding here.
+
+@ProviderFor(newDashboardEnabled)
+final newDashboardEnabledProvider = NewDashboardEnabledProvider._();
+
+/// Single source of truth for whether the "new look" (hero) dashboard is shown.
+/// Just the `newDashboard` setting — the toggle is never locked. The
+/// `mihox-newboard` header writes this setting via _applyCustomViewSettings under
+/// the standard `mihox-custom` policy (`update` re-applies on every profile apply,
+/// `add` only when the subscription is first added), so the provider can switch the
+/// board on/off through the normal header pipeline rather than overriding here.
+
+final class NewDashboardEnabledProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Single source of truth for whether the "new look" (hero) dashboard is shown.
+  /// Just the `newDashboard` setting — the toggle is never locked. The
+  /// `mihox-newboard` header writes this setting via _applyCustomViewSettings under
+  /// the standard `mihox-custom` policy (`update` re-applies on every profile apply,
+  /// `add` only when the subscription is first added), so the provider can switch the
+  /// board on/off through the normal header pipeline rather than overriding here.
+  NewDashboardEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'newDashboardEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$newDashboardEnabledHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return newDashboardEnabled(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$newDashboardEnabledHash() =>
+    r'20e27e356439d84e2015660330a80f572fdea18b';
+
 @ProviderFor(hasAnnounceData)
 final hasAnnounceDataProvider = HasAnnounceDataProvider._();
 
@@ -2219,7 +2281,7 @@ final class CheckIpProvider
   }
 }
 
-String _$checkIpHash() => r'07ebf8d032349e2b3adda483e68b1936ffbed68d';
+String _$checkIpHash() => r'04cc9442d1916904f241066536fef6c9b822fe19';
 
 @ProviderFor(genColorScheme)
 final genColorSchemeProvider = GenColorSchemeFamily._();

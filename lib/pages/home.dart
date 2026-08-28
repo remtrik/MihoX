@@ -8,6 +8,7 @@ import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart';
 import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
+import 'package:mihox/views/dashboard/widgets/hero_nav_bar.dart';
 import 'package:mihox/widgets/widgets.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,45 +16,52 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => HomeBackScope(
-        child: Consumer(
-          builder: (_, ref, child) {
-            final viewMode = ref.watch(
-              homeStateProvider.select((s) => s.viewMode),
-            );
-            final navigationItems = ref.watch(
-              homeStateProvider.select((s) => s.navigationItems),
-            );
-            final pageLabel = ref.watch(
-              homeStateProvider.select((s) => s.pageLabel),
-            );
+    child: Consumer(
+      builder: (_, ref, child) {
+        final viewMode = ref.watch(homeStateProvider.select((s) => s.viewMode));
+        final navigationItems = ref.watch(
+          homeStateProvider.select((s) => s.navigationItems),
+        );
+        final pageLabel = ref.watch(
+          homeStateProvider.select((s) => s.pageLabel),
+        );
 
-            final rawIndex =
-                navigationItems.indexWhere((e) => e.label == pageLabel);
-            assert(
-              rawIndex != -1,
-              'pageLabel "$pageLabel" not found in navigationItems',
-            );
-            final currentIndex = rawIndex == -1 ? 0 : rawIndex;
+        final rawIndex = navigationItems.indexWhere(
+          (e) => e.label == pageLabel,
+        );
+        assert(
+          rawIndex != -1,
+          'pageLabel "$pageLabel" not found in navigationItems',
+        );
+        final currentIndex = rawIndex == -1 ? 0 : rawIndex;
 
-            final navigationBar = CommonNavigationBar(
-              viewMode: viewMode,
-              navigationItems: navigationItems,
-              currentIndex: currentIndex,
-            );
+        final navigationBar = CommonNavigationBar(
+          viewMode: viewMode,
+          navigationItems: navigationItems,
+          currentIndex: currentIndex,
+        );
 
-            return CommonScaffold(
-              key: globalState.homeScaffoldKey,
-              title: Intl.message(pageLabel.name),
-              sideNavigationBar:
-                  viewMode != ViewMode.mobile ? navigationBar : null,
-              body: child!,
-              bottomNavigationBar:
-                  viewMode == ViewMode.mobile ? navigationBar : null,
-            );
-          },
-          child: const _HomePageView(),
-        ),
-      );
+        // Mobile bottom bar follows the dashboard style: the hero nav bar for
+        // the new look, the classic Material NavigationBar for the old one.
+        final newDashboard = ref.watch(newDashboardEnabledProvider);
+        final bottomNavigationBar = viewMode == ViewMode.mobile
+            ? (newDashboard ? const HeroNavBar() : navigationBar)
+            : null;
+
+        final sideNavigationBar = viewMode != ViewMode.mobile
+            ? navigationBar
+            : null;
+        return CommonScaffold(
+          key: globalState.homeScaffoldKey,
+          title: Intl.message(pageLabel.name),
+          sideNavigationBar: sideNavigationBar,
+          body: child!,
+          bottomNavigationBar: bottomNavigationBar,
+        );
+      },
+      child: const _HomePageView(),
+    ),
+  );
 }
 
 class _HomePageView extends ConsumerStatefulWidget {
@@ -109,7 +117,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     final index = _indexOfLabel(label);
     if (index == -1) return;
 
-    final animate = ref.read(appSettingProvider).isAnimateToPage &&
+    final animate =
+        ref.read(appSettingProvider).isAnimateToPage &&
         ref.read(isMobileViewProvider);
 
     if (animate) {
@@ -175,17 +184,21 @@ class CommonNavigationBar extends ConsumerWidget {
   }
 
   List<Widget> _destinations(BuildContext context) => navigationItems
-      .map((e) => NavigationDestination(
-            icon: e.icon,
-            label: Intl.message(e.label.name),
-          ))
+      .map(
+        (e) => NavigationDestination(
+          icon: e.icon,
+          label: Intl.message(e.label.name),
+        ),
+      )
       .toList();
 
   List<NavigationRailDestination> _railDestinations() => navigationItems
-      .map((e) => NavigationRailDestination(
-            icon: e.icon,
-            label: Text(Intl.message(e.label.name)),
-          ))
+      .map(
+        (e) => NavigationRailDestination(
+          icon: e.icon,
+          label: Text(Intl.message(e.label.name)),
+        ),
+      )
       .toList();
 
   @override
@@ -201,57 +214,77 @@ class CommonNavigationBar extends ConsumerWidget {
       );
     }
 
-    final showLabel = ref.watch(
-      appSettingProvider.select((s) => s.showLabel),
-    );
+    final showLabel = ref.watch(appSettingProvider.select((s) => s.showLabel));
     final colorScheme = context.colorScheme;
-    final labelStyle =
-        context.textTheme.labelLarge!.copyWith(color: colorScheme.onSurface);
+    final labelStyle = context.textTheme.labelLarge!.copyWith(
+      color: colorScheme.onSurface,
+    );
 
     return Material(
-      color: colorScheme.surfaceContainer,
-      child: Column(
-        children: [
-          const SizedBox(height: 16),
-          Expanded(
-            child: ScrollConfiguration(
-              behavior: HiddenBarScrollBehavior(),
-              child: SingleChildScrollView(
-                child: IntrinsicHeight(
-                  child: NavigationRail(
-                    backgroundColor: colorScheme.surfaceContainer,
-                    selectedIconTheme: IconThemeData(
-                      color: colorScheme.onSurfaceVariant,
+      color: context.colorScheme.surfaceContainer,
+      // SafeArea: the app draws edge-to-edge, so on tablets/foldables (which
+      // also get the desktop-style side rail) the status bar overlapped the
+      // logo. Shifts the whole logo+rail block below the system inset; no-op
+      // on desktop OSes.
+      child: SafeArea(
+        bottom: false,
+        right: false,
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Expanded(
+              child: ScrollConfiguration(
+                behavior: HiddenBarScrollBehavior(),
+                child: SingleChildScrollView(
+                  child: IntrinsicHeight(
+                    child: NavigationRail(
+                      backgroundColor: context.colorScheme.surfaceContainer,
+                      selectedIconTheme: IconThemeData(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                      unselectedIconTheme: IconThemeData(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                      selectedLabelTextStyle: context.textTheme.labelLarge!
+                          .copyWith(color: context.colorScheme.onSurface),
+                      unselectedLabelTextStyle: context.textTheme.labelLarge!
+                          .copyWith(color: context.colorScheme.onSurface),
+                      destinations: navigationItems
+                          .map(
+                            (e) => NavigationRailDestination(
+                              icon: e.icon,
+                              label: Text(Intl.message(e.label.name)),
+                            ),
+                          )
+                          .toList(),
+                      onDestinationSelected: (index) {
+                        globalState.appController.page =
+                            navigationItems[index].label;
+                      },
+                      extended: false,
+                      selectedIndex: currentIndex,
+                      labelType: showLabel
+                          ? NavigationRailLabelType.all
+                          : NavigationRailLabelType.none,
                     ),
-                    unselectedIconTheme: IconThemeData(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    selectedLabelTextStyle: labelStyle,
-                    unselectedLabelTextStyle: labelStyle,
-                    destinations: _railDestinations(),
-                    onDestinationSelected: _onDestinationSelected,
-                    extended: false,
-                    selectedIndex: currentIndex,
-                    labelType: showLabel
-                        ? NavigationRailLabelType.all
-                        : NavigationRailLabelType.none,
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          IconButton(
-            onPressed: () {
-              ref.read(appSettingProvider.notifier).updateState(
-                    (state) => state.copyWith(showLabel: !state.showLabel),
-                  );
-            },
-            icon: const Icon(Icons.menu),
-            tooltip: 'Toggle labels',
-          ),
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 16),
+            IconButton(
+              onPressed: () {
+                ref
+                    .read(appSettingProvider.notifier)
+                    .updateState(
+                      (state) => state.copyWith(showLabel: !state.showLabel),
+                    );
+              },
+              icon: const Icon(Icons.menu),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -259,13 +292,13 @@ class CommonNavigationBar extends ConsumerWidget {
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(BuildContext context)
-      : _colors = Theme.of(context).colorScheme,
-        _textTheme = Theme.of(context).textTheme,
-        super(
-          height: 80.0,
-          elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        );
+    : _colors = Theme.of(context).colorScheme,
+      _textTheme = Theme.of(context).textTheme,
+      super(
+        height: 80.0,
+        elevation: 3.0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      );
 
   final ColorScheme _colors;
   final TextTheme _textTheme;
@@ -281,14 +314,16 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<IconThemeData?>? get iconTheme =>
-      WidgetStateProperty.resolveWith((states) => IconThemeData(
-            size: 24.0,
-            color: states.contains(WidgetState.disabled)
-                ? _colors.onSurfaceVariant.opacity38
-                : states.contains(WidgetState.selected)
-                    ? _colors.onSecondaryContainer
-                    : _colors.onSurfaceVariant,
-          ));
+      WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          size: 24.0,
+          color: states.contains(WidgetState.disabled)
+              ? _colors.onSurfaceVariant.opacity38
+              : states.contains(WidgetState.selected)
+              ? _colors.onSecondaryContainer
+              : _colors.onSurfaceVariant,
+        ),
+      );
 
   @override
   Color? get indicatorColor => _colors.secondaryContainer;
@@ -298,14 +333,16 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<TextStyle?>? get labelTextStyle =>
-      WidgetStateProperty.resolveWith((states) => _textTheme.labelMedium!.apply(
-            overflow: TextOverflow.ellipsis,
-            color: states.contains(WidgetState.disabled)
-                ? _colors.onSurfaceVariant.opacity38
-                : states.contains(WidgetState.selected)
-                    ? _colors.onSurface
-                    : _colors.onSurfaceVariant,
-          ));
+      WidgetStateProperty.resolveWith(
+        (states) => _textTheme.labelMedium!.apply(
+          overflow: TextOverflow.ellipsis,
+          color: states.contains(WidgetState.disabled)
+              ? _colors.onSurfaceVariant.opacity38
+              : states.contains(WidgetState.selected)
+              ? _colors.onSurface
+              : _colors.onSurfaceVariant,
+        ),
+      );
 }
 
 class HomeBackScope extends StatelessWidget {

@@ -8,16 +8,26 @@ import 'print.dart';
 extension StringExtension on String {
   bool get isUrl => RegExp(r'^(http|https|ftp)://').hasMatch(this);
 
+  String get normalizeUrlCredentials {
+    final match = RegExp(r'^(https?://)([^/]+)@([^/].*)$').firstMatch(this);
+    if (match == null) return this;
+    final scheme = match.group(1)!;
+    final userinfo = match.group(2)!;
+    final hostAndPath = match.group(3)!;
+    final encoded = userinfo.replaceAll('@', '%40');
+    return '$scheme$encoded@$hostAndPath';
+  }
+
   dynamic get splitByMultipleSeparators {
-    final parts =
-        split(RegExp(r'[, ;]+')).where((part) => part.isNotEmpty).toList();
+    final parts = split(RegExp(r'[, ;]+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
 
     return parts.length > 1 ? parts : this;
   }
 
-  int compareToLower(String other) => toLowerCase().compareTo(
-        other.toLowerCase(),
-      );
+  int compareToLower(String other) =>
+      toLowerCase().compareTo(other.toLowerCase());
 
   List<int> get encodeUtf16LeWithBom {
     final byteData = ByteData(length * 2);
@@ -59,10 +69,6 @@ extension StringExtension on String {
     final bytes = utf8.encode(this);
     return md5.convert(bytes).toString();
   }
-
-// bool containsToLower(String target) {
-//   return toLowerCase().contains(target);
-// }
 }
 
 extension StringExtensionSafe on String? {

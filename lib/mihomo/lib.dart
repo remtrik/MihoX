@@ -1,277 +1,372 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
-import 'package:ffi/ffi.dart';
+import 'package:flutter/services.dart';
 import 'package:mihox/common/common.dart';
-import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart';
-import 'package:mihox/plugins/service.dart';
 import 'package:mihox/state.dart';
 
-import 'generated/mihomo_ffi.dart';
 import 'interface.dart';
 
 class MihomoLib extends MihomoHandlerInterface with AndroidMihomoInterface {
-  factory MihomoLib() {
-    _instance ??= MihomoLib._internal();
-    return _instance!;
-  }
+  factory MihomoLib() => _instance ??= MihomoLib._internal();
 
   MihomoLib._internal() {
-    _initService();
+    _channel.setMethodCallHandler(_onMethodCall);
+    unawaited(_init());
   }
   static MihomoLib? _instance;
-  Completer<bool> _canSendCompleter = Completer();
-  SendPort? sendPort;
-  final receiverPort = ReceivePort();
+
+  final MethodChannel _channel = const MethodChannel(
+    'org.remtrik.mihox/service',
+  );
+  Completer<bool> _initCompleter = Completer<bool>();
+  // Guards against launching a second concurrent native `init` while a prior
+  // _init() is still awaiting (its completer not yet settled).
+  bool _initInFlight = false;
+
+  static const int _maxCrashRetries = 5;
+  int _crashCount = 0;
+  DateTime? _lastCrashTime;
+
+  Future<void> _init() async {
+    _initInFlight = true;
+    try {
+      await _channel
+          .invokeMethod<String>('init')
+          .timeout(const Duration(seconds: initTimeoutSeconds));
+      _crashCount = 0;
+      if (!_initCompleter.isCompleted) _initCompleter.complete(true);
+    } catch (e) {
+      commonPrint.log('MihomohLib init failed: $e');
+      if (!_initCompleter.isCompleted) _initCompleter.complete(false);
+    } finally {
+      _initInFlight = false;
+    }
+  }
+
+  Future<void> _handleCrashRestart() async {
+    final now = DateTime.now();
+    if (_lastCrashTime != null &&
+        now.difference(_lastCrashTime!).inSeconds > 60) {
+      _crashCount = 0;
+    }
+    _lastCrashTime = now;
+    _crashCount++;
+
+    if (_crashCount > _maxCrashRetries) {
+      commonPrint.log(
+        'service crash loop: $_crashCount crashes, giving up. '
+        'Restart the app to retry.',
+      );
+      if (!_initCompleter.isCompleted) _initCompleter.complete(false);
+      return;
+    }
+
+    final delayMs = 1000 * (1 << (_crashCount - 1)).clamp(1, 16);
+    commonPrint.log(
+      'service crash #$_crashCount/$_maxCrashRetries, '
+      'retrying in ${delayMs}ms',
+    );
+    await Future.delayed(Duration(milliseconds: delayMs));
+    // A prior _init() may already be running (e.g. another crash arrived mid-
+    // init); don't spawn a second concurrent native init.
+    if (_initInFlight) {
+      commonPrint.log('service crash restart skipped: init already in flight');
+      return;
+    }
+    if (_initCompleter.isCompleted) _initCompleter = Completer<bool>();
+    unawaited(_init());
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'event':
+        final raw = call.arguments as String?;
+        if (raw == null || raw.isEmpty) return null;
+        try {
+          handleResult(ActionResult.fromJson(json.decode(raw)));
+        } catch (e) {
+          commonPrint.log('event parse err: $e raw=$raw');
+        }
+        return null;
+      case 'crash':
+        commonPrint.log('service crash: ${call.arguments}');
+        unawaited(_handleCrashRestart());
+        return null;
+      case 'onStarted':
+        return null;
+      default:
+        return null;
+    }
+  }
 
   @override
-  Future<bool> preload() async => true;
-
-  Future<void> _initService() async {
-    await service?.destroy();
-    _registerMainPort(receiverPort.sendPort);
-    receiverPort.listen((message) {
-      if (message is SendPort) {
-        if (_canSendCompleter.isCompleted) {
-          sendPort = null;
-          _canSendCompleter = Completer();
-        }
-        sendPort = message;
-        _canSendCompleter.complete(true);
-      } else if (message is Map) {
-        // Ignore IPC responses (Map type) - they don't need processing
-        return;
-      } else {
-        handleResult(ActionResult.fromJson(json.decode(message)));
-      }
-    });
-    await service?.init();
-  }
-
-  void _registerMainPort(SendPort sendPort) {
-    IsolateNameServer.removePortNameMapping(mainIsolate);
-    IsolateNameServer.registerPortWithName(sendPort, mainIsolate);
-  }
+  Future<bool> preload() => _initCompleter.future;
 
   @override
   Future<bool> destroy() async {
-    await service?.destroy();
+    try {
+      await _channel.invokeMethod<bool>('shutdown');
+    } catch (e) {
+      commonPrint.log('shutdown channel error: $e');
+    }
+    // shutdown unbinds the remote service; re-arm init state so a later preload()/
+    // reconnectIfNeeded() forces a fresh bind + event-listener registration instead
+    // of reporting "ready" against a dead service.
+    _crashCount = 0;
+    if (_initCompleter.isCompleted) _initCompleter = Completer<bool>();
     return true;
   }
 
   @override
   void reStart() {
-    _initService();
+    _crashCount = 0;
+    if (_initCompleter.isCompleted) _initCompleter = Completer<bool>();
+    unawaited(_init());
+  }
+
+  void reconnectIfNeeded() {
+    // An init is already running (completer not yet settled); let it finish
+    // rather than spawning a second concurrent native init.
+    if (_initInFlight) {
+      return;
+    }
+    // Re-register on EVERY resume (no _initSucceeded short-circuit): the event pipe is
+    // registered once per Flutter engine, but a warm app-open after a headless tile
+    // start keeps this engine alive while the :remote core it registered against has
+    // been recycled (eventListener==nil) — so logs/journal/delays silently stop
+    // arriving even though the polled traffic keeps working. Re-invoking init re-binds
+    // and re-registers the listener idempotently (Service.bind no-ops if bound;
+    // setEventListener swaps the listener under a lock). Still respect the crash budget
+    // so a genuine crash-loop doesn't spin.
+    if (_crashCount > _maxCrashRetries) {
+      return;
+    }
+    _crashCount = 0;
+    if (_initCompleter.isCompleted) _initCompleter = Completer<bool>();
+    unawaited(_init());
   }
 
   @override
   Future<bool> shutdown() async {
     await super.shutdown();
-    await destroy();
-    return true;
+    return destroy();
   }
 
   @override
   Future<void> sendMessage(String message) async {
-    await _canSendCompleter.future;
-    sendPort?.send(message);
+    try {
+      final res = await _channel.invokeMethod<String>('invokeAction', message);
+      if (res == null || res.isEmpty) {
+        _failPendingCompleter(message, 'empty response');
+        return;
+      }
+      try {
+        handleResult(ActionResult.fromJson(json.decode(res)));
+      } catch (e) {
+        commonPrint.log('invokeAction parse err: $e');
+        _failPendingCompleter(message, res);
+      }
+    } catch (e) {
+      commonPrint.log('sendMessage channel error: $e');
+      _failPendingCompleter(message, '$e');
+    }
   }
 
-  /// Send a custom IPC message to service (for foreground notification updates)
-  Future<void> sendIpcMessage(Map<String, dynamic> message) async {
-    await _canSendCompleter.future;
-    sendPort?.send(message);
+  void _failPendingCompleter(String message, String reason) {
+    try {
+      final decoded = json.decode(message);
+      if (decoded is Map<String, dynamic>) {
+        final id = decoded['id'] as String?;
+        final method = decoded['method'] as String?;
+        if (id != null) {
+          final completer = callbackCompleterMap.remove(id);
+          if (completer != null && !completer.isCompleted) {
+            commonPrint.log(
+              '_failPendingCompleter: method=$method reason=$reason',
+            );
+            // Complete with the typed default (not null) so a Completer<bool/String/Map>
+            // resolves immediately instead of throwing TypeError and hanging to timeout.
+            completer.complete(callbackDefaultMap.remove(id));
+          }
+        }
+      }
+    } catch (e) {
+      commonPrint.log('_failPendingCompleter parse error: $e reason=$reason');
+    }
+  }
+
+  // --- fork-specific straight-through methods (native returns direct result) --
+
+  @override
+  Future<String> getAndroidVpnOptions() async {
+    try {
+      return (await _channel
+              .invokeMethod<String>('getAndroidVpnOptions')
+              .timeout(const Duration(seconds: getAndroidVpnOptionsTimeoutSeconds))) ??
+          '';
+    } catch (e) {
+      commonPrint.log('getAndroidVpnOptions error: $e');
+      return '';
+    }
   }
 
   @override
-  Future<String> getAndroidVpnOptions() => invoke<String>(
-        method: ActionMethod.getAndroidVpnOptions,
-      );
+  Future<bool> updateDns(String value) async {
+    try {
+      await _channel
+          .invokeMethod('updateDns', value)
+          .timeout(const Duration(seconds: updateDnsTimeoutSeconds));
+      return true;
+    } catch (e) {
+      commonPrint.log('updateDns error: $e');
+      return false;
+    }
+  }
 
-  @override
-  Future<bool> updateDns(String value) => invoke<bool>(
-        method: ActionMethod.updateDns,
-        data: value,
-      );
-
+  /// null means the tunnel is confirmed stopped. A failed probe (channel
+  /// error / timeout) THROWS instead of returning null — callers must be able
+  /// to tell "stopped" from "unknown", otherwise a slow bind on cold start
+  /// gets treated as "stopped" and actively kills a live VPN.
   @override
   Future<DateTime?> getRunTime() async {
-    final runTimeString = await invoke<String>(
-      method: ActionMethod.getRunTime,
-    );
-    if (runTimeString.isEmpty) return null;
-
-    return DateTime.fromMillisecondsSinceEpoch(int.parse(runTimeString));
+    final rt = await _channel
+        .invokeMethod('getRunTime')
+        .timeout(const Duration(seconds: getRunTimeTimeoutSeconds));
+    final ms = (rt is int) ? rt : int.tryParse('$rt');
+    if (ms == null || ms == 0) return null;
+    return DateTime.fromMillisecondsSinceEpoch(ms);
   }
 
   @override
-  Future<String> getCurrentProfileName() => invoke<String>(
-        method: ActionMethod.getCurrentProfileName,
-      );
-}
-
-class MihomoLibHandler {
-  factory MihomoLibHandler() {
-    _instance ??= MihomoLibHandler._internal();
-    return _instance!;
-  }
-
-  MihomoLibHandler._internal() {
-    lib = DynamicLibrary.open("libmihomo.so");
-    mihomoFFI = MihomoFFI(lib);
-    mihomoFFI.initNativeApiBridge(
-      NativeApi.initializeApiDLData,
-    );
-  }
-  static MihomoLibHandler? _instance;
-
-  late final MihomoFFI mihomoFFI;
-
-  late final DynamicLibrary lib;
-
-  Future<String> invokeAction(String actionParams) {
-    final completer = Completer<String>();
-    final receiver = ReceivePort();
-    receiver.listen((message) {
-      if (!completer.isCompleted) {
-        completer.complete(message);
-        receiver.close();
-      }
-    });
-    final actionParamsChar = actionParams.toNativeUtf8().cast<Char>();
-    mihomoFFI.invokeAction(
-      actionParamsChar,
-      receiver.sendPort.nativePort,
-    );
-    malloc.free(actionParamsChar);
-    return completer.future;
-  }
-
-  void attachMessagePort(int messagePort) {
-    mihomoFFI.attachMessagePort(
-      messagePort,
-    );
-  }
-
-  void updateDns(String dns) {
-    final dnsChar = dns.toNativeUtf8().cast<Char>();
-    mihomoFFI.updateDns(dnsChar);
-    malloc.free(dnsChar);
-  }
-
-  void setState(CoreState state) {
-    final stateChar = json.encode(state).toNativeUtf8().cast<Char>();
-    mihomoFFI.setState(stateChar);
-    malloc.free(stateChar);
-  }
-
-  String getCurrentProfileName() {
-    final currentProfileRaw = mihomoFFI.getCurrentProfileName();
-    final currentProfile = currentProfileRaw.cast<Utf8>().toDartString();
-    mihomoFFI.freeCString(currentProfileRaw);
-    return currentProfile;
-  }
-
-  String getAndroidVpnOptions() {
-    final vpnOptionsRaw = mihomoFFI.getAndroidVpnOptions();
-    final vpnOptions = vpnOptionsRaw.cast<Utf8>().toDartString();
-    mihomoFFI.freeCString(vpnOptionsRaw);
-    return vpnOptions;
-  }
-
-  Traffic getTraffic() {
-    final trafficRaw = mihomoFFI.getTraffic();
-    final trafficString = trafficRaw.cast<Utf8>().toDartString();
-    mihomoFFI.freeCString(trafficRaw);
-    if (trafficString.isEmpty) return Traffic();
-
-    return Traffic.fromMap(json.decode(trafficString));
-  }
-
-  Traffic getTotalTraffic({bool value = false}) {
-    final trafficRaw = mihomoFFI.getTotalTraffic();
-    final trafficString = trafficRaw.cast<Utf8>().toDartString();
-    mihomoFFI.freeCString(trafficRaw);
-    if (trafficString.isEmpty) return Traffic();
-
-    return Traffic.fromMap(json.decode(trafficString));
-  }
-
-  Future<bool> startListener() async {
-    mihomoFFI.startListener();
-    return true;
-  }
-
-  Future<bool> stopListener() async {
-    mihomoFFI.stopListener();
-    return true;
-  }
-
-  DateTime? getRunTime() {
-    final runTimeRaw = mihomoFFI.getRunTime();
-    final runTimeString = runTimeRaw.cast<Utf8>().toDartString();
-    if (runTimeString.isEmpty) return null;
-
-    return DateTime.fromMillisecondsSinceEpoch(int.parse(runTimeString));
-  }
-
-  Future<Map<String, dynamic>> getConfig(String id) async {
-    final path = await appPath.getProfilePath(id);
-    final pathChar = path.toNativeUtf8().cast<Char>();
-    final configRaw = mihomoFFI.getConfig(pathChar);
-    final configString = configRaw.cast<Utf8>().toDartString();
-    if (configString.isEmpty) { 
-      malloc.free(pathChar);
-      mihomoFFI.freeCString(configRaw);
-      return {};
+  Future<String> getCurrentProfileName() async {
+    try {
+      return (await _channel
+              .invokeMethod<String>('getCurrentProfileName')
+              .timeout(const Duration(seconds: getCurrentProfileNameTimeoutSeconds))) ??
+          '';
+    } catch (e) {
+      commonPrint.log('getCurrentProfileName error: $e');
+      return '';
     }
-
-    final config = json.decode(configString);
-    malloc.free(pathChar);
-    mihomoFFI.freeCString(configRaw);
-    return config;
   }
 
-  Future<String> quickStart(
-    InitParams initParams,
-    SetupParams setupParams,
-    CoreState state,
-  ) {
-    final completer = Completer<String>();
-    final receiver = ReceivePort();
-    receiver.listen((message) {
-      if (!completer.isCompleted) {
-        completer.complete(message);
-        receiver.close();
+  // --- VPN lifecycle --------------------------------------------------------
+
+  /// Tells the `:remote` service to bring the TUN tunnel up using the current
+  /// Go-provided `AndroidVpnOptions`, merged with UI access control settings.
+  Future<int> startVpn() async {
+    final optionsRaw = await getAndroidVpnOptions();
+    if (optionsRaw.isEmpty) {
+      // Probe failed/timed out (e.g. core busy in setupConfig). Starting anyway
+      // would bring the tunnel up with default VpnOptions — no routes, no
+      // access control (split tunneling silently lost). Fail the start instead.
+      commonPrint.log('startVpn aborted: empty AndroidVpnOptions');
+      return 0;
+    }
+    final merged = _mergeAccessControl(optionsRaw);
+    // Defensive backstop: the native side always replies (even on permission
+    // denial -> 0), but never block the start flow indefinitely if it doesn't.
+    final res = await _channel
+        .invokeMethod('start', {'data': merged})
+        .timeout(const Duration(seconds: startVpnTimeoutSeconds), onTimeout: () => 0);
+    return (res is int) ? res : int.tryParse('$res') ?? 0;
+  }
+
+  String _mergeAccessControl(String optionsJson) {
+    if (optionsJson.isEmpty) return optionsJson;
+    try {
+      final map = json.decode(optionsJson) as Map<String, dynamic>;
+      final ac = globalState.config.vpnProps.accessControl;
+      if (ac.enable) {
+        map['accessControl'] = {
+          'mode': ac.mode.name,
+          'acceptList': ac.acceptList,
+          'rejectList': ac.rejectList,
+        };
       }
-    });
-    final params = json.encode(setupParams);
-    final initValue = json.encode(initParams);
-    final stateParams = json.encode(state);
-    final initParamsChar = initValue.toNativeUtf8().cast<Char>();
-    final paramsChar = params.toNativeUtf8().cast<Char>();
-    final stateParamsChar = stateParams.toNativeUtf8().cast<Char>();
-    mihomoFFI.quickStart(
-      initParamsChar,
-      paramsChar,
-      stateParamsChar,
-      receiver.sendPort.nativePort,
-    );
-    malloc
-      ..free(initParamsChar)
-      ..free(paramsChar)
-      ..free(stateParamsChar);
-    return completer.future;
+      return json.encode(map);
+    } catch (_) {
+      return optionsJson;
+    }
+  }
+
+  Future<bool> stopVpn() async {
+    // The native side resolves the result inside a coroutine that can be
+    // cancelled (engine detach) or starved (frozen main dispatcher) — without
+    // a timeout this await can hang forever, leaving the UI stuck in
+    // "connected" with a frozen runtime. UI-side cleanup must always proceed.
+    try {
+      await _channel
+          .invokeMethod('stop')
+          .timeout(const Duration(seconds: stopVpnTimeoutSeconds), onTimeout: () => null);
+    } catch (e) {
+      commonPrint.log('stopVpn error: $e');
+    }
+    return true;
+  }
+
+  /// One-shot start: atomically `initMihomo` + `setupConfig` + foreground
+  /// service bring-up on the remote side. Returns an error string (empty on
+  /// success) matching the legacy Dart API.
+  Future<String> quickStart({
+    required InitParams initParams,
+    required SetupParams setupParams,
+    required CoreState state,
+  }) async {
+    final res = await _channel
+        .invokeMethod<String>('quickStart', <String, String>{
+          'init': json.encode(initParams),
+          'params': json.encode(setupParams),
+          'state': json.encode(state),
+        })
+        .timeout(
+          const Duration(seconds: quickStartTimeoutSeconds),
+          onTimeout: () => 'quickStart timed out',
+        );
+    return res ?? '';
+  }
+
+  /// Push foreground-notification params (title/server/content) so the
+  /// :remote service can render the sticky notification without having to
+  /// call back into Dart.
+  Future<void> updateNotificationParams({
+    required String title,
+    String server = '',
+  }) async {
+    try {
+      await _channel
+          .invokeMethod(
+            'updateNotificationParams',
+            json.encode({'title': title, 'stopText': server}),
+          )
+          .timeout(const Duration(seconds: updateNotificationParamsTimeoutSeconds));
+    } catch (e) {
+      commonPrint.log('updateNotificationParams error: $e');
+    }
+  }
+
+  /// Persist quickStart-equivalent params so tile/widget/Always-on can
+  /// cold-start without Flutter via MihoXVpnService.coldStart().
+  Future<void> saveParamsForColdStart({
+    required InitParams initParams,
+    required SetupParams setupParams,
+    required CoreState state,
+  }) async {
+    try {
+      await _channel
+          .invokeMethod('saveParams', <String, String>{
+            'init': json.encode(initParams),
+            'params': json.encode(setupParams),
+            'state': json.encode(state),
+          })
+          .timeout(const Duration(seconds: saveParamsTimeoutSeconds));
+    } catch (e) {
+      commonPrint.log('saveParamsForColdStart error: $e');
+    }
   }
 }
 
-MihomoLib? get mihomoLib =>
-    Platform.isAndroid && !globalState.isService ? MihomoLib() : null;
-
-MihomoLibHandler? get mihomoLibHandler =>
-    Platform.isAndroid && globalState.isService ? MihomoLibHandler() : null;
+MihomoLib? get mihomoLib => Platform.isAndroid ? MihomoLib() : null;

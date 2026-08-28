@@ -25,14 +25,15 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) =>
-      builder(
-        context,
-      );
+  ) => builder(context);
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     const align = Alignment.topRight;
     final animationValue = CurvedAnimation(
       parent: animation,
@@ -45,10 +46,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
           alignment: align,
           child: CustomSingleChildLayout(
             delegate: OverflowAwareLayoutDelegate(
-              offset: value.translate(
-                48,
-                -8,
-              ),
+              offset: value.translate(48, -8),
             ),
             child: child,
           ),
@@ -66,9 +64,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
               ),
             ),
           ),
-          child: builder(
-            context,
-          ),
+          child: builder(context),
         ),
       ),
     );
@@ -90,9 +86,7 @@ class PopupController extends ValueNotifier<bool> {
   }
 }
 
-typedef PopupOpen = Function({
-  Offset offset,
-});
+typedef PopupOpen = Function({Offset offset});
 
 class CommonPopupBox extends StatefulWidget {
   const CommonPopupBox({
@@ -118,15 +112,15 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     _isOpen = true;
     Navigator.of(context)
         .push(
-      CommonPopupRoute(
-        barrierLabel: utils.id,
-        builder: (context) => widget.popup,
-        offsetNotifier: _targetOffsetValueNotifier,
-      ),
-    )
+          CommonPopupRoute(
+            barrierLabel: utils.id,
+            builder: (context) => widget.popup,
+            offsetNotifier: _targetOffsetValueNotifier,
+          ),
+        )
         .then((_) {
-      _isOpen = false;
-    });
+          _isOpen = false;
+        });
   }
 
   void _updateOffset() {
@@ -137,32 +131,26 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     final viewPadding = MediaQuery.of(context).viewPadding;
     _targetOffsetValueNotifier.value = renderBox
         .localToGlobal(
-          Offset.zero.translate(
-            viewPadding.right,
-            viewPadding.top,
-          ),
+          Offset.zero.translate(viewPadding.right, viewPadding.top),
         )
-        .translate(
-          _offset.dx,
-          _offset.dy,
-        );
+        .translate(_offset.dx, _offset.dy);
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (_, _) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_isOpen) {
-            _updateOffset();
-          }
-        });
-        return widget.targetBuilder(_open);
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (_, _) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_isOpen) {
+          _updateOffset();
+        }
       });
+      return widget.targetBuilder(_open);
+    },
+  );
 }
 
 class OverflowAwareLayoutDelegate extends SingleChildLayoutDelegate {
-  OverflowAwareLayoutDelegate({
-    required this.offset,
-  });
+  OverflowAwareLayoutDelegate({required this.offset});
   final Offset offset;
 
   @override
@@ -219,9 +207,7 @@ class CommonPopupMenu extends StatelessWidget {
             }
           : null,
       child: Container(
-        constraints: BoxConstraints(
-          minWidth: minWidth,
-        ),
+        constraints: BoxConstraints(minWidth: minWidth),
         padding: EdgeInsets.only(
           left: 16,
           right: 64,
@@ -232,14 +218,8 @@ class CommonPopupMenu extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           children: [
             if (item.icon != null) ...[
-              Icon(
-                item.icon,
-                size: fontSize + 4,
-                color: color,
-              ),
-              const SizedBox(
-                width: 16,
-              ),
+              Icon(item.icon, size: fontSize + 4, color: color),
+              const SizedBox(width: 16),
             ],
             Flexible(
               child: Text(
@@ -258,32 +238,25 @@ class CommonPopupMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
-        child: IntrinsicWidth(
-          child: Card(
-            elevation: 12,
-            color: context.colorScheme.surfaceContainer,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedSuperellipseBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final item in items.asMap().entries) ...[
-                  _popupMenuItem(
-                    context,
-                    item: item.value,
-                    index: item.key,
-                  ),
-                  if (item.value != items.last)
-                    const Divider(
-                      height: 0,
-                    ),
-                ],
-              ],
-            ),
-          ),
+    child: IntrinsicWidth(
+      child: Card(
+        elevation: 12,
+        color: context.colorScheme.surfaceContainer,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-      );
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final item in items.asMap().entries) ...[
+              _popupMenuItem(context, item: item.value, index: item.key),
+              if (item.value != items.last) const Divider(height: 0),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
 }

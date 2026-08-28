@@ -35,10 +35,7 @@ class _LineChartState extends State<LineChart>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
     points = widget.points;
     prevPoints = points;
   }
@@ -61,22 +58,20 @@ class _LineChartState extends State<LineChart>
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-      builder: (_, container) => AnimatedBuilder(
-            animation: _controller.view,
-            builder: (_, _) => CustomPaint(
-              painter: LineChartPainter(
-                prevPoints: prevPoints,
-                points: points,
-                progress: _controller.value,
-                gradient: widget.gradient,
-                color: widget.color,
-              ),
-              child: SizedBox(
-                height: container.maxHeight,
-                width: container.maxWidth,
-              ),
-            ),
-          ));
+    builder: (_, container) => AnimatedBuilder(
+      animation: _controller.view,
+      builder: (_, _) => CustomPaint(
+        painter: LineChartPainter(
+          prevPoints: prevPoints,
+          points: points,
+          progress: _controller.value,
+          gradient: widget.gradient,
+          color: widget.color,
+        ),
+        child: SizedBox(height: container.maxHeight, width: container.maxWidth),
+      ),
+    ),
+  );
 }
 
 class LineChartPainter extends CustomPainter {
@@ -157,16 +152,16 @@ class LineChartPainter extends CustomPainter {
   }
 
   Path getAnimatedPath(Size size) {
-    final interpolatedPoints =
-        getInterpolatePoints(prevPoints, points, progress);
+    final interpolatedPoints = getInterpolatePoints(
+      prevPoints,
+      points,
+      progress,
+    );
     final path = getPath(interpolatedPoints, size);
 
     final metric = path.computeMetrics().first;
     final length = metric.length;
-    return metric.extractPath(
-      0,
-      length,
-    );
+    return metric.extractPath(0, length);
   }
 
   @override
@@ -184,10 +179,7 @@ class LineChartPainter extends CustomPainter {
       final gradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          color.opacity38,
-          color.opacity10,
-        ],
+        colors: [color.opacity38, color.opacity10],
       );
 
       final shader = gradient.createShader(
@@ -195,18 +187,20 @@ class LineChartPainter extends CustomPainter {
       );
 
       canvas.drawPath(
-          fillPath,
-          Paint()
-            ..shader = shader
-            ..style = PaintingStyle.fill);
+        fillPath,
+        Paint()
+          ..shader = shader
+          ..style = PaintingStyle.fill,
+      );
     }
 
     canvas.drawPath(
-        path,
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke);
+      path,
+      Paint()
+        ..color = color
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke,
+    );
   }
 
   @override

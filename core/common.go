@@ -2,20 +2,18 @@ package main
 
 import (
 	b "bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
-	"github.com/metacubex/mihomo/common/batch"
-	"github.com/metacubex/mihomo/common/convert"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -28,18 +26,19 @@ import (
 	"github.com/metacubex/mihomo/log"
 	rp "github.com/metacubex/mihomo/rules/provider"
 	"github.com/metacubex/mihomo/tunnel"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
-	currentConfig          *config.Config
-	version                = 0
-	isRunning              = false
-	runLock                sync.Mutex
-	mBatch, _              = batch.New(context.Background(), batch.WithConcurrencyNum[bool](50))
-	proxyDescriptions      = map[string]string{}
-	proxyNetworks          = map[string]string{}
-	pendingTunEnable       = false
-	currentTestURL         = "https://www.gstatic.com/generate_204"
+	currentConfig     *config.Config
+	version           atomic.Int32
+	isRunning         = false
+	runLock           sync.Mutex
+	testDelaySem      = semaphore.NewWeighted(50)
+	proxyDescMu       sync.RWMutex
+	proxyDescriptions = map[string]string{}
+	pendingTunEnable      = false
+	currentTestURL        = "https://www.gstatic.com/generate_204"
 	minHealthCheckInterval = 5 * time.Second
 )
 
@@ -92,10 +91,9 @@ func computeMinHealthCheckInterval(rawConfig *config.RawConfig) {
 	minHealthCheckInterval = d
 }
 
-// extractProxyDescriptionsFromRaw caches custom server descriptions and proxy networks by proxy name.
+// extractProxyDescriptionsFromRaw caches custom server descriptions by proxy name.
 func extractProxyDescriptionsFromRaw(rawConfig *config.RawConfig) {
 	descriptions := make(map[string]string, len(rawConfig.Proxy))
-	networks := make(map[string]string, len(rawConfig.Proxy))
 	for _, proxy := range rawConfig.Proxy {
 		nameValue, ok := proxy["name"]
 		if !ok {
@@ -118,24 +116,17 @@ func extractProxyDescriptionsFromRaw(rawConfig *config.RawConfig) {
 				}
 			}
 		}
-		network := ""
-		if value, ok := proxy["network"]; ok {
-			if text, ok := value.(string); ok {
-				network = text
-			}
+		if description == "" {
+			continue
 		}
-		if description != "" {
-			descriptions[name] = description
-		}
-		if network != "" {
-			networks[name] = network
-		}
+		descriptions[name] = description
 	}
+	proxyDescMu.Lock()
 	proxyDescriptions = descriptions
-	proxyNetworks = networks
+	proxyDescMu.Unlock()
 }
 
-// proxiesWithDescriptions injects serverDescription and network for each proxy in API response.
+// proxiesWithDescriptions injects serverDescription for each proxy in API response.
 func proxiesWithDescriptions() map[string]interface{} {
 	result := make(map[string]interface{})
 	for name, proxy := range proxiesWithProviders() {
@@ -147,13 +138,11 @@ func proxiesWithDescriptions() map[string]interface{} {
 		if err := json.Unmarshal(data, &item); err != nil {
 			continue
 		}
-		if desc, ok := proxyDescriptions[name]; ok && desc != "" {
+		proxyDescMu.RLock()
+		desc, hasDesc := proxyDescriptions[name]
+		proxyDescMu.RUnlock()
+		if hasDesc && desc != "" {
 			item["serverDescription"] = desc
-		}
-		if netw, ok := proxyNetworks[name]; ok && netw != "" {
-			if existing, has := item["network"]; !has || existing == "" {
-				item["network"] = netw
-			}
 		}
 		result[name] = item
 	}
@@ -320,6 +309,9 @@ func readFile(path string) ([]byte, error) {
 func updateConfig(params *UpdateParams) {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if currentConfig == nil {
+		return
+	}
 	general := currentConfig.General
 	if params.MixedPort != nil {
 		general.MixedPort = *params.MixedPort
@@ -369,11 +361,21 @@ func updateConfig(params *UpdateParams) {
 	if params.Tun != nil {
 		general.Tun.Enable = params.Tun.Enable
 		pendingTunEnable = params.Tun.Enable
-		general.Tun.AutoRoute = *params.Tun.AutoRoute
-		general.Tun.Device = *params.Tun.Device
-		general.Tun.RouteAddress = *params.Tun.RouteAddress
-		general.Tun.DNSHijack = *params.Tun.DNSHijack
-		general.Tun.Stack = *params.Tun.Stack
+		if params.Tun.AutoRoute != nil {
+			general.Tun.AutoRoute = *params.Tun.AutoRoute
+		}
+		if params.Tun.Device != nil {
+			general.Tun.Device = *params.Tun.Device
+		}
+		if params.Tun.RouteAddress != nil {
+			general.Tun.RouteAddress = *params.Tun.RouteAddress
+		}
+		if params.Tun.DNSHijack != nil {
+			general.Tun.DNSHijack = *params.Tun.DNSHijack
+		}
+		if params.Tun.Stack != nil {
+			general.Tun.Stack = *params.Tun.Stack
+		}
 	}
 
 	updateListeners()
@@ -399,11 +401,13 @@ func setupConfig(params *SetupParams) error {
 	}
 	log.Infoln("[Setup] ParseRawConfig took %s", time.Since(parseStart))
 	pendingTunEnable = currentConfig.General.Tun.Enable
-	currentConfig.General.Tun.Enable = false
-	// Parse and cache config only. Full runtime apply happens on Start.
+	if runtime.GOOS == "android" || !isRunning {
+		currentConfig.General.Tun.Enable = false
+	}
 	applyStart := time.Now()
-	executor.ApplyConfig(currentConfig, false)
+	executor.ApplyConfig(currentConfig, true)
 	log.Infoln("[Setup] executor.ApplyConfig took %s", time.Since(applyStart))
+	go runtime.GC()
 	currentConfig.General.Tun.Enable = pendingTunEnable
 	// External-controller lifecycle is independent from TUN start/stop.
 	// Recreate API server during setup so it survives app restarts without
@@ -438,23 +442,4 @@ func UnmarshalJson(data []byte, v any) error {
 	decoder.UseNumber()
 	err := decoder.Decode(v)
 	return err
-}
-
-// handleConvertV2ray converts a V2Ray (v2rayN / NekoBox / base64 subscription)
-// link string into a list of mihomo proxy maps using the mihomo kernel.
-func handleConvertV2ray(data string) string {
-	proxies, err := convert.ConvertsV2Ray([]byte(data))
-	if err != nil {
-		log.Warnln("[Convert] convert v2ray failed: %v", err)
-		return jsonMustMarshal(map[string]any{"error": err.Error()})
-	}
-	return jsonMustMarshal(proxies)
-}
-
-func jsonMustMarshal(v any) string {
-	data, err := json.Marshal(v)
-	if err != nil {
-		return "[]"
-	}
-	return string(data)
 }

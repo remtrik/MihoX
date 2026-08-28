@@ -18,64 +18,58 @@ class OutboundMode extends StatelessWidget {
       child: Consumer(
         builder: (_, ref, _) {
           final mode = ref.watch(
-            patchMihomoConfigProvider.select(
-              (state) => state.mode,
-            ),
+            patchMihomoConfigProvider.select((state) => state.mode),
           );
           return Theme(
-              data: Theme.of(context).copyWith(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  hoverColor: Colors.transparent),
-              child: CommonCard(
-                onPressed: () {},
-                info: Info(
-                  label: appLocalizations.outboundMode,
-                  iconData: Icons.call_split_sharp,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 12,
-                    bottom: 16,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final item in Mode.values)
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: ListItem.radio(
-                            dense: true,
-                            horizontalTitleGap: 4,
-                            padding: EdgeInsets.only(
-                              left: 12.ap,
-                              right: 16.ap,
-                            ),
-                            delegate: RadioDelegate(
-                              value: item,
-                              groupValue: mode,
-                              onChanged: (value) async {
-                                if (value == null) {
-                                  return;
-                                }
-                                globalState.appController.changeMode(value);
-                              },
-                            ),
-                            title: Text(
-                              Intl.message(item.name),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.toSoftBold,
-                            ),
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+            ),
+            child: CommonCard(
+              onPressed: () {},
+              info: Info(
+                label: appLocalizations.outboundMode,
+                iconData: Icons.call_split_sharp,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (final item in Mode.values)
+                      Flexible(
+                        fit: FlexFit.tight,
+                        child: ListItem.radio(
+                          dense: true,
+                          horizontalTitleGap: 4,
+                          padding: EdgeInsets.only(left: 12.ap, right: 16.ap),
+                          delegate: RadioDelegate(
+                            value: item,
+                            groupValue: mode,
+                            onChanged: (value) async {
+                              if (value == null) {
+                                return;
+                              }
+                              globalState.appController.changeMode(value);
+                            },
+                          ),
+                          title: Text(
+                            Intl.message(item.name),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.toSoftBold,
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-              ));
+              ),
+            ),
+          );
         },
       ),
     );
@@ -86,10 +80,10 @@ class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
   Color _getTextColor(BuildContext context, Mode mode) => switch (mode) {
-        Mode.rule => context.colorScheme.onSecondaryContainer,
-        Mode.global => context.colorScheme.onPrimaryContainer,
-        Mode.direct => context.colorScheme.onTertiaryContainer,
-      };
+    Mode.rule => context.colorScheme.onSecondaryContainer,
+    Mode.global => context.colorScheme.onPrimaryContainer,
+    Mode.direct => context.colorScheme.onTertiaryContainer,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -101,9 +95,7 @@ class OutboundModeV2 extends StatelessWidget {
         child: Consumer(
           builder: (_, ref, _) {
             final mode = ref.watch(
-              patchMihomoConfigProvider.select(
-                (state) => state.mode,
-              ),
+              patchMihomoConfigProvider.select((state) => state.mode),
             );
             final thumbColor = switch (mode) {
               Mode.rule => context.colorScheme.secondaryContainer,
@@ -124,16 +116,11 @@ class OutboundModeV2 extends StatelessWidget {
                         height: height - 16,
                         child: Text(
                           Intl.message(item.name),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.adjustSize(1)
                               .copyWith(
                                 color: item == mode
-                                    ? _getTextColor(
-                                        context,
-                                        item,
-                                      )
+                                    ? _getTextColor(context, item)
                                     : null,
                               ),
                         ),

@@ -7,10 +7,7 @@ import 'package:mihox/providers/state.dart';
 import 'package:mihox/state.dart';
 
 class VpnManager extends ConsumerStatefulWidget {
-  const VpnManager({
-    super.key,
-    required this.child,
-  });
+  const VpnManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -27,16 +24,11 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
   }
 
   void showTip() {
-    debouncer.call(
-      FunctionTag.vpnTip,
-      () {
-        if (ref.read(runTimeProvider.notifier).isStart) {
-          globalState.showNotifier(
-            appLocalizations.vpnTip,
-          );
-        }
-      },
-    );
+    debouncer.call(FunctionTag.vpnTip, () {
+      if (ref.read(runTimeProvider.notifier).isStart) {
+        globalState.showNotifier(appLocalizations.vpnTip);
+      }
+    });
   }
 
   @override

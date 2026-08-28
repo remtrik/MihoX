@@ -59,6 +59,8 @@ mixin MihomoInterface {
 
   FutureOr<String> getMemory();
 
+  FutureOr<String> getCoreVersion();
+
   void resetTraffic();
 
   void startLog();
@@ -77,6 +79,8 @@ mixin MihomoInterface {
 
   Future<bool> setState(CoreState state);
 
+  Future<bool> setUiActive(bool active);
+
   FutureOr<String> convertV2ray(String data);
 }
 
@@ -92,6 +96,11 @@ mixin AndroidMihomoInterface {
 
 abstract class MihomoHandlerInterface with MihomoInterface {
   Map<String, Completer> callbackCompleterMap = {};
+
+  /// Per-call type-appropriate default value, so a failed call can complete the
+  /// typed completer with the right default instead of `null` (which throws a
+  /// TypeError on a non-nullable type and strands the caller until timeout).
+  Map<String, dynamic> callbackDefaultMap = {};
 
   Future<void> handleResult(ActionResult result) async {
     final completer = callbackCompleterMap[result.id];
@@ -110,6 +119,13 @@ abstract class MihomoHandlerInterface with MihomoInterface {
       }
     } catch (e) {
       commonPrint.log("${result.id} error $e");
+      // Type mismatch (e.g. the remote sent a bool for a Completer<String>):
+      // completing with the wrong type threw above and left the completer
+      // pending until the 30s safeFuture timeout — a "random" 30s freeze of
+      // whatever call this was. Complete with the typed default now.
+      if (completer != null && !completer.isCompleted) {
+        completer.complete(callbackDefaultMap[result.id]);
+      }
     }
   }
 
@@ -118,6 +134,16 @@ abstract class MihomoHandlerInterface with MihomoInterface {
   void reStart();
 
   FutureOr<bool> destroy();
+
+  T _defaultValueForType<T>(T? defaultValue) {
+    if (defaultValue != null) return defaultValue;
+    return switch (T) {
+      String => '' as T,
+      bool => false as T,
+      Map => {} as T,
+      _ => null as T,
+    };
+  }
 
   Future<T> invoke<T>({
     required ActionMethod method,
@@ -130,92 +156,83 @@ abstract class MihomoHandlerInterface with MihomoInterface {
 
     callbackCompleterMap[id] = Completer<T>();
 
-    dynamic mDefaultValue = defaultValue;
-    if (mDefaultValue == null) {
-      if (T == String) {
-        mDefaultValue = "";
-      } else if (T == bool) {
-        mDefaultValue = false;
-      } else if (T == Map) {
-        mDefaultValue = {};
-      }
-    }
+    final mDefaultValue = _defaultValueForType<T>(defaultValue);
+    callbackDefaultMap[id] = mDefaultValue;
 
-    sendMessage(
-      json.encode(
-        Action(
-          id: id,
-          method: method,
-          data: data,
-        ),
-      ),
-    );
+    sendMessage(json.encode(Action(id: id, method: method, data: data)));
 
     return (callbackCompleterMap[id]! as Completer<T>).safeFuture(
       timeout: timeout,
       onLast: () {
         callbackCompleterMap.remove(id);
+        callbackDefaultMap.remove(id);
       },
-      onTimeout: onTimeout ?? () => mDefaultValue as T,
+      onTimeout: onTimeout ?? () => mDefaultValue,
       functionName: id,
     ) as Future<T>;
   }
 
   @override
-  Future<bool> init(InitParams params) => invoke<bool>(
-        method: ActionMethod.initMihomo,
-        data: json.encode(params),
-      );
+  Future<bool> init(InitParams params) =>
+      invoke<bool>(method: ActionMethod.initMihomo, data: json.encode(params));
 
   @override
-  Future<bool> setState(CoreState state) => invoke<bool>(
-        method: ActionMethod.setState,
-        data: json.encode(state),
-      );
+  Future<bool> setState(CoreState state) =>
+      invoke<bool>(method: ActionMethod.setState, data: json.encode(state));
+
+  @override
+  Future<bool> setUiActive(bool active) => invoke<bool>(
+    method: ActionMethod.setUiActive,
+    data: active,
+    // Short timeout so an older core without this handler degrades silently
+    // instead of leaving a pending completer.
+    timeout: const Duration(seconds: setUiActiveTimeoutSeconds),
+  );
 
   @override
   Future<bool> shutdown() => invoke<bool>(
-        method: ActionMethod.shutdown,
-        timeout: const Duration(seconds: 1),
-      );
+    method: ActionMethod.shutdown,
+    timeout: const Duration(seconds: shutdownTimeoutSeconds),
+  );
 
   @override
-  Future<bool> get isInit => invoke<bool>(
-        method: ActionMethod.getIsInit,
-      );
+  Future<bool> get isInit => invoke<bool>(method: ActionMethod.getIsInit);
 
   @override
-  Future<bool> forceGc() => invoke<bool>(
-        method: ActionMethod.forceGc,
-      );
+  Future<bool> forceGc() => invoke<bool>(method: ActionMethod.forceGc);
 
   @override
-  FutureOr<String> validateConfig(String data) => invoke<String>(
-        method: ActionMethod.validateConfig,
-        data: data,
-      );
+  FutureOr<String> validateConfig(String data) =>
+      invoke<String>(method: ActionMethod.validateConfig, data: data);
 
   @override
   Future<void> healthCheck([String groupName = '']) => invoke<String>(
-        method: ActionMethod.healthCheck,
-        data: groupName,
-        timeout: const Duration(seconds: 30),
-      );
+    method: ActionMethod.healthCheck,
+    data: groupName,
+    timeout: const Duration(seconds: healthCheckTimeoutSeconds),
+  );
 
   @override
   Future<String> updateConfig(UpdateParams updateParams) => invoke<String>(
-        method: ActionMethod.updateConfig,
-        data: json.encode(updateParams),
-        timeout: const Duration(minutes: 2),
-      );
+    method: ActionMethod.updateConfig,
+    data: json.encode(updateParams),
+    timeout: const Duration(minutes: updateConfigTimeoutMinutes),
+    // Empty string means success to callers; the default-on-timeout is "",
+    // which would mask a 2-minute hang as a successful apply. Return a
+    // non-empty error string so the caller actually treats it as failed.
+    onTimeout: () => 'updateConfig timed out',
+  );
 
   @override
   Future<Result> getConfig(String path) => invoke<Result>(
-        method: ActionMethod.getConfig,
-        data: path,
-        timeout: const Duration(minutes: 2),
-        defaultValue: Result.success({}),
-      );
+    method: ActionMethod.getConfig,
+    data: path,
+    timeout: const Duration(minutes: getConfigTimeoutMinutes),
+    // A timed-out/failed read used to default to Result.success({}), making
+    // the caller treat an empty config as a successful load. Yield an error
+    // Result so getConfig()'s error path fires instead.
+    defaultValue: Result.error('getConfig timed out'),
+  );
 
   @override
   Future<String> setupConfig(SetupParams setupParams) async {
@@ -223,20 +240,22 @@ abstract class MihomoHandlerInterface with MihomoInterface {
     return invoke<String>(
       method: ActionMethod.setupConfig,
       data: data,
-      timeout: const Duration(minutes: 2),
+timeout: const Duration(minutes: updateConfigTimeoutMinutes),
+      // Non-empty = error to callers; the default "" would mask a 2-minute hang
+      // as a successful setup (and falsely advance lastProfileModified), so the
+      // recovery re-apply would silently no-op against a still-broken executor.
+      onTimeout: () => 'setupConfig timed out',
     );
   }
 
   @override
-  Future<bool> crash() => invoke<bool>(
-        method: ActionMethod.crash,
-      );
+  Future<bool> crash() => invoke<bool>(method: ActionMethod.crash);
 
   @override
   Future<Map> getProxies() => invoke<Map>(
-        method: ActionMethod.getProxies,
-        timeout: const Duration(seconds: 5),
-      );
+    method: ActionMethod.getProxies,
+    timeout: const Duration(seconds: getProxiesTimeoutSeconds),
+  );
 
   @override
   FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) =>
@@ -246,9 +265,8 @@ abstract class MihomoHandlerInterface with MihomoInterface {
       );
 
   @override
-  FutureOr<String> getExternalProviders() => invoke<String>(
-        method: ActionMethod.getExternalProviders,
-      );
+  FutureOr<String> getExternalProviders() =>
+      invoke<String>(method: ActionMethod.getExternalProviders);
 
   @override
   FutureOr<String> getExternalProvider(String externalProviderName) =>
@@ -259,60 +277,50 @@ abstract class MihomoHandlerInterface with MihomoInterface {
 
   @override
   Future<String> updateGeoData(UpdateGeoDataParams params) => invoke<String>(
-      method: ActionMethod.updateGeoData,
-      data: json.encode(params),
-      timeout: const Duration(minutes: 1));
+    method: ActionMethod.updateGeoData,
+    data: json.encode(params),
+    timeout: const Duration(seconds: updateGeoDataTimeoutSeconds),
+  );
 
   @override
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
-  }) =>
-      invoke<String>(
-        method: ActionMethod.sideLoadExternalProvider,
-        data: json.encode({
-          "providerName": providerName,
-          "data": data,
-        }),
-      );
+  }) => invoke<String>(
+    method: ActionMethod.sideLoadExternalProvider,
+    data: json.encode({"providerName": providerName, "data": data}),
+  );
 
   @override
   Future<String> updateExternalProvider(String providerName) => invoke<String>(
-        method: ActionMethod.updateExternalProvider,
-        data: providerName,
-        timeout: const Duration(minutes: 1),
-      );
+    method: ActionMethod.updateExternalProvider,
+    data: providerName,
+    timeout: const Duration(minutes: updateExternalProviderTimeoutMinutes),
+  );
 
   @override
-  FutureOr<String> getConnections() => invoke<String>(
-        method: ActionMethod.getConnections,
-      );
+  FutureOr<String> getConnections() =>
+      invoke<String>(method: ActionMethod.getConnections);
 
   @override
-  Future<bool> closeConnections() => invoke<bool>(
-        method: ActionMethod.closeConnections,
-      );
+  Future<bool> closeConnections() =>
+      invoke<bool>(method: ActionMethod.closeConnections);
 
   @override
-  Future<bool> resetConnections() => invoke<bool>(
-        method: ActionMethod.resetConnections,
-      );
+  Future<bool> resetConnections() =>
+      invoke<bool>(method: ActionMethod.resetConnections);
 
   @override
-  Future<bool> closeConnection(String id) => invoke<bool>(
-        method: ActionMethod.closeConnection,
-        data: id,
-      );
+  Future<bool> closeConnection(String id) =>
+      invoke<bool>(method: ActionMethod.closeConnection, data: id);
 
   @override
-  FutureOr<String> getTotalTraffic() => invoke<String>(
-        method: ActionMethod.getTotalTraffic,
-      );
+  FutureOr<String> getTotalTraffic() =>
+      invoke<String>(method: ActionMethod.getTotalTraffic);
 
   @override
-  FutureOr<String> getTraffic() => invoke<String>(
-        method: ActionMethod.getTraffic,
-      );
+  FutureOr<String> getTraffic() =>
+      invoke<String>(method: ActionMethod.getTraffic);
 
   @override
   void resetTraffic() {
@@ -326,20 +334,16 @@ abstract class MihomoHandlerInterface with MihomoInterface {
 
   @override
   void stopLog() {
-    invoke<bool>(
-      method: ActionMethod.stopLog,
-    );
+    invoke<bool>(method: ActionMethod.stopLog);
   }
 
   @override
-  Future<bool> startListener() => invoke<bool>(
-        method: ActionMethod.startListener,
-      );
+  Future<bool> startListener() =>
+      invoke<bool>(method: ActionMethod.startListener);
 
   @override
-  Future<bool> stopListener() => invoke<bool>(
-        method: ActionMethod.stopListener,
-      );
+  Future<bool> stopListener() =>
+      invoke<bool>(method: ActionMethod.stopListener);
 
   @override
   Future<String> asyncTestDelay(String url, String proxyName) {
@@ -351,33 +355,24 @@ abstract class MihomoHandlerInterface with MihomoInterface {
     return invoke<String>(
       method: ActionMethod.asyncTestDelay,
       data: json.encode(delayParams),
-      timeout: const Duration(
-        milliseconds: 5000,
-      ),
-      onTimeout: () => json.encode(
-        Delay(
-          name: proxyName,
-          value: -1,
-          url: url,
-        ),
-      ),
+      timeout: const Duration(milliseconds: 5000),
+      onTimeout: () => json.encode(Delay(name: proxyName, value: -1, url: url)),
     );
   }
 
   @override
-  FutureOr<String> getCountryCode(String ip) => invoke<String>(
-        method: ActionMethod.getCountryCode,
-        data: ip,
-      );
+  FutureOr<String> getCountryCode(String ip) =>
+      invoke<String>(method: ActionMethod.getCountryCode, data: ip);
 
   @override
-  FutureOr<String> getMemory() => invoke<String>(
-        method: ActionMethod.getMemory,
-      );
+  FutureOr<String> getMemory() =>
+      invoke<String>(method: ActionMethod.getMemory);
 
   @override
-  FutureOr<String> convertV2ray(String data) => invoke<String>(
-        method: ActionMethod.convertV2ray,
-        data: data,
-      );
+  FutureOr<String> getCoreVersion() =>
+      invoke<String>(method: ActionMethod.getCoreVersion);
+
+  @override
+  FutureOr<String> convertV2ray(String data) =>
+      invoke<String>(method: ActionMethod.convertV2ray, data: data);
 }

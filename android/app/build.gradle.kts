@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -35,7 +34,7 @@ android {
 
     defaultConfig {
         applicationId = "org.remtrik.mihox"
-        minSdk = flutter.minSdkVersion
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -61,7 +60,6 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".debug"
         }
 
         release {
@@ -93,6 +91,8 @@ flutter {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":common"))
+    implementation(project(":service"))
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.code.gson:gson:2.10.1")

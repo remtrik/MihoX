@@ -67,16 +67,12 @@ abstract class Profile with _$Profile {
   factory Profile.fromJson(Map<String, Object?> json) =>
       _$ProfileFromJson(json);
 
-  factory Profile.normal({
-    String? label,
-    String url = '',
-  }) =>
-      Profile(
-        label: label,
-        url: url,
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        autoUpdateDuration: defaultUpdateDuration,
-      );
+  factory Profile.normal({String? label, String url = ''}) => Profile(
+    label: label,
+    url: url,
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    autoUpdateDuration: defaultUpdateDuration,
+  );
 }
 
 @freezed
@@ -113,8 +109,8 @@ extension OverrideRuleExt on OverrideRule {
 
   OverrideRule updateRules(List<Rule> Function(List<Rule> rules) builder) =>
       type == OverrideRuleType.added
-          ? copyWith(addedRules: builder(addedRules))
-          : copyWith(overrideRules: builder(overrideRules));
+      ? copyWith(addedRules: builder(addedRules))
+      : copyWith(overrideRules: builder(overrideRules));
 }
 
 extension ProfilesExt on List<Profile> {
@@ -197,7 +193,8 @@ extension ProfileExtension on Profile {
       'support-url',
       'profile-title',
       'profile-update-interval',
-      'x-hwid-limit',
+      'x-hwid-max-devices-reached',
+      'x-hwid-not-supported',
     ];
 
     for (final headerName in headersToCollect) {
@@ -238,7 +235,17 @@ extension ProfileExtension on Profile {
       profileNameHeader = utils.decodeBase64(profileNameHeader.substring(7));
     }
 
+    var updatedUrl = url;
+    final newDomain = providerHeaders['mihox-newdomain'];
+    if (newDomain != null && newDomain.isNotEmpty) {
+      final currentUri = Uri.tryParse(url);
+      if (currentUri != null && currentUri.host != newDomain) {
+        updatedUrl = currentUri.replace(host: newDomain).toString();
+      }
+    }
+
     return copyWith(
+      url: updatedUrl,
       label: label ?? profileNameHeader,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,

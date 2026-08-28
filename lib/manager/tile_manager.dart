@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mihox/common/common.dart';
 import 'package:mihox/enum/enum.dart';
 import 'package:mihox/plugins/tile.dart';
 import 'package:mihox/state.dart';
 
 class TileManager extends StatefulWidget {
-  const TileManager({
-    super.key,
-    required this.child,
-  });
+  const TileManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -18,20 +16,26 @@ class _TileContainerState extends State<TileManager> with TileListener {
   @override
   Widget build(BuildContext context) => widget.child;
 
+  // Defer to the boot-safe _MainTileListener until appController exists; both are
+  // registered, so this guard keeps exactly one of them handling each tile event
+  // (and avoids dereferencing a null appController during cold start).
   @override
   void onStart() {
+    if (!globalState.isAppControllerReady) return;
     globalState.appController.updateStatus(true);
     super.onStart();
   }
 
   @override
   Future<void> onStop() async {
+    if (!globalState.isAppControllerReady) return;
     await globalState.appController.updateStatus(false);
     super.onStop();
   }
 
   @override
   void onChangeMode(String mode) {
+    if (!globalState.isAppControllerReady) return;
     try {
       final modeEnum = Mode.values.byName(mode);
       globalState.appController.changeMode(modeEnum);
@@ -50,7 +54,9 @@ class _TileContainerState extends State<TileManager> with TileListener {
     try {
       final current = globalState.config.patchMihomoConfig.mode.name;
       tile?.updateMode(current);
-    } catch (_) {}
+    } catch (e) {
+      commonPrint.log('updateMode init failed: $e');
+    }
   }
 
   @override

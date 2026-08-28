@@ -123,6 +123,16 @@ _AndroidVpnOptions _$AndroidVpnOptionsFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       dnsServerAddress: json['dnsServerAddress'] as String,
+      includePackage:
+          (json['includePackage'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      excludePackage:
+          (json['excludePackage'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$AndroidVpnOptionsToJson(_AndroidVpnOptions instance) =>
@@ -137,6 +147,8 @@ Map<String, dynamic> _$AndroidVpnOptionsToJson(_AndroidVpnOptions instance) =>
       'ipv6Address': instance.ipv6Address,
       'routeAddress': instance.routeAddress,
       'dnsServerAddress': instance.dnsServerAddress,
+      'includePackage': instance.includePackage,
+      'excludePackage': instance.excludePackage,
     };
 
 _InitParams _$InitParamsFromJson(Map<String, dynamic> json) => _InitParams(
@@ -318,7 +330,9 @@ const _$ActionMethodEnumMap = {
   ActionMethod.getMemory: 'getMemory',
   ActionMethod.crash: 'crash',
   ActionMethod.setupConfig: 'setupConfig',
+  ActionMethod.getCoreVersion: 'getCoreVersion',
   ActionMethod.healthCheck: 'healthCheck',
+  ActionMethod.setUiActive: 'setUiActive',
   ActionMethod.convertV2ray: 'convertV2ray',
   ActionMethod.setState: 'setState',
   ActionMethod.startTun: 'startTun',

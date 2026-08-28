@@ -36,7 +36,9 @@ class ProxyCard extends StatelessWidget {
     }
 
     final currentProxyName = ref.read(getProxyNameProvider(groupName));
-    final nextProxyName = isComputedSelected && currentProxyName == proxy.name ? '' : proxy.name;
+    final nextProxyName = isComputedSelected && currentProxyName == proxy.name
+        ? ''
+        : proxy.name;
 
     globalState.appController
       ..updateCurrentSelectedMap(groupName, nextProxyName)
@@ -57,7 +59,9 @@ class ProxyCard extends StatelessWidget {
       children: [
         Consumer(
           builder: (_, ref, child) {
-            final selectedProxyName = ref.watch(getSelectedProxyNameProvider(groupName));
+            final selectedProxyName = ref.watch(
+              getSelectedProxyNameProvider(groupName),
+            );
             return CommonCard(
               key: key,
               onPressed: () => _changeProxy(ref),
@@ -139,7 +143,8 @@ class _ProxyNameRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSelected = type == ProxyCardType.oneline &&
+    final isSelected =
+        type == ProxyCardType.oneline &&
         groupType.isComputedSelected &&
         ref.watch(getProxyNameProvider(groupName)) == proxy.name;
 
@@ -197,10 +202,9 @@ class _DelayWidget extends StatelessWidget {
       height: labelHeight,
       child: Consumer(
         builder: (context, ref, _) {
-          final delay = ref.watch(getDelayProvider(
-            proxyName: proxy.name,
-            testUrl: testUrl,
-          ));
+          final delay = ref.watch(
+            getDelayProvider(proxyName: proxy.name, testUrl: testUrl),
+          );
 
           if (delay == 0) {
             return SizedBox.square(

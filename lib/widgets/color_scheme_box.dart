@@ -20,70 +20,61 @@ class ColorSchemeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AspectRatio(
-        aspectRatio: 1,
-        child: PrimaryColorBox(
-          primaryColor: primaryColor,
-          child: Builder(
-            builder: (context) {
-              final colorScheme = Theme.of(context).colorScheme;
-              return Stack(
-                children: [
-                  CommonCard(
-                    isSelected: isSelected,
-                    onPressed: onPressed,
-                    selectWidget: Container(
-                      alignment: Alignment.center,
-                      child: const SelectIcon(),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(36),
-                        child: SizedBox(
-                          width: 72,
-                          height: 72,
-                          child: Grid(
-                            crossAxisCount: 2,
-                            children: [
-                              GridItem(
-                                mainAxisCellCount: 2,
-                                child: Container(
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              GridItem(
-                                mainAxisCellCount: 1,
-                                child: Container(
-                                  color: colorScheme.secondary,
-                                ),
-                              ),
-                              GridItem(
-                                mainAxisCellCount: 1,
-                                child: Container(
-                                  color: colorScheme.tertiary,
-                                ),
-                              )
-                            ],
+    aspectRatio: 1,
+    child: PrimaryColorBox(
+      primaryColor: primaryColor,
+      child: Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return Stack(
+            children: [
+              CommonCard(
+                isSelected: isSelected,
+                onPressed: onPressed,
+                selectWidget: Container(
+                  alignment: Alignment.center,
+                  child: const SelectIcon(),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(36),
+                    child: SizedBox(
+                      width: 72,
+                      height: 72,
+                      child: Grid(
+                        crossAxisCount: 2,
+                        children: [
+                          GridItem(
+                            mainAxisCellCount: 2,
+                            child: Container(color: colorScheme.primary),
                           ),
-                        ),
+                          GridItem(
+                            mainAxisCellCount: 1,
+                            child: Container(color: colorScheme.secondary),
+                          ),
+                          GridItem(
+                            mainAxisCellCount: 1,
+                            child: Container(color: colorScheme.tertiary),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  if (primaryColor == null && Platform.isAndroid)
-                    const Positioned(
-                      bottom: 4,
-                      right: 4,
-                      child: Icon(
-                        Icons.colorize,
-                        size: 20,
-                      ),
-                    )
-                ],
-              );
-            },
-          ),
-        ),
-      );
+                ),
+              ),
+              if (primaryColor == null && Platform.isAndroid)
+                const Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Icon(Icons.colorize, size: 20),
+                ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class PrimaryColorBox extends ConsumerWidget {
@@ -106,9 +97,7 @@ class PrimaryColorBox extends ConsumerWidget {
       ),
     );
     return Theme(
-      data: themeData.copyWith(
-        colorScheme: colorScheme,
-      ),
+      data: themeData.copyWith(colorScheme: colorScheme),
       child: child,
     );
   }

@@ -16,30 +16,23 @@ class SettingInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CommonCard(
-        isSelected: isSelected,
-        onPressed: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Icon(info.iconData),
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              Flexible(
-                child: Text(
-                  info.label,
-                  style: context.textTheme.bodyMedium,
-                ),
-              ),
-            ],
+    isSelected: isSelected,
+    onPressed: onPressed,
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Flexible(child: Icon(info.iconData)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(info.label, style: context.textTheme.bodyMedium),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class SettingTextCard extends StatelessWidget {
@@ -55,14 +48,11 @@ class SettingTextCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CommonCard(
-        onPressed: onPressed,
-        isSelected: isSelected,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Text(
-            text,
-            style: context.textTheme.bodyMedium,
-          ),
-        ),
-      );
+    onPressed: onPressed,
+    isSelected: isSelected,
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Text(text, style: context.textTheme.bodyMedium),
+    ),
+  );
 }

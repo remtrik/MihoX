@@ -83,15 +83,19 @@ class ChangeServerButton extends ConsumerWidget {
       return _buildSimpleButton(context);
     }
 
-    final currentServerName = group.now ?? '-';
+    // Show the group's current pick: the selected leaf host (the real location),
+    // or — when the pick is itself a sub-group — that sub-group's own name (its
+    // moving `now` host isn't a stable label). `now` already carries whichever it
+    // is, so no group-type branching is needed.
+    final now = group.now;
+    final currentServerName = (now != null && now.isNotEmpty)
+        ? now
+        : group.name;
 
     final currentProxy = group.all.firstWhere(
       (proxy) => proxy.name == currentServerName,
-      orElse: () => Proxy(
-        name: currentServerName,
-        type: '-',
-        serverDescription: null,
-      ),
+      orElse: () =>
+          Proxy(name: currentServerName, type: '-', serverDescription: null),
     );
 
     var flag = _extractFlag(currentProxy.name);
@@ -108,10 +112,7 @@ class ChangeServerButton extends ConsumerWidget {
           globalState.appController.page = PageLabel.proxies;
         },
         child: Container(
-          padding: baseInfoEdgeInsets.copyWith(
-            top: 6,
-            bottom: 6,
-          ),
+          padding: baseInfoEdgeInsets.copyWith(top: 6, bottom: 6),
           child: Row(
             children: [
               Container(
@@ -157,10 +158,12 @@ class ChangeServerButton extends ConsumerWidget {
               const SizedBox(width: 8),
               Consumer(
                 builder: (context, ref, _) {
-                  final delay = ref.watch(getDelayProvider(
-                    proxyName: currentProxy.name,
-                    testUrl: group.testUrl,
-                  ));
+                  final delay = ref.watch(
+                    getDelayProvider(
+                      proxyName: currentProxy.name,
+                      testUrl: group.testUrl,
+                    ),
+                  );
 
                   if (delay == null || delay <= 0) {
                     return const SizedBox.shrink();
@@ -213,72 +216,69 @@ class ChangeServerButton extends ConsumerWidget {
   }
 
   Widget _buildSimpleButton(BuildContext context) => SizedBox(
-        height: getWidgetHeight(1),
-        child: CommonCard(
-          onPressed: () {
-            globalState.appController.page = PageLabel.proxies;
-          },
-          child: Container(
-            padding: baseInfoEdgeInsets.copyWith(
-              top: 6,
-              bottom: 6,
+    height: getWidgetHeight(1),
+    child: CommonCard(
+      onPressed: () {
+        globalState.appController.page = PageLabel.proxies;
+      },
+      child: Container(
+        padding: baseInfoEdgeInsets.copyWith(top: 6, bottom: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    context.colorScheme.primary.withValues(alpha: 0.15),
+                    context.colorScheme.primary.withValues(alpha: 0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: context.colorScheme.primary.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.language_rounded,
+                size: 22,
+                color: context.colorScheme.primary,
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        context.colorScheme.primary.withValues(alpha: 0.15),
-                        context.colorScheme.primary.withValues(alpha: 0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: context.colorScheme.primary.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.language_rounded,
-                    size: 22,
-                    color: context.colorScheme.primary,
-                  ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                appLocalizations.changeServer,
+                style: context.textTheme.titleMedium?.copyWith(
+                  color: context.colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    appLocalizations.changeServer,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      color: context.colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.swap_horizontal_circle,
-                    size: 22,
-                    color: context.colorScheme.onPrimary,
-                  ),
-                ),
-              ],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.colorScheme.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.swap_horizontal_circle,
+                size: 22,
+                color: context.colorScheme.onPrimary,
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

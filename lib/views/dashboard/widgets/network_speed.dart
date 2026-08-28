@@ -16,13 +16,10 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
   static const initPoints = [Point(0, 0), Point(1, 0)];
 
   List<Point> _getPoints(List<Traffic> traffics) => [
-        ...initPoints,
-        for (var i = 0; i < traffics.length; i++)
-          Point(
-            (i + initPoints.length).toDouble(),
-            traffics[i].speed.toDouble(),
-          ),
-      ];
+    ...initPoints,
+    for (var i = 0; i < traffics.length; i++)
+      Point((i + initPoints.length).toDouble(), traffics[i].speed.toDouble()),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +38,13 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
             final traffics = ref.watch(
               trafficsProvider.select((state) => state.list),
             );
-            final lastTraffic =
-                traffics.isEmpty ? Traffic() : traffics.last;
+            final lastTraffic = traffics.isEmpty ? Traffic() : traffics.last;
             return Stack(
               children: [
                 Positioned.fill(
                   child: Padding(
-                    padding: const EdgeInsets.all(16).copyWith(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                    ),
+                    padding: const EdgeInsets.all(16)
+                        .copyWith(bottom: 0, left: 0, right: 0),
                     child: RepaintBoundary(
                       child: LineChart(
                         gradient: true,
@@ -65,10 +58,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                   top: 0,
                   right: 0,
                   child: Transform.translate(
-                    offset: const Offset(
-                      -16,
-                      -20,
-                    ),
+                    offset: const Offset(-16, -20),
                     child: Text(
                       "${lastTraffic.up}↑   ${lastTraffic.down}↓",
                       style: context.textTheme.bodySmall?.copyWith(

@@ -10,6 +10,7 @@ import 'package:mihox/common/common.dart';
 import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/selector.dart';
 import 'package:mihox/providers/config.dart';
+import 'package:mihox/providers/state.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
 
@@ -25,10 +26,7 @@ class ThemeModeItem {
 }
 
 class FontFamilyItem {
-  const FontFamilyItem({
-    required this.fontFamily,
-    required this.label,
-  });
+  const FontFamilyItem({required this.fontFamily, required this.label});
   final FontFamily fontFamily;
   final String label;
 }
@@ -38,17 +36,18 @@ class ThemeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const SingleChildScrollView(
-        child: Column(
-          spacing: 24,
-          children: [
-            _ThemeModeItem(),
-            _PrimaryColorItem(),
-            _PureBlackItem(),
-            _TextScaleFactorItem(),
-            SizedBox(height: 64),
-          ],
-        ),
-      );
+    child: Column(
+      spacing: 24,
+      children: [
+        _ThemeModeItem(),
+        _PrimaryColorItem(),
+        _PureBlackItem(),
+        _NewDashboardItem(),
+        _TextScaleFactorItem(),
+        SizedBox(height: 64),
+      ],
+    ),
+  );
 }
 
 class ItemCard extends StatelessWidget {
@@ -64,39 +63,40 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
-        runSpacing: 16,
-        children: [
-          InfoHeader(info: info, actions: actions),
-          child,
-        ],
-      );
+    runSpacing: 16,
+    children: [
+      InfoHeader(info: info, actions: actions),
+      child,
+    ],
+  );
 }
 
 List<ThemeModeItem> _buildThemeModeItems() => [
-      ThemeModeItem(
-        iconData: Icons.auto_mode,
-        label: appLocalizations.auto,
-        themeMode: ThemeMode.system,
-      ),
-      ThemeModeItem(
-        iconData: Icons.light_mode,
-        label: appLocalizations.light,
-        themeMode: ThemeMode.light,
-      ),
-      ThemeModeItem(
-        iconData: Icons.dark_mode,
-        label: appLocalizations.dark,
-        themeMode: ThemeMode.dark,
-      ),
-    ];
+  ThemeModeItem(
+    iconData: Icons.auto_mode,
+    label: appLocalizations.auto,
+    themeMode: ThemeMode.system,
+  ),
+  ThemeModeItem(
+    iconData: Icons.light_mode,
+    label: appLocalizations.light,
+    themeMode: ThemeMode.light,
+  ),
+  ThemeModeItem(
+    iconData: Icons.dark_mode,
+    label: appLocalizations.dark,
+    themeMode: ThemeMode.dark,
+  ),
+];
 
 class _ThemeModeItem extends ConsumerWidget {
   const _ThemeModeItem();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode =
-        ref.watch(themeSettingProvider.select((s) => s.themeMode));
+    final themeMode = ref.watch(
+      themeSettingProvider.select((s) => s.themeMode),
+    );
     final themeModeItems = _buildThemeModeItems();
 
     return ItemCard(
@@ -117,13 +117,17 @@ class _ThemeModeItem extends ConsumerWidget {
               return CommonCard(
                 isSelected: item.themeMode == themeMode,
                 onPressed: () {
-                  ref.read(themeSettingProvider.notifier).updateState(
+                  ref
+                      .read(themeSettingProvider.notifier)
+                      .updateState(
                         (s) => s.copyWith(themeMode: item.themeMode),
                       );
                 },
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -164,7 +168,9 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
       message: TextSpan(text: appLocalizations.resetTip),
     );
     if (res != true) return;
-    ref.read(themeSettingProvider.notifier).updateState(
+    ref
+        .read(themeSettingProvider.notifier)
+        .updateState(
           (s) => s.copyWith(
             primaryColors: defaultPrimaryColors,
             primaryColor: defaultPrimaryColor,
@@ -186,8 +192,8 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         ..remove(_removablePrimaryColor);
       final newColor = s.primaryColor == _removablePrimaryColor
           ? (newColors.contains(defaultPrimaryColor)
-              ? defaultPrimaryColor
-              : null)
+                ? defaultPrimaryColor
+                : null)
           : s.primaryColor;
       return s.copyWith(primaryColors: newColors, primaryColor: newColor);
     });
@@ -210,7 +216,9 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
       }
       return;
     }
-    ref.read(themeSettingProvider.notifier).updateState(
+    ref
+        .read(themeSettingProvider.notifier)
+        .updateState(
           (s) => s.copyWith(
             primaryColors: List<int>.from(s.primaryColors)..add(res),
           ),
@@ -230,9 +238,9 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
       ),
     );
     if (value == null) return;
-    ref.read(themeSettingProvider.notifier).updateState(
-          (s) => s.copyWith(schemeVariant: value),
-        );
+    ref
+        .read(themeSettingProvider.notifier)
+        .updateState((s) => s.copyWith(schemeVariant: value));
   }
 
   @override
@@ -243,7 +251,8 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
           a: s.primaryColor,
           b: s.primaryColors,
           c: s.schemeVariant,
-          d: s.primaryColor == defaultPrimaryColor &&
+          d:
+              s.primaryColor == defaultPrimaryColor &&
               intListEquality.equals(s.primaryColors, defaultPrimaryColors),
         ),
       ),
@@ -262,35 +271,29 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         return true;
       },
       child: ItemCard(
-        info: Info(
-          label: appLocalizations.themeColor,
-          iconData: Icons.palette,
-        ),
-        actions: genActions(
-          [
-            if (_removablePrimaryColor == null)
-              FilledButton(
-                style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                onPressed: _handleChangeSchemeVariant,
-                child: Text(Intl.message('${schemeVariant.name}Scheme')),
-              )
-            else
-              FilledButton(
-                style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                onPressed: () => setState(() => _removablePrimaryColor = null),
-                child: Text(appLocalizations.cancel),
-              ),
-            if (_removablePrimaryColor == null && !isDefault)
-              IconButton.filledTonal(
-                iconSize: 20,
-                padding: const EdgeInsets.all(4),
-                visualDensity: VisualDensity.compact,
-                onPressed: _handleReset,
-                icon: const Icon(Icons.replay),
-              ),
-          ],
-          space: 8,
-        ),
+        info: Info(label: appLocalizations.themeColor, iconData: Icons.palette),
+        actions: genActions([
+          if (_removablePrimaryColor == null)
+            FilledButton(
+              style: const ButtonStyle(visualDensity: VisualDensity.compact),
+              onPressed: _handleChangeSchemeVariant,
+              child: Text(Intl.message('${schemeVariant.name}Scheme')),
+            )
+          else
+            FilledButton(
+              style: const ButtonStyle(visualDensity: VisualDensity.compact),
+              onPressed: () => setState(() => _removablePrimaryColor = null),
+              child: Text(appLocalizations.cancel),
+            ),
+          if (_removablePrimaryColor == null && !isDefault)
+            IconButton.filledTonal(
+              iconSize: 20,
+              padding: const EdgeInsets.all(4),
+              visualDensity: VisualDensity.compact,
+              onPressed: _handleReset,
+              icon: const Icon(Icons.replay),
+            ),
+        ], space: 8),
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: LayoutBuilder(
@@ -381,17 +384,44 @@ class _PureBlackItem extends ConsumerWidget {
       horizontalTitleGap: 12,
       title: Text(
         appLocalizations.pureBlackMode,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall
+        style: Theme.of(context).textTheme.titleSmall
             ?.copyWith(color: context.colorScheme.onSurfaceVariant),
       ),
       delegate: SwitchDelegate(
         value: pureBlack,
         onChanged: (value) {
-          ref.read(themeSettingProvider.notifier).updateState(
-                (s) => s.copyWith(pureBlack: value),
-              );
+          ref
+              .read(themeSettingProvider.notifier)
+              .updateState((s) => s.copyWith(pureBlack: value));
+        },
+      ),
+    );
+  }
+}
+
+class _NewDashboardItem extends ConsumerWidget {
+  const _NewDashboardItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(newDashboardEnabledProvider);
+    return ListItem.switchItem(
+      leading: const Icon(Icons.dashboard_customize),
+      horizontalTitleGap: 12,
+      title: Text(
+        appLocalizations.newDashboard,
+        style: Theme.of(context).textTheme.titleSmall
+            ?.copyWith(color: context.colorScheme.onSurfaceVariant),
+      ),
+      delegate: SwitchDelegate(
+        value: enabled,
+        // Always user-controllable. A `mihox-newboard: true` header only sets
+        // the default (via newDashboardEnabledProvider) until the user toggles;
+        // toggling writes an explicit value that then wins over the header.
+        onChanged: (value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(newDashboard: value));
         },
       ),
     );
@@ -418,17 +448,15 @@ class _TextScaleFactorItem extends ConsumerWidget {
             horizontalTitleGap: 12,
             title: Text(
               appLocalizations.textScale,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
+              style: Theme.of(context).textTheme.titleSmall
                   ?.copyWith(color: context.colorScheme.onSurfaceVariant),
             ),
             delegate: SwitchDelegate(
               value: textScale.enable,
               onChanged: (value) {
-                ref.read(themeSettingProvider.notifier).updateState(
-                      (s) => s.copyWith.textScale(enable: value),
-                    );
+                ref
+                    .read(themeSettingProvider.notifier)
+                    .updateState((s) => s.copyWith.textScale(enable: value));
               },
             ),
           ),
@@ -452,7 +480,9 @@ class _TextScaleFactorItem extends ConsumerWidget {
                         max: maxTextScale,
                         value: textScale.scale,
                         onChanged: (value) {
-                          ref.read(themeSettingProvider.notifier).updateState(
+                          ref
+                              .read(themeSettingProvider.notifier)
+                              .updateState(
                                 (s) => s.copyWith.textScale(scale: value),
                               );
                         },
@@ -491,47 +521,47 @@ class _PaletteDialogState extends State<_PaletteDialog> {
 
   @override
   Widget build(BuildContext context) => CommonDialog(
-        title: appLocalizations.palette,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(appLocalizations.cancel),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.of(context).pop(_controller.value.toARGB32()),
-            child: Text(appLocalizations.confirm),
-          ),
-        ],
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            SizedBox(
-              width: 250,
-              height: 250,
-              child: Palette(controller: _controller),
-            ),
-            const SizedBox(height: 24),
-            ValueListenableBuilder(
-              valueListenable: _controller,
-              builder: (_, color, _) => PrimaryColorBox(
-                primaryColor: color,
-                child: FilledButton(
-                  onPressed: () {},
-                  child: Text(_controller.value.hex),
-                ),
-              ),
-            ),
-          ],
+    title: appLocalizations.palette,
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: Text(appLocalizations.cancel),
+      ),
+      TextButton(
+        onPressed: () =>
+            Navigator.of(context).pop(_controller.value.toARGB32()),
+        child: Text(appLocalizations.confirm),
+      ),
+    ],
+    child: Column(
+      children: [
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 250,
+          height: 250,
+          child: Palette(controller: _controller),
         ),
-      );
+        const SizedBox(height: 24),
+        ValueListenableBuilder(
+          valueListenable: _controller,
+          builder: (_, color, _) => PrimaryColorBox(
+            primaryColor: color,
+            child: FilledButton(
+              onPressed: () {},
+              child: Text(_controller.value.hex),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(BuildContext context)
-      : _colors = Theme.of(context).colorScheme,
-        _textTheme = Theme.of(context).textTheme,
-        super(trackHeight: 16.0);
+    : _colors = Theme.of(context).colorScheme,
+      _textTheme = Theme.of(context).textTheme,
+      super(trackHeight: 16.0);
 
   final ColorScheme _colors;
   final TextTheme _textTheme;
@@ -578,17 +608,17 @@ class _SliderDefaultsM3 extends SliderThemeData {
 
   @override
   Color? get overlayColor => WidgetStateColor.resolveWith((states) {
-        if (states.contains(WidgetState.dragged)) {
-          return _colors.primary.withValues(alpha: 0.1);
-        }
-        if (states.contains(WidgetState.hovered)) {
-          return _colors.primary.withValues(alpha: 0.08);
-        }
-        if (states.contains(WidgetState.focused)) {
-          return _colors.primary.withValues(alpha: 0.1);
-        }
-        return Colors.transparent;
-      });
+    if (states.contains(WidgetState.dragged)) {
+      return _colors.primary.withValues(alpha: 0.1);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return _colors.primary.withValues(alpha: 0.08);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return _colors.primary.withValues(alpha: 0.1);
+    }
+    return Colors.transparent;
+  });
 
   @override
   TextStyle? get valueIndicatorTextStyle =>

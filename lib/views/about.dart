@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mihox/common/common.dart';
+import 'package:mihox/enum/enum.dart';
+import 'package:mihox/mihomo/core.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/widgets/widgets.dart';
 
@@ -22,10 +25,7 @@ class Contributor {
 
 @immutable
 class ThanksPerson {
-  const ThanksPerson({
-    this.avatar,
-    required this.name,
-  });
+  const ThanksPerson({this.avatar, required this.name});
 
   final String? avatar;
   final String name;
@@ -52,34 +52,34 @@ class AboutView extends StatelessWidget {
     required String title,
     required List<Contributor> contributors,
     double avatarSize = 56.0,
-  }) =>
-      generateSection(
-        separated: false,
-        title: title,
-        items: [
-          ListItem(
-            title: Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              children: [
-                for (final c in contributors)
-                  _PersonAvatar(
-                    avatar: c.avatar,
-                    name: c.name,
-                    size: avatarSize,
-                    onTap:
-                        c.clickable ? () => globalState.openUrl(c.link) : null,
-                  ),
-              ],
-            ),
-          ),
-        ],
-      );
+  }) => generateSection(
+    separated: false,
+    title: title,
+    items: [
+      ListItem(
+        title: Wrap(
+          spacing: 16,
+          runSpacing: 12,
+          children: [
+            for (final c in contributors)
+              _PersonAvatar(
+                avatar: c.avatar,
+                name: c.name,
+                size: avatarSize,
+                onTap: c.clickable ? () => globalState.openUrl(c.link) : null,
+              ),
+          ],
+        ),
+      ),
+    ],
+  );
 
   List<Widget> _buildGratitudeSection() {
     const people = [
       ThanksPerson(
-          name: 'cool_coala', avatar: 'assets/images/avatars/cool_coala.jpg'),
+        name: 'cool_coala',
+        avatar: 'assets/images/avatars/cool_coala.jpg',
+      ),
       ThanksPerson(name: 'arpic', avatar: 'assets/images/avatars/arpic.jpg'),
       ThanksPerson(name: 'legiz', avatar: 'assets/images/avatars/legiz.jpg'),
     ];
@@ -109,34 +109,35 @@ class AboutView extends StatelessWidget {
   }
 
   List<Widget> _buildMoreSection(BuildContext context) => generateSection(
-        separated: false,
-        title: appLocalizations.more,
-        items: [
-          ListItem(
-            title: Text(appLocalizations.checkUpdate),
-            trailing: const Icon(Icons.update),
-            onTap: () => _checkUpdate(context),
-          ),
-          ListItem(
-            title: Text(appLocalizations.project),
-            trailing: const Icon(Icons.insert_link),
-            onTap: () => globalState.openUrl('https://github.com/$repository'),
-          ),
-          ListItem(
-            title: Text(appLocalizations.originalRepository),
-            trailing: const Icon(Icons.insert_link),
-            onTap: () =>
-                globalState.openUrl('https://github.com/pluralplay/FlClashX'),
-          ),
-          ListItem(
-            title: Text(appLocalizations.core),
-            trailing: const Icon(Icons.insert_link),
-            onTap: () => globalState.openUrl(
-              'https://github.com/MetaCubeX/mihomo/tree/Meta',
-            ),
-          ),
-        ],
-      );
+    separated: false,
+    title: appLocalizations.more,
+    items: [
+      ListItem(
+        title: Text(appLocalizations.checkUpdate),
+        trailing: const Icon(Icons.update),
+        onTap: () => _checkUpdate(context),
+      ),
+      if (system.isDesktop) const _CoreUpdateItem(),
+      ListItem(
+        title: Text(appLocalizations.project),
+        trailing: const Icon(Icons.insert_link),
+        onTap: () => globalState.openUrl('https://github.com/$repository'),
+      ),
+      ListItem(
+        title: Text(appLocalizations.originalRepository),
+        trailing: const Icon(Icons.insert_link),
+        onTap: () =>
+            globalState.openUrl('https://github.com/pluralplay/FlClashX'),
+      ),
+      ListItem(
+        title: Text(appLocalizations.core),
+        trailing: const Icon(Icons.insert_link),
+        onTap: () => globalState.openUrl(
+          'https://github.com/MetaCubeX/mihomo/tree/Meta',
+        ),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -194,8 +195,10 @@ class AboutView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(appName, style: textTheme.headlineSmall),
-                    Text(globalState.packageInfo.version,
-                        style: textTheme.labelLarge),
+                    Text(
+                      globalState.packageInfo.version,
+                      style: textTheme.labelLarge,
+                    ),
                     const SizedBox(height: 4),
                     const _CoreVersionWidget(),
                   ],
@@ -253,8 +256,9 @@ class _PersonAvatar extends StatelessWidget {
 
     final circle = CircleAvatar(
       radius: size / 2,
-      foregroundImage:
-          avatar != null ? AssetImage(avatar!) as ImageProvider : null,
+      foregroundImage: avatar != null
+          ? AssetImage(avatar!) as ImageProvider
+          : null,
       backgroundColor: avatar == null ? colorScheme.primaryContainer : null,
       child: avatar == null
           ? Text(
@@ -279,10 +283,7 @@ class _PersonAvatar extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: maxNameLines,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: 'Unbounded',
-            fontSize: resolvedFontSize,
-          ),
+          style: TextStyle(fontFamily: 'Unbounded', fontSize: resolvedFontSize),
         ),
       ],
     );
@@ -298,20 +299,183 @@ class _CoreVersionWidget extends StatelessWidget {
   const _CoreVersionWidget();
 
   @override
+  Widget build(BuildContext context) => FutureBuilder<String>(
+        // Prefer the running instance — after a standalone core update it is
+        // the only truthful source; the build-time constant covers a stopped
+        // core.
+        future: mihomoCore.getCoreVersion(),
+        builder: (context, snapshot) {
+          final live = snapshot.data;
+          final coreVersion =
+              live != null && live.isNotEmpty ? live : globalState.coreVersion;
+          if (coreVersion == null || coreVersion.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return Text(
+            'Core: $coreVersion',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          );
+        },
+      );
+}
+
+class _CoreUpdateItem extends StatefulWidget {
+  const _CoreUpdateItem();
+
+  @override
+  State<_CoreUpdateItem> createState() => _CoreUpdateItemState();
+}
+
+class _CoreUpdateItemState extends State<_CoreUpdateItem> {
+  Map<String, dynamic>? _release;
+  bool _busy = false;
+  bool _downloading = false;
+  double _progress = 0;
+  String _error = '';
+  bool _initialCheckDone = false;
+
+  String get _coreAssetName {
+    final arch = Platform.version.contains('arm64') ||
+            Platform.version.contains('aarch64')
+        ? 'arm64'
+        : 'amd64';
+    final platform = Platform.isWindows
+        ? 'windows'
+        : 'linux';
+    final ext = Platform.isWindows ? '.exe' : '';
+    return 'MihoXCore-$platform-$arch$ext';
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialCheckDone) {
+      _initialCheckDone = true;
+      _check();
+    }
+  }
+
+  Future<void> _check() async {
+    try {
+      final coreVersion = await mihomoCore.getCoreVersion();
+      final currentVersion =
+          coreVersion.isNotEmpty ? coreVersion : globalState.coreVersion ?? '';
+      if (currentVersion.isEmpty) {
+        return;
+      }
+      final release = await request.checkForCoreUpdate(currentVersion);
+      if (mounted && release != null) {
+        setState(() => _release = release);
+      }
+    } catch (_) {
+      // The item only appears when an update is found; stay hidden on errors.
+    }
+  }
+
+  Future<void> _download() async {
+    if (_busy || _release == null) {
+      return;
+    }
+    final assets = _release!['assets'] as List<dynamic>? ?? [];
+    final name = _coreAssetName;
+    final asset = assets
+        .cast<Map<String, dynamic>>()
+        .where((a) => (a['name'] as String?) == name)
+        .firstOrNull;
+    if (asset == null) {
+      setState(() => _error = '$name not found');
+      return;
+    }
+    final url = asset['browser_download_url'] as String;
+    setState(() {
+      _busy = true;
+      _downloading = true;
+      _progress = 0;
+      _error = '';
+    });
+    final error = await request.downloadCoreUpdate(
+      url,
+      appPath.corePendingPath,
+      onProgress: (received, total) {
+        if (!mounted || total <= 0) return;
+        setState(() => _progress = received / total);
+      },
+    );
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _downloading = false;
+      if (error != null) {
+        _error = error;
+      }
+    });
+    if (error == null) {
+      _showRestartDialog();
+    }
+  }
+
+  void _showRestartDialog() {
+    globalState.showCommonDialog(
+      dismissible: false,
+      child: CommonDialog(
+        title: appLocalizations.coreUpdateSuccess,
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Restart only the core, not the whole app. reStart applies the
+              // pending binary (helper swap on Windows) and re-inits in place, so
+              // the Dart run-state stays in sync — a full app restart
+              // (handleRestart) left the UI thinking the core was stopped while it
+              // was actually up and proxying.
+              // Close the dialog + the About sheet and jump to the dashboard so the
+              // restart happens on the main screen, not buried in settings.
+              globalState.navigatorKey.currentState
+                  ?.popUntil((route) => route.isFirst);
+              globalState.appController.page = PageLabel.dashboard;
+              globalState.appController.restartCore();
+            },
+            child: Text(appLocalizations.restart),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final coreVersion = globalState.coreVersion;
-    if (coreVersion == null || coreVersion.isEmpty) {
+    final release = _release;
+    if (release == null) {
       return const SizedBox.shrink();
     }
-
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Text(
-      'Core: $coreVersion',
-      style: textTheme.bodySmall?.copyWith(
-        color: colorScheme.onSurfaceVariant,
-      ),
+    final color = Theme.of(context).colorScheme.primary;
+    final tag = (release['tag_name'] as String).replaceFirst('core-', '');
+    final subtitle = _error.isNotEmpty
+        ? '${appLocalizations.coreUpdateFailed}: $_error'
+        : _downloading
+            ? appLocalizations.coreUpdateDownloading
+            : tag;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListItem(
+          title: Text(
+            appLocalizations.coreUpdateAvailable,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(subtitle),
+          onTap: _download,
+          trailing: Icon(Icons.system_update, color: color),
+        ),
+        if (_downloading)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: LinearProgressIndicator(
+              value: _progress > 0 ? _progress : null,
+            ),
+          ),
+      ],
     );
   }
 }

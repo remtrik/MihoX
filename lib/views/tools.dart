@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mihox/common/common.dart';
+import 'package:mihox/common/yaml_dump.dart';
+import 'package:mihox/enum/enum.dart';
 import 'package:mihox/l10n/l10n.dart';
+import 'package:mihox/mihomo/core.dart';
 import 'package:mihox/models/models.dart';
+import 'package:mihox/pages/editor.dart';
 import 'package:mihox/providers/providers.dart';
+import 'package:mihox/state.dart';
 import 'package:mihox/views/about.dart';
 import 'package:mihox/views/access.dart';
 import 'package:mihox/views/application_setting.dart';
@@ -14,6 +19,10 @@ import 'package:mihox/views/config/config.dart';
 import 'package:mihox/views/hotkey.dart';
 import 'package:mihox/widgets/widgets.dart';
 import 'package:path/path.dart' show dirname, join;
+import 'package:re_editor/re_editor.dart';
+import 'package:re_highlight/languages/yaml.dart';
+import 'package:re_highlight/styles/atom-one-dark.dart';
+import 'package:re_highlight/styles/atom-one-light.dart';
 
 import 'backup_and_recovery.dart';
 import 'developer.dart';
@@ -41,40 +50,40 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
       );
 
   Widget _buildNavigationMenu(List<NavigationItem> navigationItems) => Column(
-        children: [
-          for (final navigationItem in navigationItems) ...[
-            _buildNavigationMenuItem(navigationItem),
-            navigationItems.last != navigationItem
-                ? const Divider(
-                    height: 0,
-                  )
-                : Container(),
-          ]
-        ],
-      );
+    children: [
+      for (final navigationItem in navigationItems) ...[
+        _buildNavigationMenuItem(navigationItem),
+        navigationItems.last != navigationItem
+            ? const Divider(height: 0)
+            : Container(),
+      ],
+    ],
+  );
 
   List<Widget> _getOtherList(BuildContext context, bool enableDeveloperMode) =>
       generateSection(
         title: AppLocalizations.of(context).other,
         items: [
+          const _RuntimeConfigItem(),
           if (enableDeveloperMode) const _DeveloperItem(),
           const _InfoItem(),
+          const _CoreStatusItem(),
         ],
       );
 
   List<Widget> _getSettingList(BuildContext context) => generateSection(
-        title: AppLocalizations.of(context).settings,
-        items: [
-          const _LocaleItem(),
-          const _ThemeItem(),
-          const _BackupItem(),
-          if (system.isDesktop) const _HotkeyItem(),
-          if (Platform.isWindows) const _LoopbackItem(),
-          if (Platform.isAndroid) const _AccessItem(),
-          const _ConfigItem(),
-          const _SettingItem(),
-        ],
-      );
+    title: AppLocalizations.of(context).settings,
+    items: [
+      const _LocaleItem(),
+      const _ThemeItem(),
+      const _BackupItem(),
+      if (system.isDesktop) const _HotkeyItem(),
+      if (Platform.isWindows) const _LoopbackItem(),
+      if (Platform.isAndroid) const _AccessItem(),
+      const _ConfigItem(),
+      const _SettingItem(),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +103,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
           return Column(
             children: [
               ListHeader(title: appLocale.more),
-              _buildNavigationMenu(state.navigationItems)
+              _buildNavigationMenu(state.navigationItems),
             ],
           );
         },
@@ -121,8 +130,9 @@ class _LocaleItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocale = AppLocalizations.of(context);
-    final locale =
-        ref.watch(appSettingProvider.select((state) => state.locale));
+    final locale = ref.watch(
+      appSettingProvider.select((state) => state.locale),
+    );
     final subTitle = locale ?? appLocale.defaultText;
     final currentLocale = utils.getLocaleForString(locale);
     return ListItem<Locale?>.options(
@@ -133,7 +143,9 @@ class _LocaleItem extends ConsumerWidget {
         title: appLocale.language,
         options: [null, ...AppLocalizations.delegate.supportedLocales],
         onChanged: (locale) {
-          ref.read(appSettingProvider.notifier).updateState(
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState(
                 (state) => state.copyWith(locale: locale?.toString()),
               );
         },
@@ -154,10 +166,7 @@ class _ThemeItem extends StatelessWidget {
       leading: const Icon(Icons.style),
       title: Text(appLocale.theme),
       subtitle: Text(appLocale.themeDesc),
-      delegate: OpenDelegate(
-        title: appLocale.theme,
-        widget: const ThemeView(),
-      ),
+      delegate: OpenDelegate(title: appLocale.theme, widget: const ThemeView()),
     );
   }
 }
@@ -272,6 +281,115 @@ class _SettingItem extends StatelessWidget {
   }
 }
 
+class _RuntimeConfigItem extends StatelessWidget {
+  const _RuntimeConfigItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocale = AppLocalizations.of(context);
+    return ListItem(
+      leading: const Icon(Icons.code),
+      title: Text(appLocale.runtimeConfig),
+      onTap: () {
+        final config = globalState.lastRuntimeConfig;
+        if (config == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(appLocale.runtimeConfigNotAvailable)),
+          );
+          return;
+        }
+
+        final buffer = StringBuffer();
+        yamlDump(buffer, config, 0);
+
+        showExtend(
+          context,
+          builder: (_, type) =>
+              _RuntimeConfigSheet(type: type, text: buffer.toString()),
+        );
+      },
+    );
+  }
+}
+
+class _RuntimeConfigSheet extends ConsumerStatefulWidget {
+  const _RuntimeConfigSheet({required this.type, required this.text});
+  final SheetType type;
+  final String text;
+
+  @override
+  ConsumerState<_RuntimeConfigSheet> createState() =>
+      _RuntimeConfigSheetState();
+}
+
+class _RuntimeConfigSheetState extends ConsumerState<_RuntimeConfigSheet> {
+  late final CodeLineEditingController _controller;
+  late final CodeFindController _findController;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = CodeLineEditingController.fromText(widget.text);
+    _findController = CodeFindController(_controller);
+  }
+
+  @override
+  void dispose() {
+    _findController.dispose();
+    _controller.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobileView = ref.watch(isMobileViewProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return AdaptiveSheetScaffold(
+      type: widget.type,
+      title: AppLocalizations.of(context).runtimeConfig,
+      actions: [
+        IconButton(
+          onPressed: _findController.findMode,
+          icon: const Icon(Icons.search),
+        ),
+      ],
+      body: CodeEditor(
+        readOnly: true,
+        controller: _controller,
+        findController: _findController,
+        findBuilder: (context, controller, readOnly) => FindPanel(
+          controller: controller,
+          readOnly: readOnly,
+          isMobileView: isMobileView,
+        ),
+        padding: const EdgeInsets.only(right: 16),
+        scrollbarBuilder: (context, child, details) =>
+            CommonScrollBar(controller: details.controller, child: child),
+        toolbarController: ContextMenuControllerImpl(editable: false),
+        indicatorBuilder:
+            (context, editingController, chunkController, notifier) => Row(
+              children: [
+                DefaultCodeLineNumber(
+                  controller: editingController,
+                  notifier: notifier,
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
+        style: CodeEditorStyle(
+          fontSize: context.textTheme.bodyLarge?.fontSize?.ap,
+          fontFamily: FontFamily.jetBrainsMono.value,
+          codeTheme: CodeHighlightTheme(
+            languages: {'yaml': CodeHighlightThemeMode(mode: langYaml)},
+            theme: isDark ? atomOneDarkTheme : atomOneLightTheme,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _InfoItem extends StatelessWidget {
   const _InfoItem();
 
@@ -281,10 +399,7 @@ class _InfoItem extends StatelessWidget {
     return ListItem.open(
       leading: const Icon(Icons.info),
       title: Text(appLocale.about),
-      delegate: OpenDelegate(
-        title: appLocale.about,
-        widget: const AboutView(),
-      ),
+      delegate: OpenDelegate(title: appLocale.about, widget: const AboutView()),
     );
   }
 }
@@ -302,6 +417,85 @@ class _DeveloperItem extends StatelessWidget {
         title: appLocale.developerMode,
         widget: const DeveloperView(),
       ),
+    );
+  }
+}
+
+enum _CoreState { running, restarting, stopped }
+
+class _CoreStatusItem extends StatefulWidget {
+  const _CoreStatusItem();
+
+  @override
+  State<_CoreStatusItem> createState() => _CoreStatusItemState();
+}
+
+class _CoreStatusItemState extends State<_CoreStatusItem> {
+  _CoreState _state = _CoreState.stopped;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkCoreStatus();
+  }
+
+  Future<void> _checkCoreStatus() async {
+    try {
+      final alive = await mihomoCore.isInit;
+      if (mounted) {
+        setState(
+          () => _state = alive ? _CoreState.running : _CoreState.stopped,
+        );
+      }
+    } catch (_) {
+      if (mounted) setState(() => _state = _CoreState.stopped);
+    }
+  }
+
+  Color get _statusColor => switch (_state) {
+    _CoreState.running => Colors.green,
+    _CoreState.restarting => Colors.orange,
+    _CoreState.stopped => Colors.red,
+  };
+
+  String _statusText(AppLocalizations l) => switch (_state) {
+    _CoreState.running => l.coreStatusRunning,
+    _CoreState.restarting => l.coreStatusRestarting,
+    _CoreState.stopped => l.coreStatusStopped,
+  };
+
+  Future<void> _restart() async {
+    if (_state == _CoreState.restarting) return;
+    setState(() => _state = _CoreState.restarting);
+    try {
+      await globalState.appController.restartCore();
+      if (mounted) setState(() => _state = _CoreState.running);
+    } catch (_) {
+      if (mounted) setState(() => _state = _CoreState.stopped);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocale = AppLocalizations.of(context);
+    return ListItem(
+      leading: Icon(Icons.memory, color: _statusColor),
+      title: Text(appLocale.restartCore),
+      subtitle: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _statusColor,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(_statusText(appLocale)),
+        ],
+      ),
+      onTap: _restart,
     );
   }
 }

@@ -9,10 +9,7 @@ import 'package:mihox/providers/config.dart';
 import 'package:mihox/state.dart';
 
 class HotKeyManager extends ConsumerStatefulWidget {
-  const HotKeyManager({
-    super.key,
-    required this.child,
-  });
+  const HotKeyManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -23,15 +20,11 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      hotKeyActionsProvider,
-      (prev, next) {
-        if (!hotKeyActionListEquality.equals(prev, next)) {
-          _updateHotKeys(hotKeyActions: next);
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual(hotKeyActionsProvider, (prev, next) {
+      if (!hotKeyActionListEquality.equals(prev, next)) {
+        _updateHotKeys(hotKeyActions: next);
+      }
+    }, fireImmediately: true);
   }
 
   Future<void> _handleHotKeyAction(HotAction action) async {
@@ -55,49 +48,43 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     await hotKeyManager.unregisterAll();
     final hotkeyActionHandles = hotKeyActions
         .where(
-      (hotKeyAction) =>
-          hotKeyAction.key != null && hotKeyAction.modifiers.isNotEmpty,
-    )
-        .map<Future>(
-      (hotKeyAction) async {
-        final modifiers = hotKeyAction.modifiers
-            .map((item) => item.toHotKeyModifier())
-            .toList();
-        final hotKey = HotKey(
-          key: PhysicalKeyboardKey(hotKeyAction.key!),
-          modifiers: modifiers,
-        );
-        return hotKeyManager.register(
-          hotKey,
-          keyDownHandler: (_) {
-            _handleHotKeyAction(hotKeyAction.action);
-          },
-        );
-      },
-    );
+          (hotKeyAction) =>
+              hotKeyAction.key != null && hotKeyAction.modifiers.isNotEmpty,
+        )
+        .map<Future>((hotKeyAction) async {
+          final modifiers = hotKeyAction.modifiers
+              .map((item) => item.toHotKeyModifier())
+              .toList();
+          final hotKey = HotKey(
+            key: PhysicalKeyboardKey(hotKeyAction.key!),
+            modifiers: modifiers,
+          );
+          return hotKeyManager.register(
+            hotKey,
+            keyDownHandler: (_) {
+              _handleHotKeyAction(hotKeyAction.action);
+            },
+          );
+        });
     await Future.wait(hotkeyActionHandles);
   }
 
   Shortcuts _buildShortcuts(Widget child) => Shortcuts(
-        shortcuts: {
-          utils.controlSingleActivator(LogicalKeyboardKey.keyW):
-              const CloseWindowIntent(),
-        },
-        child: Actions(
-          actions: {
-            CloseWindowIntent: CallbackAction<CloseWindowIntent>(
-              onInvoke: (_) => globalState.appController.handleBackOrExit(),
-            ),
-            DoNothingIntent: CallbackAction<DoNothingIntent>(
-              onInvoke: (_) => null,
-            ),
-          },
-          child: child,
+    shortcuts: {
+      utils.controlSingleActivator(LogicalKeyboardKey.keyW):
+          const CloseWindowIntent(),
+    },
+    child: Actions(
+      actions: {
+        CloseWindowIntent: CallbackAction<CloseWindowIntent>(
+          onInvoke: (_) => globalState.appController.handleBackOrExit(),
         ),
-      );
+        DoNothingIntent: CallbackAction<DoNothingIntent>(onInvoke: (_) => null),
+      },
+      child: child,
+    ),
+  );
 
   @override
-  Widget build(BuildContext context) => _buildShortcuts(
-        widget.child,
-      );
+  Widget build(BuildContext context) => _buildShortcuts(widget.child);
 }

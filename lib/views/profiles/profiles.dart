@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart' hide Action;
-import 'package:mihox/pages/pages.dart';
 import 'package:mihox/providers/providers.dart';
 import 'package:mihox/state.dart';
 import 'package:mihox/views/profiles/edit_profile.dart';
@@ -36,12 +35,10 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
   }
 
   bool _isDesktopPaste(KeyEvent e) {
-    if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) {
+    if (!Platform.isWindows && !Platform.isLinux) {
       return false;
     }
-    final ctrl = Platform.isMacOS
-        ? HardwareKeyboard.instance.isMetaPressed
-        : HardwareKeyboard.instance.isControlPressed;
+    final ctrl = HardwareKeyboard.instance.isControlPressed;
     return ctrl && e.logicalKey == LogicalKeyboardKey.keyV;
   }
 
@@ -76,24 +73,18 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
   Future<void> _updateProfiles() async {
     final profiles = globalState.config.profiles;
     final messages = [];
-    final updateProfiles = profiles.map<Future>(
-      (profile) async {
-        if (profile.type == ProfileType.file) return;
+    final updateProfiles = profiles.map<Future>((profile) async {
+      if (profile.type == ProfileType.file) return;
+      globalState.appController.setProfile(profile.copyWith(isUpdating: true));
+      try {
+        await globalState.appController.updateProfile(profile);
+      } catch (e) {
+        messages.add("${profile.label ?? profile.id}: $e \n");
         globalState.appController.setProfile(
-          profile.copyWith(isUpdating: true),
+          profile.copyWith(isUpdating: false),
         );
-        try {
-          await globalState.appController.updateProfile(profile);
-        } catch (e) {
-          messages.add("${profile.label ?? profile.id}: $e \n");
-          globalState.appController.setProfile(
-            profile.copyWith(
-              isUpdating: false,
-            ),
-          );
-        }
-      },
-    );
+      }
+    });
     final titleMedium = context.textTheme.titleMedium;
     await Future.wait(updateProfiles);
     if (messages.isNotEmpty) {
@@ -102,7 +93,7 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
         message: TextSpan(
           children: [
             for (final message in messages)
-              TextSpan(text: message, style: titleMedium)
+              TextSpan(text: message, style: titleMedium),
           ],
         ),
       );
@@ -111,122 +102,112 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
 
   @override
   List<Widget> get actions => [
-        IconButton(
-          onPressed: () {
-            showExtend(
-              context,
-              builder: (_, type) => const ScriptsView(),
-            );
-          },
-          icon: Consumer(
-            builder: (context, ref, _) {
-              final isScriptMode = ref.watch(
-                  scriptStateProvider.select((state) => state.realId != null));
-              return Icon(
-                Icons.functions,
-                color: isScriptMode ? context.colorScheme.primary : null,
-              );
-            },
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            final profiles = globalState.config.profiles;
-            showSheet(
-              context: context,
-              builder: (_, type) => ReorderableProfilesSheet(
-                type: type,
-                profiles: profiles,
-              ),
-            );
-          },
-          icon: const Icon(Icons.sort),
-          iconSize: 26,
-        ),
-      ];
+    IconButton(
+      onPressed: () {
+        showExtend(context, builder: (_, type) => const ScriptsView());
+      },
+      icon: Consumer(
+        builder: (context, ref, _) {
+          final isScriptMode = ref.watch(
+            scriptStateProvider.select((state) => state.realId != null),
+          );
+          return Icon(
+            Icons.functions,
+            color: isScriptMode ? context.colorScheme.primary : null,
+          );
+        },
+      ),
+    ),
+    IconButton(
+      onPressed: () {
+        final profiles = globalState.config.profiles;
+        showSheet(
+          context: context,
+          builder: (_, type) =>
+              ReorderableProfilesSheet(type: type, profiles: profiles),
+        );
+      },
+      icon: const Icon(Icons.sort),
+      iconSize: 26,
+    ),
+  ];
 
   @override
   Widget? get floatingActionButton => Column(
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    FloatingActionButton(
-      heroTag: null,
-      onPressed: _handleShowAddExtendPage,
-      child: const Icon(Icons.add),
-    ),
-    const SizedBox(height: 10),
-    FloatingActionButton(
-      heroTag: null,
-      onPressed: _updateProfiles,
-      child: const Icon(Icons.sync),
-    ),
-  ],
-);
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      FloatingActionButton(
+        heroTag: null,
+        onPressed: _handleShowAddExtendPage,
+        child: const Icon(Icons.add),
+      ),
+      const SizedBox(height: 10),
+      FloatingActionButton(
+        heroTag: null,
+        onPressed: _updateProfiles,
+        child: const Icon(Icons.sync),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) => Focus(
-        focusNode: _focusNode,
-        autofocus: true,
-        onKeyEvent: (node, event) {
-          if (event is KeyDownEvent && _isDesktopPaste(event)) {
-            _handlePaste();
-            return KeyEventResult.handled;
+    focusNode: _focusNode,
+    autofocus: true,
+    onKeyEvent: (node, event) {
+      if (event is KeyDownEvent && _isDesktopPaste(event)) {
+        _handlePaste();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    },
+    child: Consumer(
+      builder: (_, ref, _) {
+        ref.listenManual(isCurrentPageProvider(PageLabel.profiles), (
+          prev,
+          next,
+        ) {
+          if (prev != next && next == true) {
+            initPageState();
           }
-          return KeyEventResult.ignored;
-        },
-        child: Consumer(
-          builder: (_, ref, _) {
-            ref.listenManual(
-              isCurrentPageProvider(PageLabel.profiles),
-              (prev, next) {
-                if (prev != next && next == true) {
-                  initPageState();
-                }
-              },
-              fireImmediately: true,
-            );
-            final profilesSelectorState =
-                ref.watch(profilesSelectorStateProvider);
-            if (profilesSelectorState.profiles.isEmpty) {
-              return NullStatus(
-                label: appLocalizations.nullProfileDesc,
-              );
-            }
-            return Align(
-              alignment: Alignment.topCenter,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: 88,
-                ),
-                child: Grid(
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  crossAxisCount: profilesSelectorState.columns,
-                  children: [
-                    for (int i = 0;
-                        i < profilesSelectorState.profiles.length;
-                        i++)
-                      GridItem(
-                        child: ProfileItem(
-                          key: Key(profilesSelectorState.profiles[i].id),
-                          profile: profilesSelectorState.profiles[i],
-                          groupValue: profilesSelectorState.currentProfileId,
-                          onChanged: (profileId) {
-                            ref.read(currentProfileIdProvider.notifier).value =
-                                profileId;
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      );
+        }, fireImmediately: true);
+        final profilesSelectorState = ref.watch(profilesSelectorStateProvider);
+        if (profilesSelectorState.profiles.isEmpty) {
+          return NullStatus(label: appLocalizations.nullProfileDesc);
+        }
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 88,
+            ),
+            child: Grid(
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              crossAxisCount: profilesSelectorState.columns,
+              children: [
+                for (int i = 0; i < profilesSelectorState.profiles.length; i++)
+                  GridItem(
+                    child: ProfileItem(
+                      key: Key(profilesSelectorState.profiles[i].id),
+                      profile: profilesSelectorState.profiles[i],
+                      groupValue: profilesSelectorState.currentProfileId,
+                      onChanged: (profileId) {
+                        ref.read(currentProfileIdProvider.notifier).value =
+                            profileId;
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 
 class ProfileItem extends StatefulWidget {
@@ -295,18 +276,10 @@ class _ProfileItemState extends State<ProfileItem> {
     if (widget.profile.type == ProfileType.file) return;
     await globalState.safeRun(silence: false, () async {
       try {
-        appController.setProfile(
-          widget.profile.copyWith(
-            isUpdating: true,
-          ),
-        );
+        appController.setProfile(widget.profile.copyWith(isUpdating: true));
         await appController.updateProfile(widget.profile);
       } catch (e) {
-        appController.setProfile(
-          widget.profile.copyWith(
-            isUpdating: false,
-          ),
-        );
+        appController.setProfile(widget.profile.copyWith(isUpdating: false));
         rethrow;
       }
     });
@@ -318,11 +291,9 @@ class _ProfileItemState extends State<ProfileItem> {
       builder: (_, type) => AdaptiveSheetScaffold(
         type: type,
         disableBackground: false,
-        body: EditProfileView(
-          profile: widget.profile,
-          context: context,
-        ),
-        title: "${appLocalizations.edit} ${appLocalizations.profile.toLowerCase()}",
+        body: EditProfileView(profile: widget.profile, context: context),
+        title:
+            "${appLocalizations.edit} ${appLocalizations.profile.toLowerCase()}",
       ),
     );
   }
@@ -343,51 +314,55 @@ class _ProfileItemState extends State<ProfileItem> {
 
     final expireDate = subscriptionInfo.expire > 0
         ? DateFormat('dd.MM.yyyy').format(
-            DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000))
+            DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000),
+          )
         : "N/A";
 
     return [
       const SizedBox(height: 4),
       if (!isUnlimited)
-        Builder(builder: (context) {
-          final totalTraffic = TrafficValue(value: subscriptionInfo.total);
-          final usedTrafficValue =
-              subscriptionInfo.upload + subscriptionInfo.download;
-          final usedTraffic = TrafficValue(value: usedTrafficValue);
+        Builder(
+          builder: (context) {
+            final totalTraffic = TrafficValue(value: subscriptionInfo.total);
+            final usedTrafficValue =
+                subscriptionInfo.upload + subscriptionInfo.download;
+            final usedTraffic = TrafficValue(value: usedTrafficValue);
 
-          var progress = 0.0;
-          if (subscriptionInfo.total > 0) {
-            progress = usedTrafficValue / subscriptionInfo.total;
-          }
-          progress = progress.clamp(0.0, 1.0);
+            var progress = 0.0;
+            if (subscriptionInfo.total > 0) {
+              progress = usedTrafficValue / subscriptionInfo.total;
+            }
+            progress = progress.clamp(0.0, 1.0);
 
-          Color progressColor = Colors.green;
-          if (progress > 0.9) {
-            progressColor = Colors.red;
-          } else if (progress > 0.7) {
-            progressColor = Colors.orange;
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${appLocalizations.traffic} ${usedTraffic.showValue} ${usedTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
-                style: context.textTheme.bodySmall,
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
-                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+            Color progressColor = Colors.green;
+            if (progress > 0.9) {
+              progressColor = Colors.red;
+            } else if (progress > 0.7) {
+              progressColor = Colors.orange;
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${appLocalizations.traffic} ${usedTraffic.showValue} ${usedTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
+                  style: context.textTheme.bodySmall,
                 ),
-              ),
-            ],
-          );
-        }),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       const SizedBox(height: 6),
       Text(
         expireDate != "N/A"
@@ -405,168 +380,136 @@ class _ProfileItemState extends State<ProfileItem> {
 
   Future<void> _handleExportFile(BuildContext context) async {
     final commonScaffoldState = context.commonScaffoldState;
-    final res = await commonScaffoldState?.loadingRun<bool>(
-      () async {
-        final file = await widget.profile.getFile();
-        final value = await picker.saveFile(
-          widget.profile.label ?? widget.profile.id,
-          file.readAsBytesSync(),
-        );
-        if (value == null) return false;
-        return true;
-      },
-      title: appLocalizations.tip,
-    );
+    final res = await commonScaffoldState?.loadingRun<bool>(() async {
+      final file = await widget.profile.getFile();
+      final value = await picker.saveFile(
+        widget.profile.label ?? widget.profile.id,
+        file.readAsBytesSync(),
+      );
+      if (value == null) return false;
+      return true;
+    }, title: appLocalizations.tip);
     if (res == true && context.mounted) {
       await context.showNotifier(appLocalizations.exportSuccess);
     }
   }
 
   void _handlePushGenProfilePage(BuildContext context, String id) {
-    final overrideProfileView = OverrideProfileView(
-      profileId: id,
-    );
-    BaseNavigator.modal(
-      context,
-      overrideProfileView,
-    );
+    final overrideProfileView = OverrideProfileView(profileId: id);
+    BaseNavigator.modal(context, overrideProfileView);
   }
 
   @override
   Widget build(BuildContext context) => CommonCard(
-        isSelected: widget.profile.id == widget.groupValue,
-        onPressed: _isTV
-            ? null
-            : () {
-                widget.onChanged(widget.profile.id);
-              },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap:
-                      _isTV ? () => widget.onChanged(widget.profile.id) : null,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.profile.label ?? widget.profile.id,
-                        style: context.textTheme.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      ..._buildUrlProfileInfo(context)
-                    ],
+    isSelected: widget.profile.id == widget.groupValue,
+    onPressed: _isTV
+        ? null
+        : () {
+            widget.onChanged(widget.profile.id);
+          },
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: _isTV ? () => widget.onChanged(widget.profile.id) : null,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.profile.label ?? widget.profile.id,
+                    style: context.textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  ..._buildUrlProfileInfo(context),
+                ],
               ),
-              SizedBox(
-                height: 40,
-                width: 40,
-                child: FadeThroughBox(
-                  child: widget.profile.isUpdating
-                      ? const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: CircularProgressIndicator(),
-                        )
-                      : CommonPopupBox(
-                          popup: CommonPopupMenu(
-                            items: [
-                              if (_isTV)
-                                PopupMenuItemData(
-                                  icon: Icons.check_circle_outline,
-                                  label: appLocalizations.selectProfile,
-                                  onPressed: () {
-                                    widget.onChanged(widget.profile.id);
-                                  },
-                                ),
-                              PopupMenuItemData(
-                                icon: Icons.edit_outlined,
-                                label: appLocalizations.edit,
-                                onPressed: () {
-                                  _handleShowEditExtendPage(context);
-                                },
-                              ),
-                              if (widget.profile.type == ProfileType.url) ...[
-                                PopupMenuItemData(
-                                  icon: Icons.sync_alt_sharp,
-                                  label: appLocalizations.sync,
-                                  onPressed: updateProfile,
-                                ),
-                              ],
-                              if (system.isMobile && !_isTV)
-                                PopupMenuItemData(
-                                  icon: Icons.tv_outlined,
-                                  label: appLocalizations.sendToTv,
-                                  onPressed: () {
-                                    BaseNavigator.push(
-                                        context,
-                                        SendToTvPage(
-                                            profileUrl: widget.profile.url));
-                                  },
-                                ),
-                              if (widget.profile
-                                          .providerHeaders['support-url'] !=
-                                      null &&
-                                  widget.profile.providerHeaders['support-url']!
-                                      .isNotEmpty &&
-                                  !_isTV)
-                                PopupMenuItemData(
-                                  icon: Icons.contact_support,
-                                  label: appLocalizations.support,
-                                  onPressed: () {
-                                    globalState.openUrl(widget.profile
-                                        .providerHeaders['support-url']!);
-                                  },
-                                ),
-                              PopupMenuItemData(
-                                icon: Icons.extension_outlined,
-                                label: appLocalizations.override,
-                                onPressed: () {
-                                  _handlePushGenProfilePage(
-                                      context, widget.profile.id);
-                                },
-                              ),
-                              PopupMenuItemData(
-                                icon: Icons.file_copy_outlined,
-                                label: appLocalizations.exportFile,
-                                onPressed: () {
-                                  _handleExportFile(context);
-                                },
-                              ),
-                              PopupMenuItemData(
-                                icon: Icons.delete_outlined,
-                                label: appLocalizations.delete,
-                                onPressed: () {
-                                  _handleDeleteProfile(context);
-                                },
-                              ),
-                            ],
-                          ),
-                          targetBuilder: (open) => Focus(
-                            focusNode: _menuFocusNode,
-                            canRequestFocus: true,
-                            child: Material(
-                              color: _isMenuFocused
-                                  ? Theme.of(context).focusColor
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
-                              child: IconButton(
-                                onPressed: open,
-                                icon: const Icon(Icons.more_vert),
-                              ),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+            width: 40,
+            child: FadeThroughBox(
+              child: widget.profile.isUpdating
+                  ? const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: CircularProgressIndicator(),
+                    )
+                  : CommonPopupBox(
+                      popup: CommonPopupMenu(
+                        items: [
+                          if (_isTV)
+                            PopupMenuItemData(
+                              icon: Icons.check_circle_outline,
+                              label: appLocalizations.selectProfile,
+                              onPressed: () {
+                                widget.onChanged(widget.profile.id);
+                              },
                             ),
+                          PopupMenuItemData(
+                            icon: Icons.edit_outlined,
+                            label: appLocalizations.edit,
+                            onPressed: () {
+                              _handleShowEditExtendPage(context);
+                            },
+                          ),
+                          if (widget.profile.type == ProfileType.url) ...[
+                            PopupMenuItemData(
+                              icon: Icons.sync_alt_sharp,
+                              label: appLocalizations.sync,
+                              onPressed: updateProfile,
+                            ),
+                          ],
+                          PopupMenuItemData(
+                            icon: Icons.extension_outlined,
+                            label: appLocalizations.override,
+                            onPressed: () {
+                              _handlePushGenProfilePage(
+                                context,
+                                widget.profile.id,
+                              );
+                            },
+                          ),
+                          PopupMenuItemData(
+                            icon: Icons.file_copy_outlined,
+                            label: appLocalizations.exportFile,
+                            onPressed: () {
+                              _handleExportFile(context);
+                            },
+                          ),
+                          PopupMenuItemData(
+                            icon: Icons.delete_outlined,
+                            label: appLocalizations.delete,
+                            onPressed: () {
+                              _handleDeleteProfile(context);
+                            },
+                          ),
+                        ],
+                      ),
+                      targetBuilder: (open) => Focus(
+                        focusNode: _menuFocusNode,
+                        canRequestFocus: true,
+                        child: Material(
+                          color: _isMenuFocused
+                              ? Theme.of(context).focusColor
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                          child: IconButton(
+                            onPressed: open,
+                            icon: const Icon(Icons.more_vert),
                           ),
                         ),
-                ),
-              ),
-            ],
+                      ),
+                    ),
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class ReorderableProfilesSheet extends StatefulWidget {
@@ -592,21 +535,14 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
     profiles = List.from(widget.profiles);
   }
 
-  Widget proxyDecorator(
-    Widget child,
-    int index,
-    Animation<double> animation,
-  ) {
+  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
     final profile = profiles[index];
     return AnimatedBuilder(
       animation: animation,
       builder: (_, child) {
         final animValue = Curves.easeInOut.transform(animation.value);
         final scale = lerpDouble(1, 1.02, animValue)!;
-        return Transform.scale(
-          scale: scale,
-          child: child,
-        );
+        return Transform.scale(scale: scale, child: child);
       },
       child: Container(
         key: Key(profile.id),
@@ -614,10 +550,7 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
         child: CommonCard(
           type: CommonCardType.filled,
           child: ListTile(
-            contentPadding: const EdgeInsets.only(
-              right: 44,
-              left: 16,
-            ),
+            contentPadding: const EdgeInsets.only(right: 44, left: 16),
             title: Text(profile.label ?? profile.id),
           ),
         ),
@@ -627,59 +560,49 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
 
   @override
   Widget build(BuildContext context) => AdaptiveSheetScaffold(
-        type: widget.type,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              globalState.appController.profiles = profiles;
-            },
-            icon: const Icon(
-              Icons.save,
-            ),
-          )
-        ],
-        body: Padding(
-          padding: const EdgeInsets.only(
-            bottom: 32,
-            top: 16,
-          ),
-          child: ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-            ),
-            proxyDecorator: proxyDecorator,
-            onReorderItem: (oldIndex, newIndex) {
-              setState(() {
-                final profile = profiles.removeAt(oldIndex);
-                profiles.insert(newIndex, profile);
-              });
-            },
-            itemBuilder: (_, index) {
-              final profile = profiles[index];
-              return Container(
-                key: Key(profile.id),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: CommonCard(
-                  type: CommonCardType.filled,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.only(
-                      right: 16,
-                      left: 16,
-                    ),
-                    title: Text(profile.label ?? profile.id),
-                    trailing: ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                  ),
+    type: widget.type,
+    actions: [
+      IconButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          globalState.appController.profiles = profiles;
+        },
+        icon: const Icon(Icons.save),
+      ),
+    ],
+    body: Padding(
+      padding: const EdgeInsets.only(bottom: 32, top: 16),
+      child: ReorderableListView.builder(
+        buildDefaultDragHandles: false,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        proxyDecorator: proxyDecorator,
+        onReorderItem: (oldIndex, newIndex) {
+          setState(() {
+            final profile = profiles.removeAt(oldIndex);
+            profiles.insert(newIndex, profile);
+          });
+        },
+        itemBuilder: (_, index) {
+          final profile = profiles[index];
+          return Container(
+            key: Key(profile.id),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: CommonCard(
+              type: CommonCardType.filled,
+              child: ListTile(
+                contentPadding: const EdgeInsets.only(right: 16, left: 16),
+                title: Text(profile.label ?? profile.id),
+                trailing: ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle),
                 ),
-              );
-            },
-            itemCount: profiles.length,
-          ),
-        ),
-        title: appLocalizations.profilesSort,
-      );
+              ),
+            ),
+          );
+        },
+        itemCount: profiles.length,
+      ),
+    ),
+    title: appLocalizations.profilesSort,
+  );
 }

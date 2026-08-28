@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/enum/enum.dart';
@@ -38,23 +41,20 @@ class _StartButtonState extends ConsumerState<StartButton>
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(
-        parent: _pressController,
-        curve: Curves.easeOut,
-      ),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _pressController, curve: Curves.easeOut));
 
-    ref.listenManual(
-      runTimeProvider.select((state) => state != null),
-      (prev, next) {
-        if (next != isStart) {
-          isStart = next;
-          updateController();
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual(runTimeProvider.select((state) => state != null), (
+      prev,
+      next,
+    ) {
+      if (next != isStart) {
+        isStart = next;
+        updateController();
+      }
+    }, fireImmediately: true);
   }
 
   @override
@@ -65,15 +65,14 @@ class _StartButtonState extends ConsumerState<StartButton>
   }
 
   void handleSwitchStart() {
+    if (Platform.isAndroid) {
+      HapticFeedback.mediumImpact();
+    }
     isStart = !isStart;
     updateController();
-    debouncer.call(
-      FunctionTag.updateStatus,
-      () {
-        globalState.appController.updateStatus(isStart);
-      },
-      duration: commonDuration,
-    );
+    debouncer.call(FunctionTag.updateStatus, () {
+      globalState.appController.updateStatus(isStart);
+    }, duration: commonDuration);
   }
 
   void updateController() {
@@ -105,8 +104,9 @@ class _StartButtonState extends ConsumerState<StartButton>
 
     final colorScheme = Theme.of(context).colorScheme;
     final activeColor = Colors.green.shade600.withValues(alpha: 0.9);
-    final inactiveColor =
-        colorScheme.secondaryContainer.withValues(alpha: 0.85);
+    final inactiveColor = colorScheme.secondaryContainer.withValues(
+      alpha: 0.85,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -152,13 +152,16 @@ class _StartButtonState extends ConsumerState<StartButton>
                         switchInCurve: Curves.easeOutCubic,
                         switchOutCurve: Curves.easeInCubic,
                         transitionBuilder: (childWidget, animation) {
-                          final offsetAnimation = Tween<Offset>(
-                            begin: const Offset(0, 0.3),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ));
+                          final offsetAnimation =
+                              Tween<Offset>(
+                                begin: const Offset(0, 0.3),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              );
 
                           return SlideTransition(
                             position: offsetAnimation,
@@ -170,12 +173,9 @@ class _StartButtonState extends ConsumerState<StartButton>
                         },
                         layoutBuilder: (currentChild, previousChildren) =>
                             Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            ...previousChildren,
-                            ?currentChild,
-                          ],
-                        ),
+                              alignment: Alignment.center,
+                              children: [...previousChildren, ?currentChild],
+                            ),
                         child: Consumer(
                           builder: (_, ref, _) {
                             final runTime = ref.watch(runTimeProvider);
@@ -185,9 +185,7 @@ class _StartButtonState extends ConsumerState<StartButton>
                                 text,
                                 key: ValueKey('time_$text'),
                                 style: context.textTheme.titleMedium?.toSoftBold
-                                    .copyWith(
-                                  color: Colors.white,
-                                ),
+                                    .copyWith(color: Colors.white),
                               );
                             } else {
                               return const SizedBox.shrink(

@@ -33,11 +33,12 @@ mixin PageMixin<T extends StatefulWidget> on State<T> {
         ..floatingActionButton = floatingActionButton
         ..onKeywordsUpdate = onKeywordsUpdate
         ..updateSearchState(
-          (_) => onSearch != null ? AppBarSearchState(onSearch: onSearch!) : null,
+          (_) =>
+              onSearch != null ? AppBarSearchState(onSearch: onSearch!) : null,
         );
     });
   }
-  
+
   void onPageHidden() {}
 
   List<Widget> get actions => [];

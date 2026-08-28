@@ -14,9 +14,7 @@ class RealTunEnable extends _$RealTunEnable with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(bool value) {
-    globalState.appState = globalState.appState.copyWith(
-      realTunEnable: value,
-    );
+    globalState.appState = globalState.appState.copyWith(realTunEnable: value);
   }
 }
 
@@ -31,9 +29,7 @@ class Logs extends _$Logs with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(FixedList<Log> value) {
-    globalState.appState = globalState.appState.copyWith(
-      logs: value,
-    );
+    globalState.appState = globalState.appState.copyWith(logs: value);
   }
 }
 
@@ -44,9 +40,7 @@ class Requests extends _$Requests with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(FixedList<Connection> value) {
-    globalState.appState = globalState.appState.copyWith(
-      requests: value,
-    );
+    globalState.appState = globalState.appState.copyWith(requests: value);
   }
 
   void addRequest(Connection value) {
@@ -61,9 +55,7 @@ class Providers extends _$Providers with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(List<ExternalProvider> value) {
-    globalState.appState = globalState.appState.copyWith(
-      providers: value,
-    );
+    globalState.appState = globalState.appState.copyWith(providers: value);
   }
 
   void setProvider(ExternalProvider? provider) {
@@ -81,9 +73,7 @@ class Packages extends _$Packages with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(List<Package> value) {
-    globalState.appState = globalState.appState.copyWith(
-      packages: value,
-    );
+    globalState.appState = globalState.appState.copyWith(packages: value);
   }
 }
 
@@ -94,9 +84,7 @@ class AppBrightness extends _$AppBrightness with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(Brightness? value) {
-    globalState.appState = globalState.appState.copyWith(
-      brightness: value,
-    );
+    globalState.appState = globalState.appState.copyWith(brightness: value);
   }
 
   void setState(Brightness? value) {
@@ -111,9 +99,7 @@ class Traffics extends _$Traffics with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(FixedList<Traffic> value) {
-    globalState.appState = globalState.appState.copyWith(
-      traffics: value,
-    );
+    globalState.appState = globalState.appState.copyWith(traffics: value);
   }
 
   void addTraffic(Traffic value) {
@@ -132,9 +118,7 @@ class TotalTraffic extends _$TotalTraffic with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(Traffic value) {
-    globalState.appState = globalState.appState.copyWith(
-      totalTraffic: value,
-    );
+    globalState.appState = globalState.appState.copyWith(totalTraffic: value);
   }
 }
 
@@ -145,17 +129,13 @@ class LocalIp extends _$LocalIp with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(String? value) {
-    globalState.appState = globalState.appState.copyWith(
-      localIp: value,
-    );
+    globalState.appState = globalState.appState.copyWith(localIp: value);
   }
 
   @override
   set state(String? value) {
     super.state = value;
-    globalState.appState = globalState.appState.copyWith(
-      localIp: state,
-    );
+    globalState.appState = globalState.appState.copyWith(localIp: state);
   }
 }
 
@@ -166,9 +146,7 @@ class RunTime extends _$RunTime with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(int? value) {
-    globalState.appState = globalState.appState.copyWith(
-      runTime: value,
-    );
+    globalState.appState = globalState.appState.copyWith(runTime: value);
   }
 
   bool get isStart => state != null;
@@ -181,9 +159,7 @@ class ViewSize extends _$ViewSize with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(Size value) {
-    globalState.appState = globalState.appState.copyWith(
-      viewSize: value,
-    );
+    globalState.appState = globalState.appState.copyWith(viewSize: value);
   }
 
   ViewMode get viewMode => utils.getViewMode(state.width);
@@ -210,9 +186,7 @@ class Init extends _$Init with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(bool value) {
-    globalState.appState = globalState.appState.copyWith(
-      isInit: value,
-    );
+    globalState.appState = globalState.appState.copyWith(isInit: value);
   }
 }
 
@@ -224,9 +198,7 @@ class CurrentPageLabel extends _$CurrentPageLabel
 
   @override
   void onUpdate(PageLabel value) {
-    globalState.appState = globalState.appState.copyWith(
-      pageLabel: value,
-    );
+    globalState.appState = globalState.appState.copyWith(pageLabel: value);
   }
 }
 
@@ -237,9 +209,7 @@ class SortNum extends _$SortNum with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(int value) {
-    globalState.appState = globalState.appState.copyWith(
-      sortNum: value,
-    );
+    globalState.appState = globalState.appState.copyWith(sortNum: value);
   }
 
   int add() => state++;
@@ -252,9 +222,7 @@ class CheckIpNum extends _$CheckIpNum with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(int value) {
-    globalState.appState = globalState.appState.copyWith(
-      checkIpNum: value,
-    );
+    globalState.appState = globalState.appState.copyWith(checkIpNum: value);
   }
 
   int add() => state++;
@@ -267,9 +235,7 @@ class BackBlock extends _$BackBlock with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(bool value) {
-    globalState.appState = globalState.appState.copyWith(
-      backBlock: value,
-    );
+    globalState.appState = globalState.appState.copyWith(backBlock: value);
   }
 }
 
@@ -280,9 +246,7 @@ class Version extends _$Version with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(int value) {
-    globalState.appState = globalState.appState.copyWith(
-      version: value,
-    );
+    globalState.appState = globalState.appState.copyWith(version: value);
   }
 }
 
@@ -293,9 +257,7 @@ class Groups extends _$Groups with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(List<Group> value) {
-    globalState.appState = globalState.appState.copyWith(
-      groups: value,
-    );
+    globalState.appState = globalState.appState.copyWith(groups: value);
   }
 }
 
@@ -306,9 +268,7 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(DelayMap value) {
-    globalState.appState = globalState.appState.copyWith(
-      delayMap: value,
-    );
+    globalState.appState = globalState.appState.copyWith(delayMap: value);
   }
 
   void setDelay(Delay delay) {
@@ -343,8 +303,6 @@ class ProxiesQuery extends _$ProxiesQuery with AutoDisposeNotifierMixin {
 
   @override
   void onUpdate(String value) {
-    globalState.appState = globalState.appState.copyWith(
-      proxiesQuery: value,
-    );
+    globalState.appState = globalState.appState.copyWith(proxiesQuery: value);
   }
 }

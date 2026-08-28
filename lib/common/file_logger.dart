@@ -70,14 +70,17 @@ class FileLogger {
           .toList();
 
       // Sort by modification time (oldest first)
-      files
-          .sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+      files.sort(
+        (a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()),
+      );
 
       // Remove old files if we exceed max count
       while (files.length > maxLogFiles) {
         try {
           files.removeAt(0).deleteSync();
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('delete old log file failed: $e');
+        }
       }
     } catch (e) {
       // Silently fail rotation
@@ -130,8 +133,10 @@ class FileLogger {
       try {
         await _currentSink!.flush();
         await _currentSink!.close();
-      } catch (_) {}
-      _currentSink = null;
+} catch (e) {
+      debugPrint('close log sink failed: $e');
+    }
+    _currentSink = null;
     }
   }
 
@@ -141,7 +146,7 @@ class FileLogger {
     // Don't try to write to file if bindings aren't initialized yet
     // Messages stay in queue and will be written when bindings are ready
     if (!_checkBindingInitialized()) return;
-    
+
     _isWriting = true;
 
     try {
@@ -149,8 +154,8 @@ class FileLogger {
 
       while (_writeQueue.isNotEmpty) {
         final message = _writeQueue.removeAt(0);
-        final timestamp =
-            DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(DateTime.now());
+        final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss.SSS')
+            .format(DateTime.now());
         _currentSink?.writeln('[$timestamp] $message');
       }
 

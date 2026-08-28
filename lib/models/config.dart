@@ -29,7 +29,7 @@ const defaultBypassDomain = [
   "172.2*",
   "172.30.*",
   "172.31.*",
-  "192.168.*"
+  "192.168.*",
 ];
 
 const defaultAppSettingProps = AppSettingProps();
@@ -38,9 +38,7 @@ const defaultNetworkProps = NetworkProps();
 const defaultProxiesStyle = ProxiesStyle();
 const defaultWindowProps = WindowProps();
 const defaultAccessControl = AccessControl();
-const defaultThemeProps = ThemeProps(
-  primaryColor: defaultPrimaryColor,
-);
+const defaultThemeProps = ThemeProps(primaryColor: defaultPrimaryColor);
 
 const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.announce,
@@ -81,9 +79,11 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
+    @Default(true) bool zashboardInApp,
     @Default(false) bool overrideProviderSettings,
     @Default(false) bool overrideNetworkSettings,
     @Default(RecoveryStrategy.compatible) RecoveryStrategy recoveryStrategy,
+    bool? newDashboard,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
@@ -111,9 +111,9 @@ abstract class AccessControl with _$AccessControl {
 
 extension AccessControlExt on AccessControl {
   List<String> get currentList => switch (mode) {
-        AccessControlMode.acceptSelected => acceptList,
-        AccessControlMode.rejectSelected => rejectList,
-      };
+    AccessControlMode.acceptSelected => acceptList,
+    AccessControlMode.rejectSelected => rejectList,
+  };
 }
 
 @freezed
@@ -176,10 +176,8 @@ abstract class ProxiesStyle with _$ProxiesStyle {
 
 @freezed
 abstract class TextScale with _$TextScale {
-  const factory TextScale({
-    @Default(false) enable,
-    @Default(1.0) scale,
-  }) = _TextScale;
+  const factory TextScale({@Default(false) enable, @Default(1.0) scale}) =
+      _TextScale;
 
   factory TextScale.fromJson(Map<String, Object?> json) =>
       _$TextScaleFromJson(json);
@@ -279,7 +277,19 @@ abstract class Config with _$Config {
           proxiesStyle["iconStyle"] = "icon";
         }
       }
-    } catch (_) {}
+
+      // Migration: strip removed fields from profiles
+      final profiles = json["profiles"];
+      if (profiles is List) {
+        for (final p in profiles) {
+          if (p is Map) {
+            p.remove("updateMethod");
+          }
+        }
+      }
+    } catch (e) {
+      commonPrint.log('profile migration failed: $e');
+    }
     return Config.fromJson(json);
   }
 }

@@ -20,54 +20,76 @@ class Windows {
   static final _uxtheme = DynamicLibrary.open('uxtheme.dll');
   static final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-  static final _getProcAddress = _kernel32.lookupFunction<
-      IntPtr Function(IntPtr hModule, Pointer<Utf8> lpProcName),
-      int Function(int hModule, Pointer<Utf8> lpProcName)>('GetProcAddress');
+  static final _getProcAddress = _kernel32
+      .lookupFunction<
+        IntPtr Function(IntPtr hModule, Pointer<Utf8> lpProcName),
+        int Function(int hModule, Pointer<Utf8> lpProcName)
+      >('GetProcAddress');
 
-  static final _getModuleHandleW = _kernel32.lookupFunction<
-      IntPtr Function(Pointer<Utf16> lpModuleName),
-      int Function(Pointer<Utf16> lpModuleName)>('GetModuleHandleW');
+  static final _getModuleHandleW = _kernel32
+      .lookupFunction<
+        IntPtr Function(Pointer<Utf16> lpModuleName),
+        int Function(Pointer<Utf16> lpModuleName)
+      >('GetModuleHandleW');
 
-  static final _shellExecuteW = _shell32.lookupFunction<
-      Int32 Function(
+  static final _shellExecuteW = _shell32
+      .lookupFunction<
+        Int32 Function(
           Pointer<Utf16> hwnd,
           Pointer<Utf16> lpOperation,
           Pointer<Utf16> lpFile,
           Pointer<Utf16> lpParameters,
           Pointer<Utf16> lpDirectory,
-          Int32 nShowCmd),
-      int Function(
+          Int32 nShowCmd,
+        ),
+        int Function(
           Pointer<Utf16> hwnd,
           Pointer<Utf16> lpOperation,
           Pointer<Utf16> lpFile,
           Pointer<Utf16> lpParameters,
           Pointer<Utf16> lpDirectory,
-          int nShowCmd)>('ShellExecuteW');
+          int nShowCmd,
+        )
+      >('ShellExecuteW');
 
-  static final _setWindowTheme = _uxtheme.lookupFunction<
-      Int32 Function(IntPtr hwnd, Pointer<Utf16> pszSubAppName,
-          Pointer<Utf16> pszSubIdList),
-      int Function(int hwnd, Pointer<Utf16> pszSubAppName,
-          Pointer<Utf16> pszSubIdList)>('SetWindowTheme');
+  static final _setWindowTheme = _uxtheme
+      .lookupFunction<
+        Int32 Function(
+          IntPtr hwnd,
+          Pointer<Utf16> pszSubAppName,
+          Pointer<Utf16> pszSubIdList,
+        ),
+        int Function(
+          int hwnd,
+          Pointer<Utf16> pszSubAppName,
+          Pointer<Utf16> pszSubIdList,
+        )
+      >('SetWindowTheme');
 
   int Function(int)? _lookupIntFn(int moduleHandle, int ordinal) {
-    final ptr =
-        _getProcAddress(moduleHandle, Pointer<Utf8>.fromAddress(ordinal));
+    final ptr = _getProcAddress(
+      moduleHandle,
+      Pointer<Utf8>.fromAddress(ordinal),
+    );
     if (ptr == 0) return null;
     return Pointer<NativeFunction<Int32 Function(Int32)>>.fromAddress(ptr)
         .asFunction<int Function(int)>();
   }
 
   void Function()? _lookupVoidFn(int moduleHandle, int ordinal) {
-    final ptr =
-        _getProcAddress(moduleHandle, Pointer<Utf8>.fromAddress(ordinal));
+    final ptr = _getProcAddress(
+      moduleHandle,
+      Pointer<Utf8>.fromAddress(ordinal),
+    );
     if (ptr == 0) return null;
     return Pointer<NativeFunction<Void Function()>>.fromAddress(ptr)
         .asFunction<void Function()>();
   }
 
   bool isDarkMode() {
-    final key = CURRENT_USER.open(r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize');
+    final key = CURRENT_USER.open(
+      r'Software\Microsoft\Windows\CurrentVersion\Themes\Personalize',
+    );
     final value = key.getInt('AppsUseLightTheme');
     return value == 0; // 0 means "not light mode" i.e. dark
   }
@@ -97,8 +119,9 @@ class Windows {
   void applyDarkModeToMenu(int hwnd) {
     if (hwnd == 0) return;
 
-    final themeName =
-        isDarkMode() ? 'DarkMode_Explorer'.toNativeUtf16() : nullptr;
+    final themeName = isDarkMode()
+        ? 'DarkMode_Explorer'.toNativeUtf16()
+        : nullptr;
     try {
       _setWindowTheme(hwnd, themeName, nullptr);
     } catch (_) {
@@ -173,6 +196,8 @@ class Windows {
 
     await _killProcess(helperPort);
 
+    final coreHash = await coreUpdater.calcCoreSha256();
+
     final command = [
       "/c",
       if (status == WindowsHelperServiceStatus.presence) ...[
@@ -190,6 +215,14 @@ class Windows {
       "sc",
       "start",
       appHelperService,
+      // Sync the helper's core allow-list while elevation is already granted,
+      // so a previously updated core isn't refused by a stale hash.
+      if (coreHash != null) ...[
+        "&&",
+        "echo",
+        '$coreHash>',
+        '"${appPath.allowedCoreHashPath}"',
+      ],
     ].join(" ");
 
     final res = runas("cmd.exe", command);
@@ -248,7 +281,8 @@ class Windows {
   }
 
   Future<bool> registerTask(String appName) async {
-    final taskXml = '''
+    final taskXml =
+        '''
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.3" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <Principals>

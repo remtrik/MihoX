@@ -7,12 +7,14 @@ import 'package:mihox/common/common.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Picker {
-  Future<PlatformFile?> pickerFile({FileType fileType = FileType.any, List<String>? allowedExtensions}) async => 
-      FilePicker.pickFile(
-        type: fileType,
-        allowedExtensions: allowedExtensions,
-        initialDirectory: await appPath.downloadDirPath,
-      );
+  Future<PlatformFile?> pickerFile({
+    FileType fileType = FileType.any,
+    List<String>? allowedExtensions,
+  }) async => FilePicker.pickFile(
+    type: fileType,
+    allowedExtensions: allowedExtensions,
+    initialDirectory: await appPath.downloadDirPath,
+  );
 
   Future<String?> saveFile(String fileName, Uint8List bytes) async {
     final path = await FilePicker.saveFile(
@@ -33,9 +35,10 @@ class Picker {
       return null;
     }
     final controller = MobileScannerController();
-    final capture = await controller.analyzeImage(xFile.path, formats: [
-      BarcodeFormat.qrCode,
-    ]);
+    final capture = await controller.analyzeImage(
+      xFile.path,
+      formats: [BarcodeFormat.qrCode],
+    );
     final result = capture?.barcodes.first.rawValue;
     if (result == null || !result.isUrl) {
       throw appLocalizations.pleaseUploadValidQrcode;

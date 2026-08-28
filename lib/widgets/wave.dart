@@ -26,10 +26,8 @@ class _WaveViewState extends State<WaveView>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    )..repeat();
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..repeat();
   }
 
   @override
@@ -40,23 +38,21 @@ class _WaveViewState extends State<WaveView>
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-      builder: (_, constraints) => RepaintBoundary(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) => CustomPaint(
-                painter: WavePainter(
-                  animationValue: _controller.value,
-                  waveAmplitude: widget.waveAmplitude,
-                  waveFrequency: widget.waveFrequency,
-                  waveColor: widget.waveColor,
-                ),
-                size: Size(
-                  constraints.maxWidth,
-                  constraints.maxHeight,
-                ),
-              ),
-            ),
-          ));
+    builder: (_, constraints) => RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => CustomPaint(
+          painter: WavePainter(
+            animationValue: _controller.value,
+            waveAmplitude: widget.waveAmplitude,
+            waveFrequency: widget.waveFrequency,
+            waveColor: widget.waveColor,
+          ),
+          size: Size(constraints.maxWidth, constraints.maxHeight),
+        ),
+      ),
+    ),
+  );
 }
 
 class WavePainter extends CustomPainter {

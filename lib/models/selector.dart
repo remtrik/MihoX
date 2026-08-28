@@ -13,29 +13,18 @@ part 'generated/selector.freezed.dart';
 
 @freezed
 abstract class VM2<A, B> with _$VM2<A, B> {
-  const factory VM2({
-    required A a,
-    required B b,
-  }) = _VM2;
+  const factory VM2({required A a, required B b}) = _VM2;
 }
 
 @freezed
 abstract class VM3<A, B, C> with _$VM3<A, B, C> {
-  const factory VM3({
-    required A a,
-    required B b,
-    required C c,
-  }) = _VM3;
+  const factory VM3({required A a, required B b, required C c}) = _VM3;
 }
 
 @freezed
 abstract class VM4<A, B, C, D> with _$VM4<A, B, C, D> {
-  const factory VM4({
-    required A a,
-    required B b,
-    required C c,
-    required D d,
-  }) = _VM4;
+  const factory VM4({required A a, required B b, required C c, required D d}) =
+      _VM4;
 }
 
 @freezed
@@ -113,23 +102,19 @@ abstract class ProxiesSelectorState with _$ProxiesSelectorState {
 
 @freezed
 abstract class GroupNamesState with _$GroupNamesState {
-  const factory GroupNamesState({
-    required List<String> groupNames,
-  }) = _GroupNamesState;
+  const factory GroupNamesState({required List<String> groupNames}) =
+      _GroupNamesState;
 }
 
 @freezed
 abstract class GroupsState with _$GroupsState {
-  const factory GroupsState({
-    required List<Group> value,
-  }) = _GroupsState;
+  const factory GroupsState({required List<Group> value}) = _GroupsState;
 }
 
 @freezed
 abstract class NavigationItemsState with _$NavigationItemsState {
-  const factory NavigationItemsState({
-    required List<NavigationItem> value,
-  }) = _NavigationItemsState;
+  const factory NavigationItemsState({required List<NavigationItem> value}) =
+      _NavigationItemsState;
 }
 
 @freezed
@@ -188,32 +173,27 @@ extension PackageListSelectorStateExt on PackageListSelectorState {
 
   List<Package> getSortList(List<String> selectedList) {
     final sort = accessControl.sort;
-    return list
-        .sorted(
-      (a, b) => switch (sort) {
+    return list.sorted((a, b) {
+      final isSelectA = selectedList.contains(a.packageName);
+      final isSelectB = selectedList.contains(b.packageName);
+      if (isSelectA != isSelectB) {
+        return isSelectA ? -1 : 1;
+      }
+      return switch (sort) {
         AccessSortType.none => 0,
         AccessSortType.name => utils.sortByChar(
-            utils.getPinyin(a.label),
-            utils.getPinyin(b.label),
-          ),
+          utils.getPinyin(a.label),
+          utils.getPinyin(b.label),
+        ),
         AccessSortType.time => b.lastUpdateTime.compareTo(a.lastUpdateTime),
-      },
-    )
-        .sorted(
-      (a, b) {
-        final isSelectA = selectedList.contains(a.packageName);
-        final isSelectB = selectedList.contains(b.packageName);
-        if (isSelectA && isSelectB) return 0;
-        if (isSelectA) return -1;
-        if (isSelectB) return 1;
-        return 0;
-      },
-    );
+      };
+    });
   }
 }
 
 @freezed
-abstract class ProxiesListHeaderSelectorState with _$ProxiesListHeaderSelectorState {
+abstract class ProxiesListHeaderSelectorState
+    with _$ProxiesListHeaderSelectorState {
   const factory ProxiesListHeaderSelectorState({
     required double offset,
     required int currentIndex,
@@ -259,10 +239,8 @@ abstract class DashboardState with _$DashboardState {
 
 @freezed
 abstract class ProxyCardState with _$ProxyCardState {
-  const factory ProxyCardState({
-    required String proxyName,
-    String? testUrl,
-  }) = _ProxyCardState;
+  const factory ProxyCardState({required String proxyName, String? testUrl}) =
+      _ProxyCardState;
 }
 
 @freezed

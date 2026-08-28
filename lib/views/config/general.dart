@@ -27,10 +27,10 @@ class OverrideNetworkSettingsItem extends ConsumerWidget {
           delegate: SwitchDelegate(
             value: overrideNetworkSettings,
             onChanged: (value) {
-              ref.read(appSettingProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      overrideNetworkSettings: value,
-                    ),
+              ref
+                  .read(appSettingProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith(overrideNetworkSettings: value),
                   );
             },
           ),
@@ -38,9 +38,7 @@ class OverrideNetworkSettingsItem extends ConsumerWidget {
         if (!overrideNetworkSettings)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
+            color: Theme.of(context).colorScheme.surfaceContainerHighest
                 .withValues(alpha: 0.5),
             child: Row(
               children: [
@@ -73,8 +71,9 @@ class LogLevelItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final uiLogLevel =
-        ref.watch(patchMihomoConfigProvider.select((state) => state.logLevel));
+    final uiLogLevel = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.logLevel),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -102,11 +101,9 @@ class LogLevelItem extends ConsumerWidget {
                   if (value == null) {
                     return;
                   }
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          logLevel: value,
-                        ),
-                      );
+                  ref
+                      .read(patchMihomoConfigProvider.notifier)
+                      .updateState((state) => state.copyWith(logLevel: value));
                 },
                 textBuilder: (logLevel) => logLevel.name,
                 value: display,
@@ -124,8 +121,9 @@ class UaItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final globalUa =
-        ref.watch(patchMihomoConfigProvider.select((state) => state.globalUa));
+    final globalUa = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.globalUa),
+    );
     return ListItem<String?>.options(
       leading: const Icon(Icons.computer_outlined),
       title: const Text("UA"),
@@ -141,11 +139,9 @@ class UaItem extends ConsumerWidget {
         ],
         value: globalUa,
         onChanged: (value) {
-          ref.read(patchMihomoConfigProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  globalUa: value,
-                ),
-              );
+          ref
+              .read(patchMihomoConfigProvider.notifier)
+              .updateState((state) => state.copyWith(globalUa: value));
         },
         textBuilder: (ua) => ua ?? appLocalizations.defaultText,
       ),
@@ -159,7 +155,8 @@ class KeepAliveIntervalItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiKeepAlive = ref.watch(
-        patchMihomoConfigProvider.select((state) => state.keepAliveInterval));
+      patchMihomoConfigProvider.select((state) => state.keepAliveInterval),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -187,8 +184,9 @@ class KeepAliveIntervalItem extends ConsumerWidget {
                   }
                   final intValue = int.tryParse(value);
                   if (intValue == null) {
-                    return appLocalizations
-                        .numberTip(appLocalizations.interval);
+                    return appLocalizations.numberTip(
+                      appLocalizations.interval,
+                    );
                   }
                   return null;
                 },
@@ -197,10 +195,10 @@ class KeepAliveIntervalItem extends ConsumerWidget {
                     return;
                   }
                   final intValue = int.parse(value);
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          keepAliveInterval: intValue,
-                        ),
+                  ref
+                      .read(patchMihomoConfigProvider.notifier)
+                      .updateState(
+                        (state) => state.copyWith(keepAliveInterval: intValue),
                       );
                 },
               ),
@@ -217,8 +215,9 @@ class TestUrlItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final testUrl =
-        ref.watch(appSettingProvider.select((state) => state.testUrl));
+    final testUrl = ref.watch(
+      appSettingProvider.select((state) => state.testUrl),
+    );
     return ListItem.input(
       leading: const Icon(Icons.timeline),
       title: Text(appLocalizations.testUrl),
@@ -240,11 +239,9 @@ class TestUrlItem extends ConsumerWidget {
           if (value == null) {
             return;
           }
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  testUrl: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(testUrl: value));
         },
       ),
     );
@@ -255,9 +252,7 @@ class PortItem extends ConsumerWidget {
   const PortItem({super.key});
 
   Future<void> handleShowPortDialog() async {
-    await globalState.showCommonDialog(
-      child: const _PortDialog(),
-    );
+    await globalState.showCommonDialog(child: const _PortDialog());
     // inputDelegate.onChanged(value);
   }
 
@@ -270,9 +265,7 @@ class PortItem extends ConsumerWidget {
       final secure = ref.watch(
         currentProfileProvider.select(
           (p) =>
-              p?.providerHeaders['mihox-androidsecure']
-                  ?.trim()
-                  .toLowerCase() ==
+              p?.providerHeaders['mihox-androidsecure']?.trim().toLowerCase() ==
               'true',
         ),
       );
@@ -281,8 +274,9 @@ class PortItem extends ConsumerWidget {
       }
     }
 
-    final mixedPort =
-        ref.watch(patchMihomoConfigProvider.select((state) => state.mixedPort));
+    final mixedPort = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.mixedPort),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -308,33 +302,32 @@ class HostsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        leading: const Icon(Icons.view_list_outlined),
-        title: const Text("Hosts"),
-        subtitle: Text(appLocalizations.hostsDesc),
-        delegate: OpenDelegate(
-          blur: false,
-          title: "Hosts",
-          widget: Consumer(
-            builder: (_, ref, _) {
-              final hosts = ref.watch(
-                  patchMihomoConfigProvider.select((state) => state.hosts));
-              return MapInputPage(
-                title: "Hosts",
-                map: hosts,
-                titleBuilder: (item) => Text(item.key),
-                subtitleBuilder: (item) => Text(item.value),
-                onChange: (value) {
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          hosts: value,
-                        ),
-                      );
-                },
-              );
+    leading: const Icon(Icons.view_list_outlined),
+    title: const Text("Hosts"),
+    subtitle: Text(appLocalizations.hostsDesc),
+    delegate: OpenDelegate(
+      blur: false,
+      title: "Hosts",
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final hosts = ref.watch(
+            patchMihomoConfigProvider.select((state) => state.hosts),
+          );
+          return MapInputPage(
+            title: "Hosts",
+            map: hosts,
+            titleBuilder: (item) => Text(item.key),
+            subtitleBuilder: (item) => Text(item.value),
+            onChange: (value) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState((state) => state.copyWith(hosts: value));
             },
-          ),
-        ),
-      );
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class SendHeadersToggle extends ConsumerStatefulWidget {
@@ -387,8 +380,8 @@ class _SendHeadersToggleState extends ConsumerState<SendHeadersToggle> {
           title: Text(appLocalizations.settingsSendDeviceDataTitle),
           subtitle: Text(appLocalizations.settingsSendDeviceDataSubtitle),
           delegate: SwitchDelegate(
-          value: _sendHeaders,
-          onChanged: _updatePreference,
+            value: _sendHeaders,
+            onChanged: _updatePreference,
           ),
         ),
       ),
@@ -401,8 +394,9 @@ class Ipv6Item extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ipv6 =
-        ref.watch(patchMihomoConfigProvider.select((state) => state.ipv6));
+    final ipv6 = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.ipv6),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -419,11 +413,9 @@ class Ipv6Item extends ConsumerWidget {
           delegate: SwitchDelegate(
             value: ipv6,
             onChanged: (value) async {
-              ref.read(patchMihomoConfigProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      ipv6: value,
-                    ),
-                  );
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState((state) => state.copyWith(ipv6: value));
               globalState.appController.updateMihomoConfigDebounce();
             },
           ),
@@ -438,8 +430,9 @@ class AllowLanItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allowLan =
-        ref.watch(patchMihomoConfigProvider.select((state) => state.allowLan));
+    final allowLan = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.allowLan),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -456,11 +449,9 @@ class AllowLanItem extends ConsumerWidget {
           delegate: SwitchDelegate(
             value: allowLan,
             onChanged: (value) async {
-              ref.read(patchMihomoConfigProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      allowLan: value,
-                    ),
-                  );
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState((state) => state.copyWith(allowLan: value));
               globalState.appController.updateMihomoConfigDebounce();
             },
           ),
@@ -475,8 +466,9 @@ class UnifiedDelayItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final uiUnifiedDelay = ref
-        .watch(patchMihomoConfigProvider.select((state) => state.unifiedDelay));
+    final uiUnifiedDelay = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.unifiedDelay),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -496,10 +488,10 @@ class UnifiedDelayItem extends ConsumerWidget {
               delegate: SwitchDelegate(
                 value: display,
                 onChanged: (value) async {
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          unifiedDelay: value,
-                        ),
+                  ref
+                      .read(patchMihomoConfigProvider.notifier)
+                      .updateState(
+                        (state) => state.copyWith(unifiedDelay: value),
                       );
                 },
               ),
@@ -548,10 +540,10 @@ class FindProcessItem extends ConsumerWidget {
             options: FindProcessMode.values,
             onChanged: (value) async {
               if (value == null) return;
-              ref.read(patchMihomoConfigProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      findProcessMode: value,
-                    ),
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith(findProcessMode: value),
                   );
               globalState.appController.updateMihomoConfigDebounce();
             },
@@ -570,7 +562,8 @@ class TcpConcurrentItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiTcpConcurrent = ref.watch(
-        patchMihomoConfigProvider.select((state) => state.tcpConcurrent));
+      patchMihomoConfigProvider.select((state) => state.tcpConcurrent),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -590,10 +583,10 @@ class TcpConcurrentItem extends ConsumerWidget {
               delegate: SwitchDelegate(
                 value: display,
                 onChanged: (value) async {
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          tcpConcurrent: value,
-                        ),
+                  ref
+                      .read(patchMihomoConfigProvider.notifier)
+                      .updateState(
+                        (state) => state.copyWith(tcpConcurrent: value),
                       );
                 },
               ),
@@ -610,8 +603,11 @@ class GeodataLoaderItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMemconservative = ref.watch(patchMihomoConfigProvider.select(
-        (state) => state.geodataLoader == GeodataLoader.memconservative));
+    final isMemconservative = ref.watch(
+      patchMihomoConfigProvider.select(
+        (state) => state.geodataLoader == GeodataLoader.memconservative,
+      ),
+    );
     return ListItem.switchItem(
       leading: const Icon(Icons.memory),
       title: Text(appLocalizations.geodataLoader),
@@ -619,7 +615,9 @@ class GeodataLoaderItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: isMemconservative,
         onChanged: (value) async {
-          ref.read(patchMihomoConfigProvider.notifier).updateState(
+          ref
+              .read(patchMihomoConfigProvider.notifier)
+              .updateState(
                 (state) => state.copyWith(
                   geodataLoader: value
                       ? GeodataLoader.memconservative
@@ -637,8 +635,11 @@ class ExternalControllerItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasExternalController = ref.watch(patchMihomoConfigProvider.select(
-        (state) => state.externalController == ExternalControllerStatus.open));
+    final hasExternalController = ref.watch(
+      patchMihomoConfigProvider.select(
+        (state) => state.externalController == ExternalControllerStatus.open,
+      ),
+    );
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
@@ -647,8 +648,9 @@ class ExternalControllerItem extends ConsumerWidget {
       valueListenable: globalState.effectiveExternalController,
       builder: (_, effective, _) {
         final isEffective = effective.isNotEmpty;
-        final displayAddress =
-            isEffective ? effective : ExternalControllerStatus.open.value;
+        final displayAddress = isEffective
+            ? effective
+            : ExternalControllerStatus.open.value;
         final subtitle =
             '${appLocalizations.externalControllerDesc} ($displayAddress)';
         return AbsorbPointer(
@@ -666,7 +668,9 @@ class ExternalControllerItem extends ConsumerWidget {
                 // the subscription's forced value is visible.
                 value: isEnabled ? hasExternalController : isEffective,
                 onChanged: (value) async {
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
+                  ref
+                      .read(patchMihomoConfigProvider.notifier)
+                      .updateState(
                         (state) => state.copyWith(
                           externalController: value
                               ? ExternalControllerStatus.open
@@ -699,13 +703,7 @@ final generalItems = <Widget>[
   const TcpConcurrentItem(),
   const GeodataLoaderItem(),
   const ExternalControllerItem(),
-]
-    .separated(
-      const Divider(
-        height: 0,
-      ),
-    )
-    .toList();
+].separated(const Divider(height: 0)).toList();
 
 class _PortDialog extends ConsumerStatefulWidget {
   const _PortDialog();
@@ -727,40 +725,44 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
   @override
   void initState() {
     super.initState();
-    final vm5 = ref.read(patchMihomoConfigProvider.select((state) => VM5(
+    final vm5 = ref.read(
+      patchMihomoConfigProvider.select(
+        (state) => VM5(
           a: state.mixedPort,
           b: state.port,
           c: state.socksPort,
           d: state.redirPort,
           e: state.tproxyPort,
-        )));
-    _mixedPortController = TextEditingController(
-      text: vm5.a.toString(),
+        ),
+      ),
     );
-    _portController = TextEditingController(
-      text: vm5.b.toString(),
-    );
-    _socksPortController = TextEditingController(
-      text: vm5.c.toString(),
-    );
-    _redirPortController = TextEditingController(
-      text: vm5.d.toString(),
-    );
-    _tProxyPortController = TextEditingController(
-      text: vm5.e.toString(),
-    );
+    _mixedPortController = TextEditingController(text: vm5.a.toString());
+    _portController = TextEditingController(text: vm5.b.toString());
+    _socksPortController = TextEditingController(text: vm5.c.toString());
+    _redirPortController = TextEditingController(text: vm5.d.toString());
+    _tProxyPortController = TextEditingController(text: vm5.e.toString());
+  }
+
+  @override
+  void dispose() {
+    _mixedPortController.dispose();
+    _portController.dispose();
+    _socksPortController.dispose();
+    _redirPortController.dispose();
+    _tProxyPortController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleReset() async {
     final res = await globalState.showMessage(
-      message: TextSpan(
-        text: appLocalizations.resetTip,
-      ),
+      message: TextSpan(text: appLocalizations.resetTip),
     );
     if (res != true) {
       return;
     }
-    ref.read(patchMihomoConfigProvider.notifier).updateState(
+    ref
+        .read(patchMihomoConfigProvider.notifier)
+        .updateState(
           (state) => state.copyWith(
             mixedPort: 7890,
             port: 0,
@@ -776,7 +778,9 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
 
   void _handleUpdate() {
     if (_formKey.currentState?.validate() == false) return;
-    ref.read(patchMihomoConfigProvider.notifier).updateState(
+    ref
+        .read(patchMihomoConfigProvider.notifier)
+        .updateState(
           (state) => state.copyWith(
             mixedPort: int.parse(_mixedPortController.text),
             port: int.parse(_portController.text),
@@ -794,6 +798,17 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     });
   }
 
+  List<String> _getOtherPorts(TextEditingController exclude) => [
+        _mixedPortController.text,
+        _portController.text,
+        _socksPortController.text,
+        _redirPortController.text,
+        _tProxyPortController.text,
+      ]
+          .where((c) => c != exclude.text)
+          .map((c) => c.trim())
+          .toList();
+
   @override
   Widget build(BuildContext context) => CommonDialog(
         title: appLocalizations.port,
@@ -803,9 +818,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
             children: [
               IconButton.filledTonal(
                 onPressed: _handleMore,
-                icon: CommonExpandIcon(
-                  expand: _isMore,
-                ),
+                icon: CommonExpandIcon(expand: _isMore),
               ),
               Row(
                 children: [
@@ -813,17 +826,15 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
                     onPressed: _handleReset,
                     child: Text(appLocalizations.reset),
                   ),
-                  const SizedBox(
-                    width: 4,
-                  ),
+                  const SizedBox(width: 4),
                   TextButton(
                     onPressed: _handleUpdate,
                     child: Text(appLocalizations.submit),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
-          )
+          ),
         ],
         child: Form(
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -837,216 +848,38 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
               child: Column(
                 spacing: 24,
                 children: [
-                  TextFormField(
-                    keyboardType: TextInputType.url,
-                    maxLines: 1,
-                    minLines: 1,
+                  PortField(
                     controller: _mixedPortController,
-                    onFieldSubmitted: (_) {
-                      _handleUpdate();
-                    },
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: appLocalizations.mixedPort,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return appLocalizations
-                            .emptyTip(appLocalizations.mixedPort);
-                      }
-                      final port = int.tryParse(value);
-                      if (port == null) {
-                        return appLocalizations
-                            .numberTip(appLocalizations.mixedPort);
-                      }
-                      if (port == 0) {
-                        return null;
-                      }
-                      if (port < 1024 || port > 49151) {
-                        return appLocalizations
-                            .portTip(appLocalizations.mixedPort);
-                      }
-                      final ports = [
-                        _portController.text,
-                        _socksPortController.text,
-                        _tProxyPortController.text,
-                        _redirPortController.text
-                      ].map((item) => item.trim());
-                      if (ports.contains(value.trim())) {
-                        return appLocalizations.portConflictTip;
-                      }
-                      return null;
-                    },
+                    label: appLocalizations.mixedPort,
+                    getOtherPorts: () => _getOtherPorts(_mixedPortController),
+                    onSubmitted: (_) => _handleUpdate(),
                   ),
                   if (_isMore) ...[
-                    TextFormField(
-                      keyboardType: TextInputType.url,
-                      maxLines: 1,
-                      minLines: 1,
+                    PortField(
                       controller: _portController,
-                      onFieldSubmitted: (_) {
-                        _handleUpdate();
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: appLocalizations.port,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.port);
-                        }
-                        final port = int.tryParse(value);
-                        if (port == null) {
-                          return appLocalizations.numberTip(
-                            appLocalizations.port,
-                          );
-                        }
-                        if (port == 0) {
-                          return null;
-                        }
-                        if (port < 1024 || port > 49151) {
-                          return appLocalizations
-                              .portTip(appLocalizations.port);
-                        }
-                        final ports = [
-                          _mixedPortController.text,
-                          _socksPortController.text,
-                          _tProxyPortController.text,
-                          _redirPortController.text
-                        ].map((item) => item.trim());
-                        if (ports.contains(value.trim())) {
-                          return appLocalizations.portConflictTip;
-                        }
-                        return null;
-                      },
+                      label: appLocalizations.port,
+                      getOtherPorts: () => _getOtherPorts(_portController),
+                      onSubmitted: (_) => _handleUpdate(),
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.url,
-                      maxLines: 1,
-                      minLines: 1,
+                    PortField(
                       controller: _socksPortController,
-                      onFieldSubmitted: (_) {
-                        _handleUpdate();
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: appLocalizations.socksPort,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.socksPort);
-                        }
-                        final port = int.tryParse(value);
-                        if (port == null) {
-                          return appLocalizations
-                              .numberTip(appLocalizations.socksPort);
-                        }
-                        if (port == 0) {
-                          return null;
-                        }
-                        if (port < 1024 || port > 49151) {
-                          return appLocalizations
-                              .portTip(appLocalizations.socksPort);
-                        }
-                        final ports = [
-                          _portController.text,
-                          _mixedPortController.text,
-                          _tProxyPortController.text,
-                          _redirPortController.text
-                        ].map((item) => item.trim());
-                        if (ports.contains(value.trim())) {
-                          return appLocalizations.portConflictTip;
-                        }
-                        return null;
-                      },
+                      label: appLocalizations.socksPort,
+                      getOtherPorts: () => _getOtherPorts(_socksPortController),
+                      onSubmitted: (_) => _handleUpdate(),
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.url,
-                      maxLines: 1,
-                      minLines: 1,
+                    PortField(
                       controller: _redirPortController,
-                      onFieldSubmitted: (_) {
-                        _handleUpdate();
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: appLocalizations.redirPort,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.redirPort);
-                        }
-                        final port = int.tryParse(value);
-                        if (port == null) {
-                          return appLocalizations
-                              .numberTip(appLocalizations.redirPort);
-                        }
-                        if (port == 0) {
-                          return null;
-                        }
-                        if (port < 1024 || port > 49151) {
-                          return appLocalizations
-                              .portTip(appLocalizations.redirPort);
-                        }
-                        final ports = [
-                          _portController.text,
-                          _socksPortController.text,
-                          _tProxyPortController.text,
-                          _mixedPortController.text
-                        ].map((item) => item.trim());
-                        if (ports.contains(value.trim())) {
-                          return appLocalizations.portConflictTip;
-                        }
-                        return null;
-                      },
+                      label: appLocalizations.redirPort,
+                      getOtherPorts: () => _getOtherPorts(_redirPortController),
+                      onSubmitted: (_) => _handleUpdate(),
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.url,
-                      maxLines: 1,
-                      minLines: 1,
+                    PortField(
                       controller: _tProxyPortController,
-                      onFieldSubmitted: (_) {
-                        _handleUpdate();
-                      },
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: appLocalizations.tproxyPort,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.tproxyPort);
-                        }
-                        final port = int.tryParse(value);
-                        if (port == null) {
-                          return appLocalizations
-                              .numberTip(appLocalizations.tproxyPort);
-                        }
-                        if (port == 0) {
-                          return null;
-                        }
-                        if (port < 1024 || port > 49151) {
-                          return appLocalizations.portTip(
-                            appLocalizations.tproxyPort,
-                          );
-                        }
-                        final ports = [
-                          _portController.text,
-                          _socksPortController.text,
-                          _mixedPortController.text,
-                          _redirPortController.text
-                        ].map((item) => item.trim());
-                        if (ports.contains(value.trim())) {
-                          return appLocalizations.portConflictTip;
-                        }
-
-                        return null;
-                      },
+                      label: appLocalizations.tproxyPort,
+                      getOtherPorts: () => _getOtherPorts(_tProxyPortController),
+                      onSubmitted: (_) => _handleUpdate(),
                     ),
-                  ]
+                  ],
                 ],
               ),
             ),

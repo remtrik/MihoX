@@ -42,8 +42,9 @@ class _MemoryMonitor {
     _ticking = true;
     try {
       final rss = ProcessInfo.currentRss;
-      final value =
-          mihomoLib != null ? rss : await mihomoCore.getMemory() + rss;
+      final value = mihomoLib != null
+          ? rss
+          : await mihomoCore.getMemory() + rss;
       if (_refCount > 0) {
         _memoryInfoStateNotifier.value = TrafficValue(value: value);
       }
@@ -78,49 +79,44 @@ class _MemoryInfoState extends State<MemoryInfo> {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: getWidgetHeight(1),
-        child: CommonCard(
-          info: Info(
-            iconData: Icons.memory,
-            label: appLocalizations.memoryInfo,
-          ),
-          onPressed: mihomoCore.requestGc,
-          child: Padding(
-            padding: baseInfoEdgeInsets.copyWith(
-              top: 0,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: globalState.measure.bodyMediumHeight + 2,
-                  child: ValueListenableBuilder(
-                    valueListenable: _memoryInfoStateNotifier,
-                    builder: (_, trafficValue, _) => Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          trafficValue.showValue,
-                          style: context.textTheme.bodyMedium?.toLight
-                              .adjustSize(1),
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          trafficValue.showUnit,
-                          style: context.textTheme.bodyMedium?.toLight
-                              .adjustSize(1),
-                        )
-                      ],
+    height: getWidgetHeight(1),
+    child: CommonCard(
+      info: Info(iconData: Icons.memory, label: appLocalizations.memoryInfo),
+      onPressed: mihomoCore.requestGc,
+      child: Padding(
+        padding: baseInfoEdgeInsets.copyWith(top: 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: globalState.measure.bodyMediumHeight + 2,
+              child: ValueListenableBuilder(
+                valueListenable: _memoryInfoStateNotifier,
+                builder: (_, trafficValue, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      trafficValue.showValue,
+                      style: context.textTheme.bodyMedium?.toLight.adjustSize(
+                        1,
+                      ),
                     ),
-                  ),
-                )
-              ],
+                    const SizedBox(width: 8),
+                    Text(
+                      trafficValue.showUnit,
+                      style: context.textTheme.bodyMedium?.toLight.adjustSize(
+                        1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

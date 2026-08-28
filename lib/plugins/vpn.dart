@@ -1,175 +1,100 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:mihox/common/common.dart';
 import 'package:mihox/mihomo/mihomo.dart';
-import 'package:mihox/models/models.dart';
-import 'package:mihox/state.dart';
 
 abstract mixin class VpnListener {
   void onDnsChanged(String dns) {}
 }
 
 class Vpn {
-  factory Vpn() {
-    _instance ??= Vpn._internal();
-    return _instance!;
-  }
-
-  Vpn._internal() {
-    methodChannel = const MethodChannel("vpn");
-    methodChannel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case "gc":
-          mihomoCore.requestGc();
-        case "getStartForegroundParams":
-          if (handleGetStartForegroundParams != null) {
-            return await handleGetStartForegroundParams!();
-          }
-          // Default handler for UI mode - get current proxy name from core
-          return _getDefaultForegroundParams();
-        case "status":
-          return mihomoLibHandler?.getRunTime() != null;
-        default:
-          for (final listener in _listeners) {
-            switch (call.method) {
-              case "dnsChanged":
-                final dns = call.arguments as String;
-                listener.onDnsChanged(dns);
-            }
-          }
-      }
-    });
-  }
+  factory Vpn() => _instance ??= Vpn._();
+  Vpn._();
   static Vpn? _instance;
-  late MethodChannel methodChannel;
-  FutureOr<String> Function()? handleGetStartForegroundParams;
 
-  /// Cached server name for foreground notification (updated via updateServerName)
-  String _cachedServerName = "";
+  String _cachedProfileName = 'MihoX';
+  String _cachedServiceName = '';
 
-  /// Cached profile info for foreground notification
-  String _cachedProfileName = "MihoX";
-  String _cachedServiceName = "";
+  String get cachedProfileName => _cachedProfileName;
+  String get cachedServiceName => _cachedServiceName;
 
-  /// Update cached server name (called from UI when proxy changes)
-  set serverName(String value) {
-    _cachedServerName = value;
-  }
-
-  /// Update cached profile info (called when profile changes or on init)
   void updateProfileInfo({
     required String profileName,
     required String serviceName,
   }) {
     _cachedProfileName = profileName;
     _cachedServiceName = serviceName;
+    _pushNotification();
   }
 
-  /// Get cached server name
-  String get cachedServerName => _cachedServerName;
-
-  /// Get cached profile name
-  String get cachedProfileName => _cachedProfileName;
-
-  /// Get cached service name
-  String get cachedServiceName => _cachedServiceName;
-
-  /// Decode base64 string if needed
-  String? _decodeBase64IfNeeded(String? value) {
-    if (value == null || value.isEmpty) return value;
+  Future<void> _pushNotification() async {
     try {
-      final normalized = base64.normalize(value);
-      return utf8.decode(base64.decode(normalized));
+      final title = _cachedServiceName.isNotEmpty
+          ? _cachedServiceName
+          : _cachedProfileName;
+      commonPrint.log(
+        '[Vpn] pushNotification: title="$title" mihomoLib=${mihomoLib != null}',
+      );
+      // Leave the stop-button label to its localized default ("Остановить" / "Stop");
+      // the service name already lives in the notification title above.
+      await mihomoLib?.updateNotificationParams(title: title);
     } catch (e) {
-      return value;
+      commonPrint.log('[Vpn] pushNotification FAILED: $e');
     }
   }
 
-  /// Default foreground params when running in UI mode
-  String _getDefaultForegroundParams() {
-    try {
-      final traffic = mihomoCore.getTraffic();
-      final profile = globalState.config.currentProfile;
-      final profileName = profile?.label ?? profile?.id ?? "MihoX";
-
-      // Resolve current proxy name using appController (always up-to-date via Riverpod)
-      String? proxyName;
-      try {
-        final serverInfoGroupName = _decodeBase64IfNeeded(
-          profile?.providerHeaders['mihox-serverinfo'],
-        );
-        if (serverInfoGroupName != null && serverInfoGroupName.isNotEmpty) {
-          proxyName = globalState.appController
-              .getSelectedProxyName(serverInfoGroupName);
-        }
-      } catch (_) {}
-
-      // Build title
-      final serverDisplay = (proxyName ?? "").trim();
-      final title = serverDisplay.isNotEmpty
-          ? "$profileName / $serverDisplay"
-          : profileName;
-
-      // Service name for subtext from header mihox-servicename
-      var serviceName = "";
-      try {
-        final svc = profile?.providerHeaders['mihox-servicename'];
-        if (svc != null && svc.isNotEmpty) {
-          serviceName = _decodeBase64IfNeeded(svc)?.trim() ?? "";
-        }
-      } catch (_) {}
-
-      return json.encode(
-          {"title": title, "server": serviceName, "content": "$traffic"});
-    } catch (e) {
-      return json.encode({"title": "MihoX", "server": "", "content": ""});
-    }
-  }
-
-  final ObserverList<VpnListener> _listeners = ObserverList<VpnListener>();
-
-  /// Accepts the raw JSON string produced by the Go core so that fields the
-  /// Dart [AndroidVpnOptions] model doesn't know about (e.g. includePackage /
-  /// excludePackage injected from profile `tun` config) still make it through
-  /// to the Kotlin VpnService unchanged.
-  Future<bool?> start(String optionsJson) async =>
-      methodChannel.invokeMethod<bool>("start", {
-        'data': optionsJson,
-      });
-
-  Future<bool?> stop() async => methodChannel.invokeMethod<bool>("stop");
-
-  /// Show subscription expiration notification
+  /// Restore-pending: Kotlin side needs a matching method on the service
+  /// channel. Kept as a best-effort call so Dart call-sites don't error.
   Future<bool?> showSubscriptionNotification({
     required String title,
     required String message,
     required String actionLabel,
     required String actionUrl,
-  }) async =>
-      methodChannel.invokeMethod<bool>("showSubscriptionNotification", {
-        'title': title,
-        'message': message,
-        'actionLabel': actionLabel,
-        'actionUrl': actionUrl,
-      });
-
-  void addListener(VpnListener listener) {
-    _listeners.add(listener);
+  }) async {
+    try {
+      return await const MethodChannelShim().invoke<bool>(
+        'showSubscriptionNotification',
+        <String, String>{
+          'title': title,
+          'message': message,
+          'actionLabel': actionLabel,
+          'actionUrl': actionUrl,
+        },
+      );
+    } catch (e) {
+      commonPrint.log('showSubscriptionNotification (not wired): $e');
+      return false;
+    }
   }
 
-  void removeListener(VpnListener listener) {
-    _listeners.remove(listener);
+  Future<bool> start(String optionsJson) async {
+    final rt = await mihomoLib?.startVpn() ?? 0;
+    return rt != 0;
+  }
+
+  Future<bool> stop() async {
+    await mihomoLib?.stopVpn();
+    return true;
+  }
+
+  final ObserverList<VpnListener> _listeners = ObserverList<VpnListener>();
+  FutureOr<String> Function()? handleGetStartForegroundParams;
+
+  void addListener(VpnListener listener) => _listeners.add(listener);
+  void removeListener(VpnListener listener) => _listeners.remove(listener);
+}
+
+/// Thin wrapper to forward untyped invocations on the service channel — avoids
+/// leaking a direct MethodChannel import from subscription_notification_service.
+class MethodChannelShim {
+  const MethodChannelShim();
+  Future<T?> invoke<T>(String method, dynamic arguments) async {
+    const channel = MethodChannel('org.remtrik.mihox/service');
+    return channel.invokeMethod<T>(method, arguments);
   }
 }
 
-Vpn? get vpn {
-  // On Android, we always need Vpn instance to handle method channel calls
-  // from the VPN service (e.g., getStartForegroundParams)
-  if (defaultTargetPlatform == TargetPlatform.android) {
-    return Vpn();
-  }
-  // On other platforms, only create in service mode
-  return globalState.isService ? Vpn() : null;
-}
+Vpn? get vpn => Platform.isAndroid ? Vpn() : null;

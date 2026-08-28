@@ -76,10 +76,7 @@ class MetainfoWidget extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.add_circle_outline,
-                  size: 48,
-                ),
+                const Icon(Icons.add_circle_outline, size: 48),
                 const SizedBox(height: 8),
                 Text(appLocalizations.addProfile),
               ],
@@ -223,8 +220,9 @@ class MetainfoWidget extends ConsumerWidget {
                           iconSize: 34,
                           color: theme.colorScheme.primary,
                           onPressed: () {
-                            globalState.appController
-                                .updateProfile(currentProfile);
+                            globalState.appController.updateProfile(
+                              currentProfile,
+                            );
                           },
                         ),
                       ],
@@ -246,10 +244,7 @@ class MetainfoWidget extends ConsumerWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      remainingText,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(remainingText, style: theme.textTheme.bodySmall),
                     FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
@@ -260,13 +255,10 @@ class MetainfoWidget extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      timeLeftUnit,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text(timeLeftUnit, style: theme.textTheme.bodyMedium),
                   ],
                 ),
-              ]
+              ],
             ],
           ),
         ),

@@ -5,29 +5,20 @@ import 'package:mihox/enum/enum.dart';
 import '../state.dart';
 
 class TooltipText extends StatelessWidget {
-  const TooltipText({
-    super.key,
-    required this.text,
-  });
+  const TooltipText({super.key, required this.text});
   final Text text;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, container) {
-          final maxWidth = container.maxWidth;
-          final size = globalState.measure.computeTextSize(
-            text,
-          );
-          if (maxWidth < size.width) {
-            return Tooltip(
-              preferBelow: false,
-              message: text.data,
-              child: text,
-            );
-          }
-          return text;
-        },
-      );
+    builder: (context, container) {
+      final maxWidth = container.maxWidth;
+      final size = globalState.measure.computeTextSize(text);
+      if (maxWidth < size.width) {
+        return Tooltip(preferBelow: false, message: text.data, child: text);
+      }
+      return text;
+    },
+  );
 }
 
 class EmojiText extends StatelessWidget {
@@ -52,26 +43,21 @@ class EmojiText extends StatelessWidget {
       if (match.start > lastMatchEnd) {
         spans.add(
           TextSpan(
-              text: text.substring(lastMatchEnd, match.start), style: style),
+            text: text.substring(lastMatchEnd, match.start),
+            style: style,
+          ),
         );
       }
       spans.add(
         TextSpan(
           text: match.group(0),
-          style: style?.copyWith(
-            fontFamily: FontFamily.twEmoji.value,
-          ),
+          style: style?.copyWith(fontFamily: FontFamily.twEmoji.value),
         ),
       );
       lastMatchEnd = match.end;
     }
     if (lastMatchEnd < text.length) {
-      spans.add(
-        TextSpan(
-          text: text.substring(lastMatchEnd),
-          style: style,
-        ),
-      );
+      spans.add(TextSpan(text: text.substring(lastMatchEnd), style: style));
     }
 
     return spans;
@@ -79,11 +65,9 @@ class EmojiText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RichText(
-        textScaler: MediaQuery.of(context).textScaler,
-        maxLines: maxLines,
-        overflow: overflow ?? TextOverflow.clip,
-        text: TextSpan(
-          children: _buildTextSpans(text),
-        ),
-      );
+    textScaler: MediaQuery.of(context).textScaler,
+    maxLines: maxLines,
+    overflow: overflow ?? TextOverflow.clip,
+    text: TextSpan(children: _buildTextSpans(text)),
+  );
 }

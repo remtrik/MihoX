@@ -13,15 +13,37 @@ class AppPath {
 
   AppPath._internal() {
     appDirPath = join(dirname(Platform.resolvedExecutable));
-    getApplicationSupportDirectory().then((value) {
-      dataDir.complete(value);
-    });
-    getTemporaryDirectory().then((value) {
-      tempDir.complete(value);
-    });
-    getDownloadsDirectory().then((value) {
-      downloadDir.complete(value);
-    });
+    getApplicationSupportDirectory()
+        .then((value) {
+          dataDir.complete(value);
+        })
+        .catchError((e) {
+          dataDir.completeError(e);
+        });
+    getTemporaryDirectory()
+        .then((value) {
+          tempDir.complete(value);
+        })
+        .catchError((e) {
+          tempDir.completeError(e);
+        });
+    if (!Platform.isAndroid) {
+      getDownloadsDirectory()
+          .then((value) {
+            downloadDir.complete(value);
+          })
+          .catchError((e) {
+            downloadDir.completeError(e);
+          });
+    } else {
+      getApplicationSupportDirectory()
+          .then((value) {
+            downloadDir.complete(Directory('${value.parent.path}/Download'));
+          })
+          .catchError((e) {
+            downloadDir.completeError(e);
+          });
+    }
   }
   static AppPath? _instance;
   Completer<Directory> dataDir = Completer();
@@ -35,6 +57,13 @@ class AppPath {
 
   String get corePath =>
       join(executableDirPath, "MihoXCore$executableExtension");
+
+  String get corePendingPath => '$corePath.pending';
+
+  /// Allow-list consumed by the Windows helper service; lives next to the
+  /// helper exe so per-machine installs keep it admin-writable only.
+  String get allowedCoreHashPath =>
+      join(executableDirPath, "allowed_core.sha256");
 
   String get helperPath =>
       join(executableDirPath, "$appHelperService$executableExtension");
@@ -68,11 +97,7 @@ class AppPath {
 
   Future<String> getProvidersDirPath(String id) async {
     final directory = await profilesPath;
-    return join(
-      directory,
-      "providers",
-      id,
-    );
+    return join(directory, "providers", id);
   }
 
   Future<String> getProvidersFilePath(
@@ -81,13 +106,7 @@ class AppPath {
     String url,
   ) async {
     final directory = await profilesPath;
-    return join(
-      directory,
-      "providers",
-      id,
-      type,
-      url.toMd5(),
-    );
+    return join(directory, "providers", id, type, url.toMd5());
   }
 
   Future<String> get tempPath async => (await tempDir.future).path;

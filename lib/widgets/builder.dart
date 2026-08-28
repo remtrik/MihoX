@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ScrollOverBuilder extends StatefulWidget {
-  const ScrollOverBuilder({
-    super.key,
-    required this.builder,
-  });
+  const ScrollOverBuilder({super.key, required this.builder});
   final Widget Function({required bool isOver}) builder;
 
   @override

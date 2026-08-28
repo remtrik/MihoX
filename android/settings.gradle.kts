@@ -20,10 +20,14 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.11.1" apply false
-    id("org.jetbrains.kotlin.android") version "2.3.0" apply false
+    id("com.android.application") version "9.3.2" apply false
+    id("com.android.library") version "9.3.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.10" apply false
+    id("org.jetbrains.kotlin.plugin.parcelize") version "2.4.10" apply false
 }
 
 
 include(":app")
 include(":core")
+include(":common")
+include(":service")

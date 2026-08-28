@@ -54,44 +54,34 @@ class _EditProfileViewState extends State<EditProfileView> {
     if (!_formKey.currentState!.validate()) return;
     final appController = globalState.appController;
     var profile = this.profile.copyWith(
-          url: urlController.text,
-          label: labelController.text,
-          autoUpdate: autoUpdate,
-          autoUpdateDuration: Duration(
-            minutes: int.parse(
-              autoUpdateDurationController.text,
-            ),
-          ),
-        );
+      url: urlController.text,
+      label: labelController.text,
+      autoUpdate: autoUpdate,
+      autoUpdateDuration: Duration(
+        minutes: int.parse(autoUpdateDurationController.text),
+      ),
+    );
     final hasUpdate = widget.profile.url != profile.url;
     if (fileData != null) {
       if (profile.type == ProfileType.url && autoUpdate) {
         final res = await globalState.showMessage(
           title: appLocalizations.tip,
-          message: TextSpan(
-            text: appLocalizations.profileHasUpdate,
-          ),
+          message: TextSpan(text: appLocalizations.profileHasUpdate),
         );
         if (res == true) {
-          profile = profile.copyWith(
-            autoUpdate: false,
-          );
+          profile = profile.copyWith(autoUpdate: false);
         }
       }
       appController.setProfileAndAutoApply(await profile.saveFile(fileData!));
     } else if (!hasUpdate) {
       appController.setProfileAndAutoApply(profile);
     } else {
-      await globalState.homeScaffoldKey.currentState?.loadingRun(
-        () async {
-          await Future.delayed(
-            commonDuration,
-          );
-          if (hasUpdate) {
-            await appController.updateProfile(profile);
-          }
-        },
-      );
+      await globalState.homeScaffoldKey.currentState?.loadingRun(() async {
+        await Future.delayed(commonDuration);
+        if (hasUpdate) {
+          await appController.updateProfile(profile);
+        }
+      });
     }
     if (mounted) {
       Navigator.of(context).pop();
@@ -112,20 +102,14 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
     final lastModified = file.lastModifiedSync();
     final size = await file.length();
-    return FileInfo(
-      size: size,
-      lastModified: lastModified,
-    );
+    return FileInfo(size: size, lastModified: lastModified);
   }
 
   Future<void> _handleSaveEdit(BuildContext context, String data) async {
-    final message = await globalState.safeRun<String>(
-      () async {
-        final message = await mihomoCore.validateConfig(data);
-        return message;
-      },
-      silence: false,
-    );
+    final message = await globalState.safeRun<String>(() async {
+      final message = await mihomoCore.validateConfig(data);
+      return message;
+    }, silence: false);
     if (message?.isNotEmpty == true) {
       await globalState.showMessage(
         title: appLocalizations.tip,
@@ -160,9 +144,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         }
         final res = await globalState.showMessage(
           title: title,
-          message: TextSpan(
-            text: appLocalizations.hasCacheChange,
-          ),
+          message: TextSpan(text: appLocalizations.hasCacheChange),
         );
         if (res == true && context.mounted) {
           await _handleSaveEdit(context, content);
@@ -291,26 +273,22 @@ class _EditProfileViewState extends State<EditProfileView> {
           child: fileInfo == null
               ? Container()
               : ListItem(
-                  title: Text(
-                    appLocalizations.profile,
-                  ),
+                  title: Text(appLocalizations.profile),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      Text(
-                        fileInfo.desc,
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
+                      const SizedBox(height: 4),
+                      Text(fileInfo.desc),
+                      const SizedBox(height: 8),
                       Wrap(
                         runSpacing: 6,
                         spacing: 12,
                         children: [
-                          if (widget.profile.providerHeaders['mihox-restrictprofile']?.toLowerCase() != 'true') ...[
+                          if (widget
+                                  .profile
+                                  .providerHeaders['mihox-restrictprofile']
+                                  ?.toLowerCase() !=
+                              'true') ...[
                             CommonChip(
                               avatar: const Icon(Icons.edit),
                               label: appLocalizations.edit,
@@ -350,17 +328,11 @@ class _EditProfileViewState extends State<EditProfileView> {
         child: Form(
           key: _formKey,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: ListView.separated(
-              padding: kMaterialListPadding.copyWith(
-                bottom: 72,
-              ),
+              padding: kMaterialListPadding.copyWith(bottom: 72),
               itemBuilder: (_, index) => items[index],
-              separatorBuilder: (_, _) => const SizedBox(
-                height: 24,
-              ),
+              separatorBuilder: (_, _) => const SizedBox(height: 24),
               itemCount: items.length,
             ),
           ),

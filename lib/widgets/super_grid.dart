@@ -71,21 +71,22 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   void _onChildrenChange() {
     _tempIndexList = List.generate(length, (index) => index);
-    _itemContexts = List.filled(
-      length,
-      null,
-    );
+    _itemContexts = List.filled(length, null);
   }
 
   void _preTransformState() {
     _sizes = _itemContexts.map((item) => item!.size!).toList();
-    _parentOffset =
-        (context.findRenderObject()! as RenderBox).localToGlobal(Offset.zero);
+    _parentOffset = (context.findRenderObject()! as RenderBox).localToGlobal(
+      Offset.zero,
+    );
     _offsets = _itemContexts
-        .map((item) =>
-            (item!.findRenderObject()! as RenderBox)
-                .localToGlobal(Offset.zero) -
-            _parentOffset)
+        .map(
+          (item) =>
+              (item!.findRenderObject()! as RenderBox).localToGlobal(
+                Offset.zero,
+              ) -
+              _parentOffset,
+        )
         .toList();
     _containerSize = context.size!;
   }
@@ -127,14 +128,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 120),
     );
 
-    _shakeAnimation = Tween<double>(
-      begin: -0.012,
-      end: 0.012,
-    ).animate(
-      CurvedAnimation(
-        parent: _shakeController,
-        curve: Curves.easeInOut,
-      ),
+    _shakeAnimation = Tween<double>(begin: -0.012, end: 0.012).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
     );
 
     _transformController = AnimationController(
@@ -146,10 +141,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   void handleAdd(GridItem gridItem) {
-    _childrenNotifier.value = List.from(_childrenNotifier.value)
-      ..add(
-        gridItem,
-      );
+    _childrenNotifier.value = List.from(_childrenNotifier.value)..add(gridItem);
   }
 
   @override
@@ -172,9 +164,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   TickerFuture _transform() {
-    final layoutOffsets = <Offset>[
-      Offset(_containerSize.width, 0),
-    ];
+    final layoutOffsets = <Offset>[Offset(_containerSize.width, 0)];
     final nextOffsets = <Offset>[];
 
     for (final index in _tempIndexList) {
@@ -194,10 +184,12 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       final endLayoutOffsetX = layoutOffset.dx;
       nextOffsets.add(offset);
 
-      final startIndex =
-          layoutOffsets.indexWhere((i) => i.dx >= startLayoutOffsetX);
-      final endIndex =
-          layoutOffsets.indexWhere((i) => i.dx >= endLayoutOffsetX);
+      final startIndex = layoutOffsets.indexWhere(
+        (i) => i.dx >= startLayoutOffsetX,
+      );
+      final endIndex = layoutOffsets.indexWhere(
+        (i) => i.dx >= endLayoutOffsetX,
+      );
       final endOffset = layoutOffsets[endIndex];
 
       if (startIndex != endIndex) {
@@ -229,18 +221,16 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
     _transformTweenMap = transformTweenMap;
 
-    _transformAnimationMap = transformTweenMap.map(
-      (key, value) {
-        final preAnimationValue = _transformAnimationMap[key]?.value;
-        return MapEntry(
-          key,
-          Tween(
-            begin: preAnimationValue ?? Offset.zero,
-            end: value.end,
-          ).animate(_transformController),
-        );
-      },
-    );
+    _transformAnimationMap = transformTweenMap.map((key, value) {
+      final preAnimationValue = _transformAnimationMap[key]?.value;
+      return MapEntry(
+        key,
+        Tween(
+          begin: preAnimationValue ?? Offset.zero,
+          end: value.end,
+        ).animate(_transformController),
+      );
+    });
 
     if (_targetIndex != -1) {
       _targetOffset = nextOffsets[_targetIndex];
@@ -271,17 +261,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     if (_targetIndex == -1) {
       return;
     }
-    const spring = SpringDescription(
-      mass: 1,
-      stiffness: 100,
-      damping: 10,
-    );
-    final simulation = SpringSimulation(
-      spring,
-      0,
-      1,
-      0,
-    );
+    const spring = SpringDescription(mass: 1, stiffness: 100, damping: 10);
+    final simulation = SpringSimulation(spring, 0, 1, 0);
     _fakeDragWidgetAnimation = Tween(
       begin: details.offset - _parentOffset,
       end: _targetOffset,
@@ -301,10 +282,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    _dragRect = _dragRect.translate(
-      0,
-      details.delta.dy,
-    );
+    _dragRect = _dragRect.translate(0, details.delta.dy);
     _edgeDraggingAutoScroller?.startAutoScrollIfNecessary(_dragRect);
   }
 
@@ -346,25 +324,22 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   Widget _buildTransform(Widget rawChild, int index) => ValueListenableBuilder(
-        valueListenable: _animating,
-        builder: (_, animating, child) {
-          if (animating && _dragIndexNotifier.value == index) {
-            return _buildSizeBox(
-              Container(),
-              index,
-            );
-          }
-          return child!;
-        },
-        child: AnimatedBuilder(
-          builder: (_, child) => Transform.translate(
-            offset: _transformAnimationMap[index]?.value ?? Offset.zero,
-            child: child,
-          ),
-          animation: _transformController.view,
-          child: rawChild,
-        ),
-      );
+    valueListenable: _animating,
+    builder: (_, animating, child) {
+      if (animating && _dragIndexNotifier.value == index) {
+        return _buildSizeBox(Container(), index);
+      }
+      return child!;
+    },
+    child: AnimatedBuilder(
+      builder: (_, child) => Transform.translate(
+        offset: _transformAnimationMap[index]?.value ?? Offset.zero,
+        child: child,
+      ),
+      animation: _transformController.view,
+      child: rawChild,
+    ),
+  );
 
   Offset _getNextOffset(List<Offset> offsets, Size size) {
     final length = offsets.length;
@@ -376,11 +351,13 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       }
       double offsetX = 0;
       double span = 0;
-      for (var j = 0;
-          span < size.width &&
-              j < length &&
-              _containerSize.width.moreOrEqual(offsetX + size.width);
-          j++) {
+      for (
+        var j = 0;
+        span < size.width &&
+            j < length &&
+            _containerSize.width.moreOrEqual(offsetX + size.width);
+        j++
+      ) {
         final tempOffset = offsets[j];
         if (offset.dy.moreOrEqual(tempOffset.dy)) {
           span = tempOffset.dx - offsetX;
@@ -397,27 +374,22 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   Widget _buildSizeBox(Widget child, int index) => ValueListenableBuilder(
-        valueListenable: _dragWidgetSizeNotifier,
-        builder: (_, size, child) => SizedBox.fromSize(
-          size: size,
-          child: child,
-        ),
-        child: child,
-      );
+    valueListenable: _dragWidgetSizeNotifier,
+    builder: (_, size, child) => SizedBox.fromSize(size: size, child: child),
+    child: child,
+  );
 
   Widget _buildInactivate(Widget child) => ValueListenableBuilder(
-        valueListenable: _animating,
-        builder: (_, animating, child) {
-          if (animating) {
-            return ActivateBox(
-              child: child!,
-            );
-          } else {
-            return child!;
-          }
-        },
-        child: child,
-      );
+    valueListenable: _animating,
+    builder: (_, animating, child) {
+      if (animating) {
+        return ActivateBox(child: child!);
+      } else {
+        return child!;
+      }
+    },
+    child: child,
+  );
 
   Widget _buildShake(Widget child) {
     final random = 0.7 + Random().nextDouble() * 0.3;
@@ -426,10 +398,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       ..repeat(reverse: true);
     return AnimatedBuilder(
       animation: _shakeAnimation,
-      builder: (_, child) => Transform.rotate(
-        angle: _shakeAnimation.value * random,
-        child: child,
-      ),
+      builder: (_, child) =>
+          Transform.rotate(angle: _shakeAnimation.value * random, child: child),
       child: child,
     );
   }
@@ -441,15 +411,9 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     required int index,
   }) {
     final target = DragTarget<int>(
-      builder: (_, _, _) => AbsorbPointer(
-        child: item,
-      ),
+      builder: (_, _, _) => AbsorbPointer(child: item),
       onWillAcceptWithDetails: (_) {
-        debouncer.call(
-          FunctionTag.handleWill,
-          _handleWill,
-          args: [index],
-        );
+        debouncer.call(FunctionTag.handleWill, _handleWill, args: [index]);
         return false;
       },
     );
@@ -518,22 +482,12 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
           final childWhenDragging = ActivateBox(
             child: Opacity(
               opacity: 0.6,
-              child: _buildSizeBox(
-                CommonCard(
-                  child: child,
-                ),
-                index,
-              ),
+              child: _buildSizeBox(CommonCard(child: child), index),
             ),
           );
           final feedback = ActivateBox(
             child: _buildSizeBox(
-              CommonCard(
-                child: Material(
-                  elevation: 6,
-                  child: child,
-                ),
-              ),
+              CommonCard(child: Material(elevation: 6, child: child)),
               index,
             ),
           );
@@ -552,27 +506,25 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   }
 
   Widget _buildFakeTransformWidget() => ValueListenableBuilder<bool>(
-        valueListenable: _animating,
-        builder: (_, animating, _) {
-          final index = _dragIndexNotifier.value;
-          if (!animating || _fakeDragWidgetAnimation == null || index == -1) {
-            return Container();
-          }
-          return _buildSizeBox(
-            AnimatedBuilder(
-              animation: _fakeDragWidgetAnimation!,
-              builder: (_, child) => Transform.translate(
-                offset: _fakeDragWidgetAnimation!.value,
-                child: child,
-              ),
-              child: ActivateBox(
-                child: _childrenNotifier.value[index].child,
-              ),
-            ),
-            index,
-          );
-        },
+    valueListenable: _animating,
+    builder: (_, animating, _) {
+      final index = _dragIndexNotifier.value;
+      if (!animating || _fakeDragWidgetAnimation == null || index == -1) {
+        return Container();
+      }
+      return _buildSizeBox(
+        AnimatedBuilder(
+          animation: _fakeDragWidgetAnimation!,
+          builder: (_, child) => Transform.translate(
+            offset: _fakeDragWidgetAnimation!.value,
+            child: child,
+          ),
+          child: ActivateBox(child: _childrenNotifier.value[index].child),
+        ),
+        index,
       );
+    },
+  );
 
   @override
   void dispose() {
@@ -588,36 +540,33 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => DeferredPointerHandler(
-        child: Stack(
-          children: [
-            _buildInactivate(
-              ValueListenableBuilder(
-                valueListenable: _childrenNotifier,
-                builder: (_, children, _) {
-                  _onChildrenChange();
-                  return Grid(
-                    axisDirection: AxisDirection.down,
-                    crossAxisCount: crossCount,
-                    crossAxisSpacing: widget.crossAxisSpacing,
-                    mainAxisSpacing: widget.mainAxisSpacing,
-                    children: [
-                      for (int i = 0; i < children.length; i++) _builderItem(i),
-                    ],
-                  );
-                },
-              ),
-            ),
-            _buildFakeTransformWidget(),
-          ],
+    child: Stack(
+      children: [
+        _buildInactivate(
+          ValueListenableBuilder(
+            valueListenable: _childrenNotifier,
+            builder: (_, children, _) {
+              _onChildrenChange();
+              return Grid(
+                axisDirection: AxisDirection.down,
+                crossAxisCount: crossCount,
+                crossAxisSpacing: widget.crossAxisSpacing,
+                mainAxisSpacing: widget.mainAxisSpacing,
+                children: [
+                  for (int i = 0; i < children.length; i++) _builderItem(i),
+                ],
+              );
+            },
+          ),
         ),
-      );
+        _buildFakeTransformWidget(),
+      ],
+    ),
+  );
 }
 
 class _DeletableContainer extends StatefulWidget {
-  const _DeletableContainer({
-    required this.child,
-    required this.onDelete,
-  });
+  const _DeletableContainer({required this.child, required this.onDelete});
   final Widget child;
   final VoidCallback onDelete;
 
@@ -635,22 +584,15 @@ class _DeletableContainerState extends State<_DeletableContainer>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: commonDuration,
-    );
-    _scaleAnimation = Tween(begin: 1.0, end: 0.4).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
-    _fadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
+    _controller = AnimationController(vsync: this, duration: commonDuration);
+    _scaleAnimation = Tween(
+      begin: 1.0,
+      end: 0.4,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _fadeAnimation = Tween(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
   }
 
   @override
@@ -680,38 +622,33 @@ class _DeletableContainerState extends State<_DeletableContainer>
 
   @override
   Widget build(BuildContext context) => Stack(
-        clipBehavior: Clip.none,
-        children: [
-          AnimatedBuilder(
-            animation: _controller.view,
-            builder: (_, child) => Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Opacity(
-                opacity: _fadeAnimation.value,
-                child: child,
+    clipBehavior: Clip.none,
+    children: [
+      AnimatedBuilder(
+        animation: _controller.view,
+        builder: (_, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Opacity(opacity: _fadeAnimation.value, child: child),
+        ),
+        child: widget.child,
+      ),
+      if (_deleteButtonVisible)
+        Positioned(
+          top: -8,
+          right: -8,
+          child: DeferPointer(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: IconButton.filled(
+                iconSize: 20,
+                padding: const EdgeInsets.all(2),
+                onPressed: _handleDel,
+                icon: const Icon(Icons.close),
               ),
             ),
-            child: widget.child,
           ),
-          if (_deleteButtonVisible)
-            Positioned(
-              top: -8,
-              right: -8,
-              child: DeferPointer(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: IconButton.filled(
-                    iconSize: 20,
-                    padding: const EdgeInsets.all(2),
-                    onPressed: _handleDel,
-                    icon: const Icon(
-                      Icons.close,
-                    ),
-                  ),
-                ),
-              ),
-            )
-        ],
-      );
+        ),
+    ],
+  );
 }

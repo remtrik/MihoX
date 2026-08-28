@@ -15,9 +15,6 @@ const defaultTun = Tun();
 const defaultDns = Dns();
 const defaultGeoXUrl = GeoXUrl();
 
-const defaultMixedPort = 7890;
-const defaultKeepAliveInterval = 30;
-
 const defaultBypassPrivateRouteAddress = [
   "1.0.0.0/8",
   "2.0.0.0/7",
@@ -100,7 +97,7 @@ const defaultBypassPrivateRouteAddress = [
   "f000::/5",
   "f800::/6",
   "fe00::/9",
-  "fec0::/10"
+  "fec0::/10",
 ];
 
 @freezed
@@ -129,9 +126,7 @@ abstract class ProxyGroup with _$ProxyGroup {
 
 @freezed
 abstract class RuleProvider with _$RuleProvider {
-  const factory RuleProvider({
-    required String name,
-  }) = _RuleProvider;
+  const factory RuleProvider({required String name}) = _RuleProvider;
 
   factory RuleProvider.fromJson(Map<String, Object?> json) =>
       _$RuleProviderFromJson(json);
@@ -201,8 +196,10 @@ extension TunExt on Tun {
         : routeAddress;
     return switch (system.isDesktop) {
       true => copyWith(autoRoute: true, routeAddress: []),
-      false =>
-        copyWith(autoRoute: mRouteAddress.isEmpty, routeAddress: mRouteAddress),
+      false => copyWith(
+        autoRoute: mRouteAddress.isEmpty,
+        routeAddress: mRouteAddress,
+      ),
     };
   }
 }
@@ -214,11 +211,7 @@ abstract class FallbackFilter with _$FallbackFilter {
     @Default("CN") @JsonKey(name: "geoip-code") String geoipCode,
     @Default(["gfw"]) List<String> geosite,
     @Default(["240.0.0.0/4"]) List<String> ipcidr,
-    @Default([
-      "+.google.com",
-      "+.facebook.com",
-      "+.youtube.com",
-    ])
+    @Default(["+.google.com", "+.facebook.com", "+.youtube.com"])
     List<String> domain,
   }) = _FallbackFilter;
 
@@ -245,32 +238,20 @@ abstract class Dns with _$Dns {
     @Default("198.18.0.1/16")
     @JsonKey(name: "fake-ip-range")
     String fakeIpRange,
-    @Default([
-      "*.lan",
-      "localhost.ptlogin2.qq.com",
-    ])
+    @Default(["*.lan", "localhost.ptlogin2.qq.com"])
     @JsonKey(name: "fake-ip-filter")
     List<String> fakeIpFilter,
     @Default({
       "www.baidu.com": "114.114.114.114",
       "+.internal.crop.com": "10.0.0.1",
-      "geosite:cn": "https://doh.pub/dns-query"
+      "geosite:cn": "https://doh.pub/dns-query",
     })
     @JsonKey(name: "nameserver-policy")
     Map<String, String> nameserverPolicy,
-    @Default([
-      "https://doh.pub/dns-query",
-      "https://dns.alidns.com/dns-query",
-    ])
+    @Default(["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"])
     List<String> nameserver,
-    @Default([
-      "tls://8.8.4.4",
-      "tls://1.1.1.1",
-    ])
-    List<String> fallback,
-    @Default([
-      "https://doh.pub/dns-query",
-    ])
+    @Default(["tls://8.8.4.4", "tls://1.1.1.1"]) List<String> fallback,
+    @Default(["https://doh.pub/dns-query"])
     @JsonKey(name: "proxy-server-nameserver")
     List<String> proxyServerNameserver,
     @Default(FallbackFilter())
@@ -338,9 +319,7 @@ abstract class ParsedRule with _$ParsedRule {
   factory ParsedRule.parseString(String value) {
     final splits = value.split(",");
     final shortSplits = splits
-        .where(
-          (item) => !item.contains("src") && !item.contains("no-resolve"),
-        )
+        .where((item) => !item.contains("src") && !item.contains("no-resolve"))
         .toList();
     final ruleAction = RuleAction.values.firstWhere(
       (item) => item.value == shortSplits.first,
@@ -378,25 +357,19 @@ abstract class ParsedRule with _$ParsedRule {
 
 extension ParsedRuleExt on ParsedRule {
   String get value => [
-        ruleAction.value,
-        if (ruleAction == RuleAction.RULE_SET)
-          ruleProvider
-        else if (ruleAction != RuleAction.MATCH)
-          content,
-        ruleAction == RuleAction.SUB_RULE ? subRule : ruleTarget,
-        if (ruleAction.hasParams) ...[
-          if (src) "src",
-          if (noResolve) "no-resolve",
-        ]
-      ].join(",");
+    ruleAction.value,
+    if (ruleAction == RuleAction.RULE_SET)
+      ruleProvider
+    else if (ruleAction != RuleAction.MATCH)
+      content,
+    ruleAction == RuleAction.SUB_RULE ? subRule : ruleTarget,
+    if (ruleAction.hasParams) ...[if (src) "src", if (noResolve) "no-resolve"],
+  ].join(",");
 }
 
 @freezed
 abstract class Rule with _$Rule {
-  const factory Rule({
-    required String id,
-    required String value,
-  }) = _Rule;
+  const factory Rule({required String id, required String value}) = _Rule;
 
   factory Rule.value(String value) => Rule(value: value, id: utils.uuidV4);
 
@@ -405,9 +378,7 @@ abstract class Rule with _$Rule {
 
 @freezed
 abstract class SubRule with _$SubRule {
-  const factory SubRule({
-    required String name,
-  }) = _SubRule;
+  const factory SubRule({required String name}) = _SubRule;
 
   factory SubRule.fromJson(Map<String, Object?> json) =>
       _$SubRuleFromJson(json);
@@ -421,13 +392,8 @@ List<Rule> _genRule(List<dynamic>? rules) {
 List<RuleProvider> _genRuleProviders(Map<String, dynamic> json) =>
     json.entries.map((entry) => RuleProvider(name: entry.key)).toList();
 
-List<SubRule> _genSubRules(Map<String, dynamic> json) => json.entries
-    .map(
-      (entry) => SubRule(
-        name: entry.key,
-      ),
-    )
-    .toList();
+List<SubRule> _genSubRules(Map<String, dynamic> json) =>
+    json.entries.map((entry) => SubRule(name: entry.key)).toList();
 
 @freezed
 abstract class MihomoConfigSnippet with _$MihomoConfigSnippet {

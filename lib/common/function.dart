@@ -15,17 +15,11 @@ class Debouncer {
     if (timer != null) {
       timer.cancel();
     }
-    _operations[tag] = Timer(
-      duration,
-      () {
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
-        Function.apply(
-          func,
-          args,
-        );
-      },
-    );
+    _operations[tag] = Timer(duration, () {
+      _operations[tag]?.cancel();
+      _operations.remove(tag);
+      Function.apply(func, args);
+    });
   }
 
   void cancel(dynamic tag) {
@@ -47,17 +41,11 @@ class Throttler {
     if (timer != null) {
       return true;
     }
-    _operations[tag] = Timer(
-      duration,
-      () {
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
-        Function.apply(
-          func,
-          args,
-        );
-      },
-    );
+    _operations[tag] = Timer(duration, () {
+      _operations[tag]?.cancel();
+      _operations.remove(tag);
+      Function.apply(func, args);
+    });
     return false;
   }
 
@@ -76,7 +64,7 @@ Future<T> retry<T>({
   var attempts = 0;
   while (attempts < maxAttempts) {
     final res = await task();
-    if (!retryIf(res) || attempts >= maxAttempts) {
+    if (!retryIf(res) || attempts >= maxAttempts - 1) {
       return res;
     }
     attempts++;

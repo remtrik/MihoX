@@ -52,8 +52,10 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final double sideLength =
-        min(400, MediaQuery.of(context).size.width * 0.67);
+    final double sideLength = min(
+      400,
+      MediaQuery.of(context).size.width * 0.67,
+    );
     final scanWindow = Rect.fromCenter(
       center: Offset(screenSize.width / 2, screenSize.height / 2),
       width: sideLength,
@@ -68,9 +70,7 @@ class _ScanPageState extends State<ScanPage> {
             scanWindow: scanWindow,
             onDetect: _handleBarcode,
           ),
-          CustomPaint(
-            painter: ScannerOverlay(scanWindow: scanWindow),
-          ),
+          CustomPaint(painter: ScannerOverlay(scanWindow: scanWindow)),
           AppBar(
             backgroundColor: Colors.transparent,
             leading: IconButton(
@@ -84,10 +84,12 @@ class _ScanPageState extends State<ScanPage> {
                   valueListenable: _scannerController,
                   builder: (context, state, child) =>
                       switch (state.torchState) {
-                    TorchState.on =>
-                      const Icon(Icons.flash_on, color: Colors.yellow),
-                    _ => const Icon(Icons.flash_off, color: Colors.grey),
-                  },
+                        TorchState.on => const Icon(
+                          Icons.flash_on,
+                          color: Colors.yellow,
+                        ),
+                        _ => const Icon(Icons.flash_off, color: Colors.grey),
+                      },
                 ),
                 onPressed: _scannerController.toggleTorch,
               ),
@@ -101,7 +103,8 @@ class _ScanPageState extends State<ScanPage> {
                 color: Colors.white,
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(
-                      Colors.black.withValues(alpha: 0.5)),
+                    Colors.black.withValues(alpha: 0.5),
+                  ),
                 ),
                 padding: const EdgeInsets.all(16),
                 iconSize: 32.0,
@@ -117,10 +120,7 @@ class _ScanPageState extends State<ScanPage> {
 }
 
 class ScannerOverlay extends CustomPainter {
-  const ScannerOverlay({
-    required this.scanWindow,
-    this.borderRadius = 12.0,
-  });
+  const ScannerOverlay({required this.scanWindow, this.borderRadius = 12.0});
 
   final Rect scanWindow;
   final double borderRadius;

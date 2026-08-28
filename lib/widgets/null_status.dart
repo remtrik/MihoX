@@ -8,10 +8,10 @@ class NullStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.titleMedium?.toBold,
-          textAlign: TextAlign.center,
-        ),
-      );
+    child: Text(
+      label,
+      style: Theme.of(context).textTheme.titleMedium?.toBold,
+      textAlign: TextAlign.center,
+    ),
+  );
 }

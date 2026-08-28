@@ -28,6 +28,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   minimizeOnExit: json['minimizeOnExit'] as bool? ?? false,
   hidden: json['hidden'] as bool? ?? false,
   developerMode: json['developerMode'] as bool? ?? false,
+  zashboardInApp: json['zashboardInApp'] as bool? ?? true,
   overrideProviderSettings: json['overrideProviderSettings'] as bool? ?? false,
   overrideNetworkSettings: json['overrideNetworkSettings'] as bool? ?? false,
   recoveryStrategy:
@@ -36,6 +37,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
         json['recoveryStrategy'],
       ) ??
       RecoveryStrategy.compatible,
+  newDashboard: json['newDashboard'] as bool?,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -57,9 +59,11 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
       'developerMode': instance.developerMode,
+      'zashboardInApp': instance.zashboardInApp,
       'overrideProviderSettings': instance.overrideProviderSettings,
       'overrideNetworkSettings': instance.overrideNetworkSettings,
       'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy]!,
+      'newDashboard': instance.newDashboard,
     };
 
 const _$RecoveryStrategyEnumMap = {
@@ -82,6 +86,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.memoryInfo: 'memoryInfo',
   DashboardWidget.changeServerButton: 'changeServerButton',
   DashboardWidget.serviceInfo: 'serviceInfo',
+  DashboardWidget.zashboardButton: 'zashboardButton',
 };
 
 _AccessControl _$AccessControlFromJson(Map<String, dynamic> json) =>

@@ -80,7 +80,9 @@ Future<Uint8List?> _hIconToPng(HICON hIcon) async {
     hbmColor = iconInfo.ref.hbmColor;
     hbmMask = iconInfo.ref.hbmMask;
     if (hbmColor.isNull) return null;
-    if (GetObject(HGDIOBJ(hbmColor), sizeOf<BITMAP>(), bmp.cast()) == 0) return null;
+    if (GetObject(HGDIOBJ(hbmColor), sizeOf<BITMAP>(), bmp.cast()) == 0) {
+      return null;
+    }
 
     final w = bmp.ref.bmWidth;
     final h = bmp.ref.bmHeight;

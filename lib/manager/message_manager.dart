@@ -7,10 +7,7 @@ import 'package:mihox/models/models.dart';
 import 'package:mihox/widgets/fade_box.dart';
 
 class MessageManager extends StatefulWidget {
-  const MessageManager({
-    super.key,
-    required this.child,
-  });
+  const MessageManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -34,10 +31,7 @@ class MessageManagerState extends State<MessageManager> {
   }
 
   Future<void> message(String text) async {
-    final commonMessage = CommonMessage(
-      id: utils.uuidV4,
-      text: text,
-    );
+    final commonMessage = CommonMessage(id: utils.uuidV4, text: text);
     commonPrint.log(text);
     _bufferMessages.add(commonMessage);
     await _showMessage();
@@ -51,9 +45,7 @@ class MessageManagerState extends State<MessageManager> {
     while (_bufferMessages.isNotEmpty) {
       final commonMessage = _bufferMessages.removeAt(0);
       _messagesNotifier.value = List.from(_messagesNotifier.value)
-        ..add(
-          commonMessage,
-        );
+        ..add(commonMessage);
       await Future.delayed(const Duration(seconds: 1));
       Future.delayed(commonMessage.duration, () {
         _handleRemove(commonMessage);
@@ -71,46 +63,39 @@ class MessageManagerState extends State<MessageManager> {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
-          widget.child,
-          ValueListenableBuilder(
-            valueListenable: _messagesNotifier,
-            builder: (_, messages, _) => FadeThroughBox(
-              margin: const EdgeInsets.only(
-                top: kToolbarHeight + 8,
-                left: 12,
-                right: 12,
-              ),
-              alignment: Alignment.topRight,
-              child: messages.isEmpty
-                  ? const SizedBox()
-                  : LayoutBuilder(
-                      key: Key(messages.last.id),
-                      builder: (_, constraints) => Card(
-                        shape: const RoundedSuperellipseBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12.0),
-                          ),
-                        ),
-                        elevation: 10,
-                        color: context.colorScheme.surfaceContainerHigh,
-                        child: Container(
-                          width: min(
-                            constraints.maxWidth,
-                            500,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 16,
-                          ),
-                          child: Text(
-                            messages.last.text,
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
+    children: [
+      widget.child,
+      ValueListenableBuilder(
+        valueListenable: _messagesNotifier,
+        builder: (_, messages, _) => FadeThroughBox(
+          margin: const EdgeInsets.only(
+            top: kToolbarHeight + 8,
+            left: 12,
+            right: 12,
           ),
-        ],
-      );
+          alignment: Alignment.topRight,
+          child: messages.isEmpty
+              ? const SizedBox()
+              : LayoutBuilder(
+                  key: Key(messages.last.id),
+                  builder: (_, constraints) => Card(
+                    shape: const RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                    ),
+                    elevation: 10,
+                    color: context.colorScheme.surfaceContainerHigh,
+                    child: Container(
+                      width: min(constraints.maxWidth, 500),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      child: Text(messages.last.text),
+                    ),
+                  ),
+                ),
+        ),
+      ),
+    ],
+  );
 }

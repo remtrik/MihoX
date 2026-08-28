@@ -20,7 +20,7 @@ class System {
 
   bool get isDesktop => Platform.isWindows || Platform.isLinux;
 
-  bool get isMobile => Platform.isAndroid;
+  bool get isMobile => Platform.isAndroid || Platform.isIOS;
 
   Future<bool> get isAndroidTV async {
     if (!Platform.isAndroid) return false;
@@ -33,7 +33,7 @@ class System {
     return switch (Platform.operatingSystem) {
       "android" => (deviceInfo as AndroidDeviceInfo).version.sdkInt,
       "windows" => (deviceInfo as WindowsDeviceInfo).majorVersion,
-      String() => 0
+      String() => 0,
     };
   }
 
@@ -78,19 +78,25 @@ class System {
       }
       return AuthorizeCode.error;
     } else if (Platform.isLinux) {
-      final shell = Platform.environment['SHELL'] ?? 'bash';
       final password = await globalState.showCommonDialog<String>(
         child: InputDialog(
           title: appLocalizations.pleaseInputAdminPassword,
           value: '',
         ),
       );
-      final arguments = [
-        "-c",
-        'echo "$password" | sudo -S chown root:root "$corePath" && echo "$password" | sudo -S chmod +sx "$corePath"'
-      ];
-      final result = await Process.run(shell, arguments);
-      if (result.exitCode != 0) {
+      if (password == null) return AuthorizeCode.error;
+      final proc = await Process.start('sudo', [
+        '-S',
+        'sh',
+        '-c',
+        'chown root:root "\$1" && chmod +sx "\$1"',
+        'sh',
+        corePath,
+      ]);
+      proc.stdin.writeln(password);
+      await proc.stdin.close();
+      final exitCode = await proc.exitCode;
+      if (exitCode != 0) {
         return AuthorizeCode.error;
       }
       return AuthorizeCode.success;

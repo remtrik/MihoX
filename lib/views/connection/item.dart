@@ -57,8 +57,9 @@ class ConnectionRow extends StatelessWidget {
     final m = connection.metadata;
     final colorScheme = context.colorScheme;
     final host = m.host.isNotEmpty ? m.host : m.destinationIP;
-    final hostLine =
-        m.destinationPort.isNotEmpty ? '$host:${m.destinationPort}' : host;
+    final hostLine = m.destinationPort.isNotEmpty
+        ? '$host:${m.destinationPort}'
+        : host;
     final down = TrafficValue(value: connection.download?.toInt()).show;
     final up = TrafficValue(value: connection.upload?.toInt()).show;
 
@@ -127,24 +128,20 @@ class ConnectionRow extends StatelessWidget {
   // App icon (or generic icon) with the destination country flag as a small corner
   // badge. The badge renders only when a country is actually known.
   Widget _leading(BuildContext context) => SizedBox(
-        width: 44,
-        height: 44,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _icon(context),
-            Positioned(
-              right: -2,
-              bottom: -2,
-              child: ConnectionFlag(
-                connection: connection,
-                size: 20,
-                badge: true,
-              ),
-            ),
-          ],
+    width: 44,
+    height: 44,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _icon(context),
+        Positioned(
+          right: -2,
+          bottom: -2,
+          child: ConnectionFlag(connection: connection, size: 20, badge: true),
         ),
-      );
+      ],
+    ),
+  );
 
   // The originating app's icon (rounded square, tappable to filter by process).
   // Falls back to a generic icon when the connection has no app process (system
@@ -185,24 +182,24 @@ class ConnectionRow extends StatelessWidget {
   }
 
   Widget _genericIcon(BuildContext context) => _square(
-        context,
-        child: Icon(
-          Icons.public_rounded,
-          size: 22,
-          color: context.colorScheme.onSurfaceVariant,
-        ),
-      );
+    context,
+    child: Icon(
+      Icons.public_rounded,
+      size: 22,
+      color: context.colorScheme.onSurfaceVariant,
+    ),
+  );
 
   Widget _square(BuildContext context, {required Widget child}) => Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: context.colorScheme.surfaceContainerHighest,
-        ),
-        alignment: Alignment.center,
-        child: child,
-      );
+    width: 40,
+    height: 40,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: context.colorScheme.surfaceContainerHighest,
+    ),
+    alignment: Alignment.center,
+    child: child,
+  );
 
   Widget _traffic(BuildContext context, IconData icon, String value) {
     final c = context.colorScheme.onSurfaceVariant;
@@ -211,10 +208,7 @@ class ConnectionRow extends StatelessWidget {
       children: [
         Icon(icon, size: 15, color: c),
         const SizedBox(width: 2),
-        Text(
-          value,
-          style: context.textTheme.bodyMedium?.copyWith(color: c),
-        ),
+        Text(value, style: context.textTheme.bodyMedium?.copyWith(color: c)),
       ],
     );
   }

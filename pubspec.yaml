@@ -60,6 +60,9 @@ dependencies:
   crypto: ^3.0.7
   riverpod: ^3.4.2
   material_color_utilities: ^0.13.0
+  flutter_displaymode: ^0.7.0
+  webview_flutter: ^4.14.1
+
 
 dev_dependencies:
   args: ^2.7.0

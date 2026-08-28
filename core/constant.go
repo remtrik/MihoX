@@ -2,15 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"net/netip"
-	"time"
-
 	"github.com/metacubex/mihomo/adapter/provider"
 	P "github.com/metacubex/mihomo/component/process"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
+	"net/netip"
+	"time"
 )
 
 type InitParams struct {
@@ -71,7 +70,7 @@ type ExternalProvider struct {
 
 const (
 	messageMethod                  Method = "message"
-	initMihomoMethod               Method = "initMihomo"
+	initClashMethod                Method = "initClash"
 	getIsInitMethod                Method = "getIsInit"
 	forceGcMethod                  Method = "forceGc"
 	shutdownMethod                 Method = "shutdown"
@@ -85,7 +84,7 @@ const (
 	asyncTestDelayMethod           Method = "asyncTestDelay"
 	getConnectionsMethod           Method = "getConnections"
 	closeConnectionsMethod         Method = "closeConnections"
-	resetConnectionsMethod         Method = "resetConnectionsMethod"
+	resetConnectionsMethod         Method = "resetConnections"
 	closeConnectionMethod          Method = "closeConnection"
 	getExternalProvidersMethod     Method = "getExternalProviders"
 	getExternalProviderMethod      Method = "getExternalProvider"
@@ -108,7 +107,9 @@ const (
 	getConfigMethod                Method = "getConfig"
 	getCoreVersionMethod           Method = "getCoreVersion"
 	healthCheckMethod              Method = "healthCheck"
-	convertV2rayMethod             Method = "convertV2ray"
+	healthProbeMethod              Method = "healthProbe"
+	setUiActiveMethod              Method = "setUiActive"
+	setScreenActiveMethod          Method = "setScreenActive"
 )
 
 type Method string

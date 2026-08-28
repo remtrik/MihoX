@@ -3,10 +3,7 @@ import 'package:mihox/common/common.dart';
 import 'package:mihox/models/models.dart';
 
 class SubscriptionInfoView extends StatelessWidget {
-  const SubscriptionInfoView({
-    super.key,
-    this.subscriptionInfo,
-  });
+  const SubscriptionInfoView({super.key, this.subscriptionInfo});
   final SubscriptionInfo? subscriptionInfo;
 
   @override
@@ -23,10 +20,10 @@ class SubscriptionInfoView extends StatelessWidget {
 
     final useShow = TrafficValue(value: use).show;
     final totalShow = TrafficValue(value: total).show;
-    final expireShow = subscriptionInfo?.expire != null &&
-            subscriptionInfo!.expire != 0
+    final expireShow =
+        subscriptionInfo?.expire != null && subscriptionInfo!.expire != 0
         ? DateTime.fromMillisecondsSinceEpoch(subscriptionInfo!.expire * 1000)
-            .show
+              .show
         : appLocalizations.infiniteTime;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,16 +33,12 @@ class SubscriptionInfoView extends StatelessWidget {
           value: progress,
           backgroundColor: context.colorScheme.primary.opacity15,
         ),
-        const SizedBox(
-          height: 8,
-        ),
+        const SizedBox(height: 8),
         Text(
           "$useShow / $totalShow · $expireShow",
           style: context.textTheme.labelMedium?.toLight,
         ),
-        const SizedBox(
-          height: 4,
-        ),
+        const SizedBox(height: 4),
       ],
     );
   }

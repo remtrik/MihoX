@@ -19,22 +19,12 @@ final trayIcon = TrayIcon.create()!;
 
 Image? _loadTrayImage(String assetName) {
   final executablePath = Platform.resolvedExecutable;
-  var assetPath = p.joinAll([
+  final assetPath = p.joinAll([
     p.dirname(executablePath),
     'data',
     'flutter_assets',
     assetName,
   ]);
-  if (Platform.isMacOS) {
-    assetPath = p.join(
-      p.dirname(p.dirname(executablePath)),
-      'Frameworks',
-      'App.framework',
-      'Resources',
-      'flutter_assets',
-      assetName,
-    );
-  }
   return Image.fromFile(assetPath);
 }
 

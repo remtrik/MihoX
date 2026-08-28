@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart';
 
@@ -22,8 +23,6 @@ extension ArchiveExt on Archive {
   void addJson<T>(String name, T raw) {
     final jsonString = json.encode(raw);
     final data = utf8.encode(jsonString);
-    addFile(
-      ArchiveFile.bytes(name, data),
-    );
+    addFile(ArchiveFile.bytes(name, data));
   }
 }

@@ -11,7 +11,7 @@ class OverrideItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final override = ref.watch(overrideDnsProvider);
-    return Column( 
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListItem.switchItem(
@@ -27,9 +27,7 @@ class OverrideItem extends ConsumerWidget {
         if (!override)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
+            color: Theme.of(context).colorScheme.surfaceContainerHighest
                 .withValues(alpha: 0.5),
             child: Row(
               children: [
@@ -62,8 +60,9 @@ class StatusItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enable = ref
-        .watch(patchMihomoConfigProvider.select((state) => state.dns.enable));
+    final enable = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.dns.enable),
+    );
     return ListItem.switchItem(
       title: Text(appLocalizations.status),
       subtitle: Text(appLocalizations.statusDesc),
@@ -84,8 +83,9 @@ class ListenItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final listen = ref
-        .watch(patchMihomoConfigProvider.select((state) => state.dns.listen));
+    final listen = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.dns.listen),
+    );
     return ListItem.input(
       title: Text(appLocalizations.listen),
       subtitle: Text(listen),
@@ -116,8 +116,9 @@ class PreferH3Item extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final preferH3 = ref
-        .watch(patchMihomoConfigProvider.select((state) => state.dns.preferH3));
+    final preferH3 = ref.watch(
+      patchMihomoConfigProvider.select((state) => state.dns.preferH3),
+    );
     return ListItem.switchItem(
       title: const Text("PreferH3"),
       subtitle: Text(appLocalizations.preferH3Desc),
@@ -245,32 +246,32 @@ class FakeIpFilterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.fakeipFilter),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.fakeipFilter,
-          widget: Consumer(
-            builder: (_, ref, _) {
-              final fakeIpFilter = ref.watch(
-                patchMihomoConfigProvider
-                    .select((state) => state.dns.fakeIpFilter),
-              );
-              return ListInputPage(
-                title: appLocalizations.fakeipFilter,
-                items: fakeIpFilter,
-                titleBuilder: Text.new,
-                onChange: (items) {
-                  ref
-                      .read(patchMihomoConfigProvider.notifier)
-                      .updateState((state) => state.copyWith.dns(
-                            fakeIpFilter: List.from(items),
-                          ));
-                },
-              );
+    title: Text(appLocalizations.fakeipFilter),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.fakeipFilter,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final fakeIpFilter = ref.watch(
+            patchMihomoConfigProvider.select((state) => state.dns.fakeIpFilter),
+          );
+          return ListInputPage(
+            title: appLocalizations.fakeipFilter,
+            items: fakeIpFilter,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) =>
+                        state.copyWith.dns(fakeIpFilter: List.from(items)),
+                  );
             },
-          ),
-        ),
-      );
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class DefaultNameserverItem extends StatelessWidget {
@@ -278,31 +279,35 @@ class DefaultNameserverItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.defaultNameserver),
-        subtitle: Text(appLocalizations.defaultNameserverDesc),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.defaultNameserver,
-          widget: Consumer(builder: (_, ref, _) {
-            final defaultNameserver = ref.watch(
-              patchMihomoConfigProvider
-                  .select((state) => state.dns.defaultNameserver),
-            );
-            return ListInputPage(
-              title: appLocalizations.defaultNameserver,
-              items: defaultNameserver,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns(
-                        defaultNameserver: List.from(items),
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.defaultNameserver),
+    subtitle: Text(appLocalizations.defaultNameserverDesc),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.defaultNameserver,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final defaultNameserver = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.defaultNameserver,
+            ),
+          );
+          return ListInputPage(
+            title: appLocalizations.defaultNameserver,
+            items: defaultNameserver,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) =>
+                        state.copyWith.dns(defaultNameserver: List.from(items)),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class NameserverItem extends StatelessWidget {
@@ -310,30 +315,32 @@ class NameserverItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.nameserver),
-        subtitle: Text(appLocalizations.nameserverDesc),
-        delegate: OpenDelegate(
-          title: appLocalizations.nameserver,
-          blur: false,
-          widget: Consumer(builder: (_, ref, _) {
-            final nameserver = ref.watch(
-              patchMihomoConfigProvider.select((state) => state.dns.nameserver),
-            );
-            return ListInputPage(
-              title: appLocalizations.nameserver,
-              items: nameserver,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns(
-                        nameserver: List.from(items),
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.nameserver),
+    subtitle: Text(appLocalizations.nameserverDesc),
+    delegate: OpenDelegate(
+      title: appLocalizations.nameserver,
+      blur: false,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final nameserver = ref.watch(
+            patchMihomoConfigProvider.select((state) => state.dns.nameserver),
+          );
+          return ListInputPage(
+            title: appLocalizations.nameserver,
+            items: nameserver,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns(nameserver: List.from(items)),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class UseHostsItem extends ConsumerWidget {
@@ -373,9 +380,9 @@ class UseSystemHostsItem extends ConsumerWidget {
         onChanged: (value) async {
           ref
               .read(patchMihomoConfigProvider.notifier)
-              .updateState((state) => state.copyWith.dns(
-                    useSystemHosts: value,
-                  ));
+              .updateState(
+                (state) => state.copyWith.dns(useSystemHosts: value),
+              );
         },
       ),
     );
@@ -387,32 +394,35 @@ class NameserverPolicyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.nameserverPolicy),
-        subtitle: Text(appLocalizations.nameserverPolicyDesc),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.nameserverPolicy,
-          widget: Consumer(builder: (_, ref, _) {
-            final nameserverPolicy = ref.watch(
-              patchMihomoConfigProvider
-                  .select((state) => state.dns.nameserverPolicy),
-            );
-            return MapInputPage(
-              title: appLocalizations.nameserverPolicy,
-              map: nameserverPolicy,
-              titleBuilder: (item) => Text(item.key),
-              subtitleBuilder: (item) => Text(item.value),
-              onChange: (value) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns(
-                        nameserverPolicy: value,
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.nameserverPolicy),
+    subtitle: Text(appLocalizations.nameserverPolicyDesc),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.nameserverPolicy,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final nameserverPolicy = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.nameserverPolicy,
+            ),
+          );
+          return MapInputPage(
+            title: appLocalizations.nameserverPolicy,
+            map: nameserverPolicy,
+            titleBuilder: (item) => Text(item.key),
+            subtitleBuilder: (item) => Text(item.value),
+            onChange: (value) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns(nameserverPolicy: value),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class ProxyServerNameserverItem extends StatelessWidget {
@@ -420,33 +430,36 @@ class ProxyServerNameserverItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.proxyNameserver),
-        subtitle: Text(appLocalizations.proxyNameserverDesc),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.proxyNameserver,
-          widget: Consumer(
-            builder: (_, ref, _) {
-              final proxyServerNameserver = ref.watch(
-                patchMihomoConfigProvider
-                    .select((state) => state.dns.proxyServerNameserver),
-              );
-              return ListInputPage(
-                title: appLocalizations.proxyNameserver,
-                items: proxyServerNameserver,
-                titleBuilder: Text.new,
-                onChange: (items) {
-                  ref.read(patchMihomoConfigProvider.notifier).updateState(
-                        (state) => state.copyWith.dns(
-                          proxyServerNameserver: List.from(items),
-                        ),
-                      );
-                },
-              );
+    title: Text(appLocalizations.proxyNameserver),
+    subtitle: Text(appLocalizations.proxyNameserverDesc),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.proxyNameserver,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final proxyServerNameserver = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.proxyServerNameserver,
+            ),
+          );
+          return ListInputPage(
+            title: appLocalizations.proxyNameserver,
+            items: proxyServerNameserver,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns(
+                      proxyServerNameserver: List.from(items),
+                    ),
+                  );
             },
-          ),
-        ),
-      );
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class FallbackItem extends StatelessWidget {
@@ -454,30 +467,32 @@ class FallbackItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.fallback),
-        subtitle: Text(appLocalizations.fallbackDesc),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.fallback,
-          widget: Consumer(builder: (_, ref, _) {
-            final fallback = ref.watch(
-              patchMihomoConfigProvider.select((state) => state.dns.fallback),
-            );
-            return ListInputPage(
-              title: appLocalizations.fallback,
-              items: fallback,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns(
-                        fallback: List.from(items),
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.fallback),
+    subtitle: Text(appLocalizations.fallbackDesc),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.fallback,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final fallback = ref.watch(
+            patchMihomoConfigProvider.select((state) => state.dns.fallback),
+          );
+          return ListInputPage(
+            title: appLocalizations.fallback,
+            items: fallback,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns(fallback: List.from(items)),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class GeoipItem extends ConsumerWidget {
@@ -486,8 +501,9 @@ class GeoipItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final geoip = ref.watch(
-      patchMihomoConfigProvider
-          .select((state) => state.dns.fallbackFilter.geoip),
+      patchMihomoConfigProvider.select(
+        (state) => state.dns.fallbackFilter.geoip,
+      ),
     );
     return ListItem.switchItem(
       title: const Text("Geoip"),
@@ -496,9 +512,9 @@ class GeoipItem extends ConsumerWidget {
         onChanged: (value) async {
           ref
               .read(patchMihomoConfigProvider.notifier)
-              .updateState((state) => state.copyWith.dns.fallbackFilter(
-                    geoip: value,
-                  ));
+              .updateState(
+                (state) => state.copyWith.dns.fallbackFilter(geoip: value),
+              );
         },
       ),
     );
@@ -511,8 +527,9 @@ class GeoipCodeItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final geoipCode = ref.watch(
-      patchMihomoConfigProvider
-          .select((state) => state.dns.fallbackFilter.geoipCode),
+      patchMihomoConfigProvider.select(
+        (state) => state.dns.fallbackFilter.geoipCode,
+      ),
     );
     return ListItem.input(
       title: Text(appLocalizations.geoipCode),
@@ -530,10 +547,10 @@ class GeoipCodeItem extends ConsumerWidget {
           if (value == null) {
             return;
           }
-          ref.read(patchMihomoConfigProvider.notifier).updateState(
-                (state) => state.copyWith.dns.fallbackFilter(
-                  geoipCode: value,
-                ),
+          ref
+              .read(patchMihomoConfigProvider.notifier)
+              .updateState(
+                (state) => state.copyWith.dns.fallbackFilter(geoipCode: value),
               );
         },
       ),
@@ -546,30 +563,35 @@ class GeositeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: const Text("Geosite"),
-        delegate: OpenDelegate(
-          blur: false,
-          title: "Geosite",
-          widget: Consumer(builder: (_, ref, _) {
-            final geosite = ref.watch(
-              patchMihomoConfigProvider
-                  .select((state) => state.dns.fallbackFilter.geosite),
-            );
-            return ListInputPage(
-              title: "Geosite",
-              items: geosite,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns.fallbackFilter(
-                        geosite: List.from(items),
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: const Text("Geosite"),
+    delegate: OpenDelegate(
+      blur: false,
+      title: "Geosite",
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final geosite = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.fallbackFilter.geosite,
+            ),
+          );
+          return ListInputPage(
+            title: "Geosite",
+            items: geosite,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns.fallbackFilter(
+                      geosite: List.from(items),
+                    ),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class IpcidrItem extends StatelessWidget {
@@ -577,30 +599,35 @@ class IpcidrItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.ipcidr),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.ipcidr,
-          widget: Consumer(builder: (_, ref, _) {
-            final ipcidr = ref.watch(
-              patchMihomoConfigProvider
-                  .select((state) => state.dns.fallbackFilter.ipcidr),
-            );
-            return ListInputPage(
-              title: appLocalizations.ipcidr,
-              items: ipcidr,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref
-                    .read(patchMihomoConfigProvider.notifier)
-                    .updateState((state) => state.copyWith.dns.fallbackFilter(
-                          ipcidr: List.from(items),
-                        ));
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.ipcidr),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.ipcidr,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final ipcidr = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.fallbackFilter.ipcidr,
+            ),
+          );
+          return ListInputPage(
+            title: appLocalizations.ipcidr,
+            items: ipcidr,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns.fallbackFilter(
+                      ipcidr: List.from(items),
+                    ),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class DomainItem extends StatelessWidget {
@@ -608,30 +635,35 @@ class DomainItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem.open(
-        title: Text(appLocalizations.domain),
-        delegate: OpenDelegate(
-          blur: false,
-          title: appLocalizations.domain,
-          widget: Consumer(builder: (_, ref, _) {
-            final domain = ref.watch(
-              patchMihomoConfigProvider
-                  .select((state) => state.dns.fallbackFilter.domain),
-            );
-            return ListInputPage(
-              title: appLocalizations.domain,
-              items: domain,
-              titleBuilder: Text.new,
-              onChange: (items) {
-                ref.read(patchMihomoConfigProvider.notifier).updateState(
-                      (state) => state.copyWith.dns.fallbackFilter(
-                        domain: List.from(items),
-                      ),
-                    );
-              },
-            );
-          }),
-        ),
-      );
+    title: Text(appLocalizations.domain),
+    delegate: OpenDelegate(
+      blur: false,
+      title: appLocalizations.domain,
+      widget: Consumer(
+        builder: (_, ref, _) {
+          final domain = ref.watch(
+            patchMihomoConfigProvider.select(
+              (state) => state.dns.fallbackFilter.domain,
+            ),
+          );
+          return ListInputPage(
+            title: appLocalizations.domain,
+            items: domain,
+            titleBuilder: Text.new,
+            onChange: (items) {
+              ref
+                  .read(patchMihomoConfigProvider.notifier)
+                  .updateState(
+                    (state) => state.copyWith.dns.fallbackFilter(
+                      domain: List.from(items),
+                    ),
+                  );
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class DnsOptions extends ConsumerWidget {
@@ -708,7 +740,6 @@ class DnsListView extends ConsumerWidget {
   const DnsListView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => generateListView(
-        dnsItems,
-      );
+  Widget build(BuildContext context, WidgetRef ref) =>
+      generateListView(dnsItems);
 }

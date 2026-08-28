@@ -46,9 +46,7 @@ class MihomoCore {
     ];
     try {
       for (final geoFileName in geoFileNameList) {
-        final geoFile = File(
-          join(homePath, geoFileName),
-        );
+        final geoFile = File(join(homePath, geoFileName));
         final isExists = geoFile.existsSync();
         if (isExists) {
           continue;
@@ -58,7 +56,7 @@ class MihomoCore {
         await geoFile.writeAsBytes(bytes, flush: true);
       }
     } catch (e) {
-      exit(0);
+      commonPrint.log("initGeo failed: $e");
     }
   }
 
@@ -71,14 +69,13 @@ class MihomoCore {
     }
     final homeDirPath = await appPath.homeDirPath;
     return mihomoInterface.init(
-      InitParams(
-        homeDir: homeDirPath,
-        version: globalState.appState.version,
-      ),
+      InitParams(homeDir: homeDirPath, version: globalState.appState.version),
     );
   }
 
   Future<bool> setState(CoreState state) => mihomoInterface.setState(state);
+
+  Future<bool> setUiActive(bool active) => mihomoInterface.setUiActive(active);
 
   Future<void> shutdown() async {
     await mihomoInterface.shutdown();
@@ -101,28 +98,42 @@ class MihomoCore {
   Future<List<Group>> getProxiesGroups() async {
     final proxies = await mihomoInterface.getProxies();
     if (proxies.isEmpty) return [];
-    final groupNames = [
-      UsedProxy.GLOBAL.name,
-      ...(proxies[UsedProxy.GLOBAL.name]["all"] as List).where((e) {
-        final proxy = proxies[e] ?? {};
-        return GroupTypeExtension.valueList.contains(proxy['type']);
-      })
-    ];
+    bool isGroup(dynamic name) =>
+        GroupTypeExtension.valueList.contains((proxies[name] ?? {})['type']);
+    // Groups reachable through GLOBAL.all, keeping GLOBAL's own ordering.
+    final fromGlobal =
+        (((proxies[UsedProxy.GLOBAL.name] ?? {})["all"] ?? []) as List)
+            .where(isGroup)
+            .toList();
+    final groupNames = [UsedProxy.GLOBAL.name, ...fromGlobal];
+    // Only when GLOBAL opts in via `mihox-override`: a curated GLOBAL lists
+    // just a subset, so the service groups used by rules (YouTube, Telegram, …)
+    // wouldn't otherwise surface. Enumerate them from the full proxy map so
+    // every defined group is available (the hidden flag still controls display).
+    if (globalState.globalOverrideEnabled.value) {
+      final seen = {UsedProxy.GLOBAL.name, ...fromGlobal};
+      // proxies.keys arrive alphabetically (Go's json.Marshal sorts map keys),
+      // so enumerate in profile-declaration order first, then append any leftover
+      // groups not named in proxy-groups (still alphabetical, but a rare tail).
+      final declared = globalState.proxyGroupOrder.value;
+      final extra = declared
+          .where((name) => !seen.contains(name) && isGroup(name))
+          .toList();
+      groupNames.addAll(extra);
+      seen.addAll(extra);
+      groupNames.addAll(
+        proxies.keys.where((name) => !seen.contains(name) && isGroup(name)),
+      );
+    }
     final groupsRaw = groupNames.map((groupName) {
       final group = proxies[groupName];
       group["all"] = ((group["all"] ?? []) as List)
-          .map(
-            (name) => proxies[name],
-          )
+          .map((name) => proxies[name])
           .where((proxy) => proxy != null)
           .toList();
       return group;
     }).toList();
-    return groupsRaw
-        .map(
-          (e) => Group.fromJson(e),
-        )
-        .toList();
+    return groupsRaw.map((e) => Group.fromJson(e)).toList();
   }
 
   FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async =>
@@ -132,7 +143,10 @@ class MihomoCore {
     final res = await mihomoInterface.getConnections();
     final connectionsData = json.decode(res) as Map;
     final connectionsRaw = connectionsData['connections'] as List? ?? [];
-    return connectionsRaw.map((e) {
+    // Rebuild the id->processPath map from scratch each poll so it only holds
+    // live connection ids; it used to grow unbounded as ids were only appended.
+    final livePaths = <String, String>{};
+    final connections = connectionsRaw.map((e) {
       final map = Map<String, dynamic>.from(e as Map);
       // Capture processPath (dropped by the Connection model) so desktop can show the
       // originating app's exe icon.
@@ -140,10 +154,14 @@ class MihomoCore {
       final id = map['id']?.toString();
       if (meta is Map && id != null) {
         final pp = meta['processPath']?.toString() ?? '';
-        if (pp.isNotEmpty) connectionProcessPaths[id] = pp;
+        if (pp.isNotEmpty) livePaths[id] = pp;
       }
       return Connection.fromJson(map);
     }).toList();
+    connectionProcessPaths
+      ..clear()
+      ..addAll(livePaths);
+    return connections;
   }
 
   void closeConnection(String id) {
@@ -159,31 +177,25 @@ class MihomoCore {
   }
 
   Future<List<ExternalProvider>> getExternalProviders() async {
-    final externalProvidersRawString =
-        await mihomoInterface.getExternalProviders();
+    final externalProvidersRawString = await mihomoInterface
+        .getExternalProviders();
     if (externalProvidersRawString.isEmpty) {
       return [];
     }
-    return Isolate.run<List<ExternalProvider>>(
-      () {
-        final externalProviders =
-            (json.decode(externalProvidersRawString) as List<dynamic>)
-                .map(
-                  (item) => ExternalProvider.fromJson(item),
-                )
-                .toList();
-        return externalProviders;
-      },
-    );
+    return Isolate.run<List<ExternalProvider>>(() {
+      final externalProviders =
+          (json.decode(externalProvidersRawString) as List<dynamic>)
+              .map((item) => ExternalProvider.fromJson(item))
+              .toList();
+      return externalProviders;
+    });
   }
 
   Future<ExternalProvider?> getExternalProvider(
-      String externalProviderName) async {
-    final externalProvidersRawString =
-        await mihomoInterface.getExternalProvider(externalProviderName);
-    if (externalProvidersRawString.isEmpty) {
-      return null;
-    }
+    String externalProviderName,
+  ) async {
+    final externalProvidersRawString = await mihomoInterface
+        .getExternalProvider(externalProviderName);
     if (externalProvidersRawString.isEmpty) {
       return null;
     }
@@ -196,13 +208,12 @@ class MihomoCore {
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
-  }) =>
-      mihomoInterface.sideLoadExternalProvider(
-          providerName: providerName, data: data);
+  }) => mihomoInterface.sideLoadExternalProvider(
+    providerName: providerName,
+    data: data,
+  );
 
-  Future<String> updateExternalProvider({
-    required String providerName,
-  }) async =>
+  Future<String> updateExternalProvider({required String providerName}) async =>
       mihomoInterface.updateExternalProvider(providerName);
 
   Future<void> startListener() async {
@@ -213,7 +224,8 @@ class MihomoCore {
     await mihomoInterface.stopListener();
   }
 
-  Future<void> healthCheck([String groupName = '']) => mihomoInterface.healthCheck(groupName);
+  Future<void> healthCheck([String groupName = '']) =>
+      mihomoInterface.healthCheck(groupName);
 
   Future<Delay> getDelay(String url, String proxyName) async {
     final data = await mihomoInterface.asyncTestDelay(url, proxyName);
@@ -243,10 +255,7 @@ class MihomoCore {
     if (countryCode.isEmpty) {
       return null;
     }
-    return IpInfo(
-      ip: ip,
-      countryCode: countryCode,
-    );
+    return IpInfo(ip: ip, countryCode: countryCode);
   }
 
   Future<Traffic> getTotalTraffic() async {
@@ -262,7 +271,15 @@ class MihomoCore {
     if (value.isEmpty) {
       return 0;
     }
-    return int.parse(value);
+    return int.tryParse(value) ?? 0;
+  }
+
+  Future<String> getCoreVersion() async {
+    try {
+      return await mihomoInterface.getCoreVersion();
+    } catch (_) {
+      return '';
+    }
   }
 
   void resetTraffic() {

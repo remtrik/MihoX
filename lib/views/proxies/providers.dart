@@ -13,9 +13,7 @@ import 'package:mihox/widgets/widgets.dart';
 typedef UpdatingMap = Map<String, bool>;
 
 class ProvidersView extends ConsumerStatefulWidget {
-  const ProvidersView({
-    super.key,
-  });
+  const ProvidersView({super.key});
 
   @override
   ConsumerState<ProvidersView> createState() => _ProvidersViewState();
@@ -26,22 +24,18 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     final providers = ref.read(providersProvider);
     final providersNotifier = ref.read(providersProvider.notifier);
     final messages = [];
-    final updateProviders = providers.map<Future>(
-      (provider) async {
-        providersNotifier.setProvider(
-          provider.copyWith(isUpdating: true),
-        );
-        final message = await mihomoCore.updateExternalProvider(
-          providerName: provider.name,
-        );
-        if (message.isNotEmpty) {
-          messages.add("${provider.name}: $message \n");
-        }
-        providersNotifier.setProvider(
-          await mihomoCore.getExternalProvider(provider.name),
-        );
-      },
-    );
+    final updateProviders = providers.map<Future>((provider) async {
+      providersNotifier.setProvider(provider.copyWith(isUpdating: true));
+      final message = await mihomoCore.updateExternalProvider(
+        providerName: provider.name,
+      );
+      if (message.isNotEmpty) {
+        messages.add("${provider.name}: $message \n");
+      }
+      providersNotifier.setProvider(
+        await mihomoCore.getExternalProvider(provider.name),
+      );
+    });
     final titleMedium = context.textTheme.titleMedium;
     await Future.wait(updateProviders);
     globalState.appController.updateGroupsDebounce();
@@ -51,10 +45,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
         message: TextSpan(
           children: [
             for (final message in messages)
-              TextSpan(
-                text: message,
-                style: titleMedium,
-              )
+              TextSpan(text: message, style: titleMedium),
           ],
         ),
       );
@@ -64,16 +55,12 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
   @override
   Widget build(BuildContext context) {
     final providers = ref.watch(providersProvider);
-    final proxyProviders = providers.where((item) => item.type == "Proxy").map(
-          (item) => ProviderItem(
-            provider: item,
-          ),
-        );
-    final ruleProviders = providers.where((item) => item.type == "Rule").map(
-          (item) => ProviderItem(
-            provider: item,
-          ),
-        );
+    final proxyProviders = providers
+        .where((item) => item.type == "Proxy")
+        .map((item) => ProviderItem(provider: item));
+    final ruleProviders = providers
+        .where((item) => item.type == "Rule")
+        .map((item) => ProviderItem(provider: item));
     final proxySection = generateSection(
       title: appLocalizations.proxyProviders,
       items: proxyProviders,
@@ -84,46 +71,28 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     );
     return CommonScaffold(
       actions: [
-        IconButton(
-          onPressed: _updateProviders,
-          icon: const Icon(
-            Icons.sync,
-          ),
-        )
+        IconButton(onPressed: _updateProviders, icon: const Icon(Icons.sync)),
       ],
-      body: generateListView([
-        ...proxySection,
-        ...ruleSection,
-      ]),
+      body: generateListView([...proxySection, ...ruleSection]),
       title: appLocalizations.providers,
     );
   }
 }
 
 class ProviderItem extends StatelessWidget {
-  const ProviderItem({
-    super.key,
-    required this.provider,
-  });
+  const ProviderItem({super.key, required this.provider});
   final ExternalProvider provider;
 
   Future<void> _handleUpdateProvider() async {
     final appController = globalState.appController;
     if (provider.vehicleType != "HTTP") return;
-    await globalState.safeRun(
-      () async {
-        appController.setProvider(
-          provider.copyWith(
-            isUpdating: true,
-          ),
-        );
-        final message = await mihomoCore.updateExternalProvider(
-          providerName: provider.name,
-        );
-        if (message.isNotEmpty) throw message;
-      },
-      silence: false,
-    );
+    await globalState.safeRun(() async {
+      appController.setProvider(provider.copyWith(isUpdating: true));
+      final message = await mihomoCore.updateExternalProvider(
+        providerName: provider.name,
+      );
+      if (message.isNotEmpty) throw message;
+    }, silence: false);
     appController.setProvider(
       await mihomoCore.getExternalProvider(provider.name),
     );
@@ -162,63 +131,48 @@ class ProviderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 4,
-        ),
-        title: Text(provider.name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    title: Text(provider.name),
+    subtitle: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 4),
+        Text(_buildProviderDesc()),
+        const SizedBox(height: 4),
+        if (provider.subscriptionInfo != null)
+          SubscriptionInfoView(subscriptionInfo: provider.subscriptionInfo),
+        const SizedBox(height: 8),
+        Wrap(
+          runSpacing: 6,
+          spacing: 12,
           children: [
-            const SizedBox(
-              height: 4,
+            CommonChip(
+              avatar: const Icon(Icons.upload),
+              label: appLocalizations.upload,
+              onPressed: _handleSideLoadProvider,
             ),
-            Text(
-              _buildProviderDesc(),
-            ),
-            const SizedBox(
-              height: 4,
-            ),
-            if (provider.subscriptionInfo != null)
-              SubscriptionInfoView(
-                subscriptionInfo: provider.subscriptionInfo,
+            if (provider.vehicleType == "HTTP")
+              CommonChip(
+                avatar: const Icon(Icons.sync),
+                label: appLocalizations.sync,
+                onPressed: _handleUpdateProvider,
               ),
-            const SizedBox(
-              height: 8,
-            ),
-            Wrap(
-              runSpacing: 6,
-              spacing: 12,
-              children: [
-                CommonChip(
-                  avatar: const Icon(Icons.upload),
-                  label: appLocalizations.upload,
-                  onPressed: _handleSideLoadProvider,
-                ),
-                if (provider.vehicleType == "HTTP")
-                  CommonChip(
-                    avatar: const Icon(Icons.sync),
-                    label: appLocalizations.sync,
-                    onPressed: _handleUpdateProvider,
-                  ),
-              ],
-            ),
-            const SizedBox(
-              height: 4,
-            ),
           ],
         ),
-        trailing: SizedBox(
-          height: 48,
-          width: 48,
-          child: FadeThroughBox(
-            child: provider.isUpdating
-                ? const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator(),
-                  )
-                : const SizedBox(),
-          ),
-        ),
-      );
+        const SizedBox(height: 4),
+      ],
+    ),
+    trailing: SizedBox(
+      height: 48,
+      width: 48,
+      child: FadeThroughBox(
+        child: provider.isUpdating
+            ? const Padding(
+                padding: EdgeInsets.all(8),
+                child: CircularProgressIndicator(),
+              )
+            : const SizedBox(),
+      ),
+    ),
+  );
 }

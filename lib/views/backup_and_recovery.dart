@@ -17,18 +17,15 @@ class BackupAndRecovery extends ConsumerWidget {
 
   Future<void> _backupOnLocal(BuildContext context) async {
     final commonScaffoldState = context.commonScaffoldState;
-    final res = await commonScaffoldState?.loadingRun<bool>(
-      () async {
-        final backupData = await globalState.appController.backupData();
-        final value = await picker.saveFile(
-          utils.getBackupFileName(),
-          Uint8List.fromList(backupData),
-        );
-        if (value == null) return false;
-        return true;
-      },
-      title: appLocalizations.backup,
-    );
+    final res = await commonScaffoldState?.loadingRun<bool>(() async {
+      final backupData = await globalState.appController.backupData();
+      final value = await picker.saveFile(
+        utils.getBackupFileName(),
+        Uint8List.fromList(backupData),
+      );
+      if (value == null) return false;
+      return true;
+    }, title: appLocalizations.backup);
     if (res != true) return;
     await globalState.showMessage(
       title: appLocalizations.backup,
@@ -40,20 +37,20 @@ class BackupAndRecovery extends ConsumerWidget {
     BuildContext context,
     RecoveryOption recoveryOption,
   ) async {
-    final file = await picker.pickerFile(fileType: FileType.custom, allowedExtensions: ["zip"]);
+    final file = await picker.pickerFile(
+      fileType: FileType.custom,
+      allowedExtensions: ["zip"],
+    );
     final data = file?.readAsBytes();
     if (data == null || !context.mounted) return;
     final commonScaffoldState = context.commonScaffoldState;
-    final res = await commonScaffoldState?.loadingRun<bool>(
-      () async {
-        await globalState.appController.recoveryData(
-          List<int>.from(await data),
-          recoveryOption,
-        );
-        return true;
-      },
-      title: appLocalizations.recovery,
-    );
+    final res = await commonScaffoldState?.loadingRun<bool>(() async {
+      await globalState.appController.recoveryData(
+        List<int>.from(await data),
+        recoveryOption,
+      );
+      return true;
+    }, title: appLocalizations.recovery);
     if (res != true) return;
     await globalState.showMessage(
       title: appLocalizations.recovery,
@@ -69,54 +66,50 @@ class BackupAndRecovery extends ConsumerWidget {
     await _recoveryOnLocal(context, recoveryOption);
   }
 
-
   Future<void> _handleUpdateRecoveryStrategy(WidgetRef ref) async {
-    final recoveryStrategy = ref.read(appSettingProvider.select(
-      (state) => state.recoveryStrategy,
-    ));
+    final recoveryStrategy = ref.read(
+      appSettingProvider.select((state) => state.recoveryStrategy),
+    );
     final res = await globalState.showCommonDialog(
       child: OptionsDialog<RecoveryStrategy>(
         title: appLocalizations.recoveryStrategy,
         options: RecoveryStrategy.values,
-        textBuilder: (mode) => Intl.message(
-          "recoveryStrategy_${mode.name}",
-        ),
+        textBuilder: (mode) => Intl.message("recoveryStrategy_${mode.name}"),
         value: recoveryStrategy,
       ),
     );
     if (res == null) {
       return;
     }
-    ref.read(appSettingProvider.notifier).updateState(
-          (state) => state.copyWith(
-            recoveryStrategy: res,
-          ),
-        );
+    ref
+        .read(appSettingProvider.notifier)
+        .updateState((state) => state.copyWith(recoveryStrategy: res));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => ListView(
-      children: [
-        ListHeader(title: appLocalizations.local),
-        ListItem(
-          onTap: () {
-            _backupOnLocal(context);
-          },
-          title: Text(appLocalizations.backup),
-          subtitle: Text(appLocalizations.localBackupDesc),
-        ),
-        ListItem(
-          onTap: () {
-            _handleRecoveryOnLocal(context);
-          },
-          title: Text(appLocalizations.recovery),
-          subtitle: Text(appLocalizations.localRecoveryDesc),
-        ),
-        ListHeader(title: appLocalizations.options),
-        Consumer(builder: (_, ref, _) {
-          final recoveryStrategy = ref.watch(appSettingProvider.select(
-            (state) => state.recoveryStrategy,
-          ));
+    children: [
+      ListHeader(title: appLocalizations.local),
+      ListItem(
+        onTap: () {
+          _backupOnLocal(context);
+        },
+        title: Text(appLocalizations.backup),
+        subtitle: Text(appLocalizations.localBackupDesc),
+      ),
+      ListItem(
+        onTap: () {
+          _handleRecoveryOnLocal(context);
+        },
+        title: Text(appLocalizations.recovery),
+        subtitle: Text(appLocalizations.localRecoveryDesc),
+      ),
+      ListHeader(title: appLocalizations.options),
+      Consumer(
+        builder: (_, ref, _) {
+          final recoveryStrategy = ref.watch(
+            appSettingProvider.select((state) => state.recoveryStrategy),
+          );
           return ListItem(
             onTap: () {
               _handleUpdateRecoveryStrategy(ref);
@@ -131,9 +124,10 @@ class BackupAndRecovery extends ConsumerWidget {
               ),
             ),
           );
-        }),
-      ],
-    );
+        },
+      ),
+    ],
+  );
 }
 
 class RecoveryOptionsDialog extends StatefulWidget {
@@ -151,26 +145,23 @@ class _RecoveryOptionsDialogState extends State<RecoveryOptionsDialog> {
 
   @override
   Widget build(BuildContext context) => CommonDialog(
-        title: appLocalizations.recovery,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 16,
+    title: appLocalizations.recovery,
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+    child: Wrap(
+      children: [
+        ListItem(
+          onTap: () {
+            _handleOnTab(RecoveryOption.onlyProfiles);
+          },
+          title: Text(appLocalizations.recoveryProfiles),
         ),
-        child: Wrap(
-          children: [
-            ListItem(
-              onTap: () {
-                _handleOnTab(RecoveryOption.onlyProfiles);
-              },
-              title: Text(appLocalizations.recoveryProfiles),
-            ),
-            ListItem(
-              onTap: () {
-                _handleOnTab(RecoveryOption.all);
-              },
-              title: Text(appLocalizations.recoveryAll),
-            )
-          ],
+        ListItem(
+          onTap: () {
+            _handleOnTab(RecoveryOption.all);
+          },
+          title: Text(appLocalizations.recoveryAll),
         ),
-      );
+      ],
+    ),
+  );
 }

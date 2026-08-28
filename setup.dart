@@ -200,10 +200,10 @@ class Build {
       runInShell: runInShell,
     );
     process.stdout.listen((data) {
-      print(utf8.decode(data));
+      print(utf8.decode(data, allowMalformed: true));
     });
     process.stderr.listen((data) {
-      print(utf8.decode(data));
+      print(utf8.decode(data, allowMalformed: true));
     });
     final exitCode = await process.exitCode;
     if (exitCode != 0 && name != null) throw "$name error";
@@ -218,19 +218,21 @@ class Build {
     return sha256.convert(await stream.reduce((a, b) => a + b)).toString();
   }
 
+  /// Reads mihomo version from [core/go.mod] (single source of truth).
   static Future<String> extractCoreVersion() async {
-    final versionFile = File(join("core", "constant", "version.go"));
-    if (!versionFile.existsSync()) {
-      throw "core/constant/version.go file not found";
+    final goMod = File(join("core", "go.mod"));
+    if (!goMod.existsSync()) {
+      throw "core/go.mod file not found";
     }
-    final content = await versionFile.readAsString();
-    final match = RegExp(r'Version\s*=\s*"([^"]+)"').firstMatch(content);
+    final content = await goMod.readAsString();
+    final match = RegExp(r'github\.com/metacubex/mihomo\s+(v[\d.]+)').firstMatch(content);
     if (match == null) {
-      throw "Could not extract Version from core/constant/version.go";
+      throw "Could not extract mihomo version from core/go.mod";
     }
     return match.group(1)!;
   }
 
+  /// Writes [lib/core_version.dart] so Flutter can show the same version without dart-define.
   static Future<void> syncCoreVersionDartFile() async {
     final v = await extractCoreVersion();
     final out = File(join(current, "lib", "core_version.dart"));

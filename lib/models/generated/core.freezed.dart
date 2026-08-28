@@ -901,7 +901,7 @@ $VpnPropsCopyWith<$Res> get vpnProps {
 /// @nodoc
 mixin _$AndroidVpnOptions {
 
- bool get enable; int get port; AccessControl? get accessControl; bool get allowBypass; bool get systemProxy; List<String> get bypassDomain; String get ipv4Address; String get ipv6Address; List<String> get routeAddress; String get dnsServerAddress;
+ bool get enable; int get port; AccessControl? get accessControl; bool get allowBypass; bool get systemProxy; List<String> get bypassDomain; String get ipv4Address; String get ipv6Address; List<String> get routeAddress; String get dnsServerAddress; List<String> get includePackage; List<String> get excludePackage;
 /// Create a copy of AndroidVpnOptions
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -914,16 +914,16 @@ $AndroidVpnOptionsCopyWith<AndroidVpnOptions> get copyWith => _$AndroidVpnOption
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidVpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.ipv4Address, ipv4Address) || other.ipv4Address == ipv4Address)&&(identical(other.ipv6Address, ipv6Address) || other.ipv6Address == ipv6Address)&&const DeepCollectionEquality().equals(other.routeAddress, routeAddress)&&(identical(other.dnsServerAddress, dnsServerAddress) || other.dnsServerAddress == dnsServerAddress));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidVpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.ipv4Address, ipv4Address) || other.ipv4Address == ipv4Address)&&(identical(other.ipv6Address, ipv6Address) || other.ipv6Address == ipv6Address)&&const DeepCollectionEquality().equals(other.routeAddress, routeAddress)&&(identical(other.dnsServerAddress, dnsServerAddress) || other.dnsServerAddress == dnsServerAddress)&&const DeepCollectionEquality().equals(other.includePackage, includePackage)&&const DeepCollectionEquality().equals(other.excludePackage, excludePackage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,enable,port,accessControl,allowBypass,systemProxy,const DeepCollectionEquality().hash(bypassDomain),ipv4Address,ipv6Address,const DeepCollectionEquality().hash(routeAddress),dnsServerAddress);
+int get hashCode => Object.hash(runtimeType,enable,port,accessControl,allowBypass,systemProxy,const DeepCollectionEquality().hash(bypassDomain),ipv4Address,ipv6Address,const DeepCollectionEquality().hash(routeAddress),dnsServerAddress,const DeepCollectionEquality().hash(includePackage),const DeepCollectionEquality().hash(excludePackage));
 
 @override
 String toString() {
-  return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress)';
+  return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress, includePackage: $includePackage, excludePackage: $excludePackage)';
 }
 
 
@@ -934,7 +934,7 @@ abstract mixin class $AndroidVpnOptionsCopyWith<$Res>  {
   factory $AndroidVpnOptionsCopyWith(AndroidVpnOptions value, $Res Function(AndroidVpnOptions) _then) = _$AndroidVpnOptionsCopyWithImpl;
 @useResult
 $Res call({
- bool enable, int port, AccessControl? accessControl, bool allowBypass, bool systemProxy, List<String> bypassDomain, String ipv4Address, String ipv6Address, List<String> routeAddress, String dnsServerAddress
+ bool enable, int port, AccessControl? accessControl, bool allowBypass, bool systemProxy, List<String> bypassDomain, String ipv4Address, String ipv6Address, List<String> routeAddress, String dnsServerAddress, List<String> includePackage, List<String> excludePackage
 });
 
 
@@ -951,7 +951,7 @@ class _$AndroidVpnOptionsCopyWithImpl<$Res>
 
 /// Create a copy of AndroidVpnOptions
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? port = null,Object? accessControl = freezed,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? ipv4Address = null,Object? ipv6Address = null,Object? routeAddress = null,Object? dnsServerAddress = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? port = null,Object? accessControl = freezed,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? ipv4Address = null,Object? ipv6Address = null,Object? routeAddress = null,Object? dnsServerAddress = null,Object? includePackage = null,Object? excludePackage = null,}) {
   return _then(AndroidVpnOptions(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
@@ -963,7 +963,9 @@ as List<String>,ipv4Address: null == ipv4Address ? _self.ipv4Address : ipv4Addre
 as String,ipv6Address: null == ipv6Address ? _self.ipv6Address : ipv6Address // ignore: cast_nullable_to_non_nullable
 as String,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,dnsServerAddress: null == dnsServerAddress ? _self.dnsServerAddress : dnsServerAddress // ignore: cast_nullable_to_non_nullable
-as String,
+as String,includePackage: null == includePackage ? _self.includePackage : includePackage // ignore: cast_nullable_to_non_nullable
+as List<String>,excludePackage: null == excludePackage ? _self.excludePackage : excludePackage // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 /// Create a copy of AndroidVpnOptions
@@ -1060,10 +1062,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress,  List<String> includePackage,  List<String> excludePackage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidVpnOptions() when $default != null:
-return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress);case _:
+return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress,_that.includePackage,_that.excludePackage);case _:
   return orElse();
 
 }
@@ -1081,10 +1083,10 @@ return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress,  List<String> includePackage,  List<String> excludePackage)  $default,) {final _that = this;
 switch (_that) {
 case _AndroidVpnOptions():
-return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress);case _:
+return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress,_that.includePackage,_that.excludePackage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1101,10 +1103,10 @@ return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  int port,  AccessControl? accessControl,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String ipv4Address,  String ipv6Address,  List<String> routeAddress,  String dnsServerAddress,  List<String> includePackage,  List<String> excludePackage)?  $default,) {final _that = this;
 switch (_that) {
 case _AndroidVpnOptions() when $default != null:
-return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress);case _:
+return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.ipv4Address,_that.ipv6Address,_that.routeAddress,_that.dnsServerAddress,_that.includePackage,_that.excludePackage);case _:
   return null;
 
 }
@@ -1116,7 +1118,7 @@ return $default(_that.enable,_that.port,_that.accessControl,_that.allowBypass,_t
 @JsonSerializable()
 
 class _AndroidVpnOptions implements AndroidVpnOptions {
-  const _AndroidVpnOptions({required this.enable, required this.port, required this.accessControl, required this.allowBypass, required this.systemProxy, required  List<String> bypassDomain, required this.ipv4Address, required this.ipv6Address,  List<String> routeAddress = const [], required this.dnsServerAddress}): _bypassDomain = bypassDomain,_routeAddress = routeAddress;
+  const _AndroidVpnOptions({required this.enable, required this.port, required this.accessControl, required this.allowBypass, required this.systemProxy, required  List<String> bypassDomain, required this.ipv4Address, required this.ipv6Address,  List<String> routeAddress = const [], required this.dnsServerAddress,  List<String> includePackage = const [],  List<String> excludePackage = const []}): _bypassDomain = bypassDomain,_routeAddress = routeAddress,_includePackage = includePackage,_excludePackage = excludePackage;
   factory _AndroidVpnOptions.fromJson(Map<String, dynamic> json) => _$AndroidVpnOptionsFromJson(json);
 
 @override final  bool enable;
@@ -1141,6 +1143,20 @@ class _AndroidVpnOptions implements AndroidVpnOptions {
 }
 
 @override final  String dnsServerAddress;
+ final  List<String> _includePackage;
+@override@JsonKey() List<String> get includePackage {
+  if (_includePackage is EqualUnmodifiableListView) return _includePackage;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_includePackage);
+}
+
+ final  List<String> _excludePackage;
+@override@JsonKey() List<String> get excludePackage {
+  if (_excludePackage is EqualUnmodifiableListView) return _excludePackage;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_excludePackage);
+}
+
 
 /// Create a copy of AndroidVpnOptions
 /// with the given fields replaced by the non-null parameter values.
@@ -1155,16 +1171,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidVpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.ipv4Address, ipv4Address) || other.ipv4Address == ipv4Address)&&(identical(other.ipv6Address, ipv6Address) || other.ipv6Address == ipv6Address)&&const DeepCollectionEquality().equals(other._routeAddress, _routeAddress)&&(identical(other.dnsServerAddress, dnsServerAddress) || other.dnsServerAddress == dnsServerAddress));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidVpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.ipv4Address, ipv4Address) || other.ipv4Address == ipv4Address)&&(identical(other.ipv6Address, ipv6Address) || other.ipv6Address == ipv6Address)&&const DeepCollectionEquality().equals(other._routeAddress, _routeAddress)&&(identical(other.dnsServerAddress, dnsServerAddress) || other.dnsServerAddress == dnsServerAddress)&&const DeepCollectionEquality().equals(other._includePackage, _includePackage)&&const DeepCollectionEquality().equals(other._excludePackage, _excludePackage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,enable,port,accessControl,allowBypass,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),ipv4Address,ipv6Address,const DeepCollectionEquality().hash(_routeAddress),dnsServerAddress);
+int get hashCode => Object.hash(runtimeType,enable,port,accessControl,allowBypass,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),ipv4Address,ipv6Address,const DeepCollectionEquality().hash(_routeAddress),dnsServerAddress,const DeepCollectionEquality().hash(_includePackage),const DeepCollectionEquality().hash(_excludePackage));
 
 @override
 String toString() {
-  return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress)';
+  return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress, includePackage: $includePackage, excludePackage: $excludePackage)';
 }
 
 
@@ -1175,7 +1191,7 @@ abstract mixin class _$AndroidVpnOptionsCopyWith<$Res> implements $AndroidVpnOpt
   factory _$AndroidVpnOptionsCopyWith(_AndroidVpnOptions value, $Res Function(_AndroidVpnOptions) _then) = __$AndroidVpnOptionsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enable, int port, AccessControl? accessControl, bool allowBypass, bool systemProxy, List<String> bypassDomain, String ipv4Address, String ipv6Address, List<String> routeAddress, String dnsServerAddress
+ bool enable, int port, AccessControl? accessControl, bool allowBypass, bool systemProxy, List<String> bypassDomain, String ipv4Address, String ipv6Address, List<String> routeAddress, String dnsServerAddress, List<String> includePackage, List<String> excludePackage
 });
 
 
@@ -1192,7 +1208,7 @@ class __$AndroidVpnOptionsCopyWithImpl<$Res>
 
 /// Create a copy of AndroidVpnOptions
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? port = null,Object? accessControl = freezed,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? ipv4Address = null,Object? ipv6Address = null,Object? routeAddress = null,Object? dnsServerAddress = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? port = null,Object? accessControl = freezed,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? ipv4Address = null,Object? ipv6Address = null,Object? routeAddress = null,Object? dnsServerAddress = null,Object? includePackage = null,Object? excludePackage = null,}) {
   return _then(_AndroidVpnOptions(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
@@ -1204,7 +1220,9 @@ as List<String>,ipv4Address: null == ipv4Address ? _self.ipv4Address : ipv4Addre
 as String,ipv6Address: null == ipv6Address ? _self.ipv6Address : ipv6Address // ignore: cast_nullable_to_non_nullable
 as String,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,dnsServerAddress: null == dnsServerAddress ? _self.dnsServerAddress : dnsServerAddress // ignore: cast_nullable_to_non_nullable
-as String,
+as String,includePackage: null == includePackage ? _self._includePackage : includePackage // ignore: cast_nullable_to_non_nullable
+as List<String>,excludePackage: null == excludePackage ? _self._excludePackage : excludePackage // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

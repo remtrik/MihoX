@@ -4,41 +4,34 @@ import 'package:flutter/widgets.dart';
 import 'package:mihox/state.dart';
 
 class CommonPopScope extends StatelessWidget {
-  const CommonPopScope({
-    super.key,
-    required this.child,
-    this.onPop,
-  });
+  const CommonPopScope({super.key, required this.child, this.onPop});
   final Widget child;
   final FutureOr<bool> Function()? onPop;
 
   @override
   Widget build(BuildContext context) => PopScope(
-        canPop: onPop == null ? true : false,
-        onPopInvokedWithResult: onPop == null
-            ? null
-            : (didPop, _) async {
-                if (didPop) {
-                  return;
-                }
-                final res = await onPop!();
-                if (!context.mounted) {
-                  return;
-                }
-                if (!res) {
-                  return;
-                }
-                Navigator.of(context).pop();
-              },
-        child: child,
-      );
+    canPop: onPop == null ? true : false,
+    onPopInvokedWithResult: onPop == null
+        ? null
+        : (didPop, _) async {
+            if (didPop) {
+              return;
+            }
+            final res = await onPop!();
+            if (!context.mounted) {
+              return;
+            }
+            if (!res) {
+              return;
+            }
+            Navigator.of(context).pop();
+          },
+    child: child,
+  );
 }
 
 class SystemBackBlock extends StatefulWidget {
-  const SystemBackBlock({
-    super.key,
-    required this.child,
-  });
+  const SystemBackBlock({super.key, required this.child});
   final Widget child;
 
   @override

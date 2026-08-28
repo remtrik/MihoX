@@ -50,15 +50,15 @@ class _LogConnectionsBodyState extends ConsumerState<LogConnectionsBody> {
         keywords: widget.keywords,
       ),
     );
-    ref.listenManual(
-      requestsProvider.select((state) => state.list),
-      (prev, next) {
-        if (!connectionListEquality.equals(prev, next)) {
-          _requests = next;
-          updateRequestsThrottler();
-        }
-      },
-    );
+    ref.listenManual(requestsProvider.select((state) => state.list), (
+      prev,
+      next,
+    ) {
+      if (!connectionListEquality.equals(prev, next)) {
+        _requests = next;
+        updateRequestsThrottler();
+      }
+    });
   }
 
   @override
@@ -116,21 +116,17 @@ class _LogConnectionsBodyState extends ConsumerState<LogConnectionsBody> {
         await Future.delayed(const Duration(milliseconds: 300));
       }
       final parts = _requests.batch(10);
-      globalState.cacheHeightMap[_tag] ??= FixedMap(
-        _requests.length,
-      );
+      globalState.cacheHeightMap[_tag] ??= FixedMap(_requests.length);
       for (var i = 0; i < parts.length; i++) {
         final part = parts[i];
-        await Future(
-          () {
-            for (final request in part) {
-              globalState.cacheHeightMap[_tag]?.updateCacheValue(
-                request.id,
-                () => _calcCacheHeight(request),
-              );
-            }
-          },
-        );
+        await Future(() {
+          for (final request in part) {
+            globalState.cacheHeightMap[_tag]?.updateCacheValue(
+              request.id,
+              () => _calcCacheHeight(request),
+            );
+          }
+        });
       }
       _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
         loading: false,
@@ -140,76 +136,71 @@ class _LogConnectionsBodyState extends ConsumerState<LogConnectionsBody> {
 
   @override
   Widget build(BuildContext context) => TextScaleNotification(
-        child: ValueListenableBuilder<ConnectionsState>(
-          valueListenable: _requestsStateNotifier,
-          builder: (_, state, _) {
-            _preLoad();
-            final connections = state.list;
-            final items = connections
-                .map<Widget>(
-                  (connection) => ConnectionRow(
-                    key: Key(connection.id),
-                    connection: connection,
-                    mode: ConnectionRowMode.log,
-                    onClickKeyword: (value) {
-                      context.commonScaffoldState?.addKeyword(value);
-                    },
-                  ),
-                )
-                .separated(
-                  const Divider(
-                    height: 0,
-                  ),
-                )
-                .toList();
-            final content = connections.isEmpty
-                ? NullStatus(
-                    label: appLocalizations
-                        .nullTip(appLocalizations.connectionsLog.toLowerCase()),
-                  )
-                : Align(
-                    alignment: Alignment.topCenter,
-                    child: ScrollToEndBox(
-                      controller: _scrollController,
+    child: ValueListenableBuilder<ConnectionsState>(
+      valueListenable: _requestsStateNotifier,
+      builder: (_, state, _) {
+        _preLoad();
+        final connections = state.list;
+        final items = connections
+            .map<Widget>(
+              (connection) => ConnectionRow(
+                key: Key(connection.id),
+                connection: connection,
+                mode: ConnectionRowMode.log,
+                onClickKeyword: (value) {
+                  context.commonScaffoldState?.addKeyword(value);
+                },
+              ),
+            )
+            .separated(const Divider(height: 0))
+            .toList();
+        final content = connections.isEmpty
+            ? NullStatus(
+                label: appLocalizations.nullTip(
+                  appLocalizations.connectionsLog.toLowerCase(),
+                ),
+              )
+            : Align(
+                alignment: Alignment.topCenter,
+                child: ScrollToEndBox(
+                  controller: _scrollController,
+                  tag: _tag,
+                  dataSource: connections,
+                  child: CommonScrollBar(
+                    controller: _scrollController,
+                    child: CacheItemExtentListView(
                       tag: _tag,
-                      dataSource: connections,
-                      child: CommonScrollBar(
-                        controller: _scrollController,
-                        child: CacheItemExtentListView(
-                          tag: _tag,
-                          reverse: true,
-                          shrinkWrap: true,
-                          physics: const NextClampingScrollPhysics(),
-                          controller: _scrollController,
-                          itemExtentBuilder: (index) {
-                            if (index.isOdd) {
-                              return 0;
-                            }
-                            return _calcCacheHeight(connections[index ~/ 2]);
-                          },
-                          itemBuilder: (_, index) => items[index],
-                          itemCount: items.length,
-                          keyBuilder: (index) {
-                            if (index.isOdd) {
-                              return "divider";
-                            }
-                            return connections[index ~/ 2].id;
-                          },
-                        ),
-                      ),
+                      reverse: true,
+                      shrinkWrap: true,
+                      physics: const NextClampingScrollPhysics(),
+                      controller: _scrollController,
+                      itemExtentBuilder: (index) {
+                        if (index.isOdd) {
+                          return 0;
+                        }
+                        return _calcCacheHeight(connections[index ~/ 2]);
+                      },
+                      itemBuilder: (_, index) => items[index],
+                      itemCount: items.length,
+                      keyBuilder: (index) {
+                        if (index.isOdd) {
+                          return "divider";
+                        }
+                        return connections[index ~/ 2].id;
+                      },
                     ),
-                  );
-            return FadeBox(
-              child: state.loading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : content,
-            );
-          },
-        ),
-        onNotification: (_) {
-          globalState.cacheHeightMap[_tag]?.clear();
-        },
-      );
+                  ),
+                ),
+              );
+        return FadeBox(
+          child: state.loading
+              ? const Center(child: CircularProgressIndicator())
+              : content,
+        );
+      },
+    ),
+    onNotification: (_) {
+      globalState.cacheHeightMap[_tag]?.clear();
+    },
+  );
 }

@@ -39,19 +39,19 @@ class CommonScaffold extends ConsumerStatefulWidget {
     required List<Widget> actions,
     bool disableBackground = false,
   }) : this(
-          key: key,
-          body: body,
-          title: title,
-          automaticallyImplyLeading: false,
-          actions: actions,
-          disableBackground: disableBackground,
-          leading: IconButton(
-            icon: const BackButtonIcon(),
-            onPressed: () {
-              onBack();
-            },
-          ),
-        );
+         key: key,
+         body: body,
+         title: title,
+         automaticallyImplyLeading: false,
+         actions: actions,
+         disableBackground: disableBackground,
+         leading: IconButton(
+           icon: const BackButtonIcon(),
+           onPressed: () {
+             onBack();
+           },
+         ),
+       );
   final AppBar? appBar;
   final Widget body;
   final Widget? bottomNavigationBar;
@@ -98,9 +98,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   void initState() {
     super.initState();
     _appBarState = ValueNotifier(
-      AppBarState(
-        editState: widget.appBarEditState,
-      ),
+      AppBarState(editState: widget.appBarEditState),
     );
   }
 
@@ -108,9 +106,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     AppBarSearchState? Function(AppBarSearchState? state) builder,
   ) {
     _appBarState.value = _appBarState.value.copyWith(
-      searchState: builder(
-        _appBarState.value.searchState,
-      ),
+      searchState: builder(_appBarState.value.searchState),
     );
   }
 
@@ -118,9 +114,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     AppBarEditState? Function(AppBarEditState? state) builder,
   ) {
     _appBarState.value = _appBarState.value.copyWith(
-      editState: builder(
-        _appBarState.value.editState,
-      ),
+      editState: builder(_appBarState.value.editState),
     );
   }
 
@@ -164,9 +158,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     } catch (e) {
       await globalState.showMessage(
         title: title ?? appLocalizations.tip,
-        message: TextSpan(
-          text: e.toString(),
-        ),
+        message: TextSpan(text: e.toString()),
       );
       _loading.value = false;
       return null;
@@ -186,20 +178,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       _handleClearInput();
       return;
     }
-    updateSearchState(
-      (state) => state?.copyWith(
-        isSearch: false,
-      ),
-    );
+    updateSearchState((state) => state?.copyWith(isSearch: false));
   }
 
   void _handleExitSearching() {
     _handleClearInput();
-    updateSearchState(
-      (state) => state?.copyWith(
-        isSearch: false,
-      ),
-    );
+    updateSearchState((state) => state?.copyWith(isSearch: false));
   }
 
   @override
@@ -266,9 +250,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               startState.onSearch(value);
             }
           },
-          decoration: InputDecoration(
-            hintText: appLocalizations.search,
-          ),
+          decoration: InputDecoration(hintText: appLocalizations.search),
         )
       : Text(
           !_isEdit
@@ -284,29 +266,20 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   ) {
     if (_isSearch) {
       return genActions([
-        IconButton(
-          onPressed: _handleClear,
-          icon: const Icon(Icons.close),
-        ),
+        IconButton(onPressed: _handleClear, icon: const Icon(Icons.close)),
       ]);
     }
 
     final hasSearch = searchState != null;
     final searchButton = IconButton(
       onPressed: () {
-        updateSearchState(
-          (state) => state?.copyWith(
-            isSearch: true,
-          ),
-        );
+        updateSearchState((state) => state?.copyWith(isSearch: true));
       },
       icon: const Icon(Icons.search),
     );
 
     if (!hasSearch) {
-      return genActions([
-        ...actions,
-      ]);
+      return genActions([...actions]);
     }
 
     // For Proxies page we want search at the end; for others keep default
@@ -314,16 +287,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final shouldPutSearchAtEnd = actions.any((w) => w is SearchOrderMarker);
 
     if (shouldPutSearchAtEnd) {
-      return genActions([
-        ...actions,
-        searchButton,
-      ]);
+      return genActions([...actions, searchButton]);
     }
 
-    return genActions([
-      searchButton,
-      ...actions,
-    ]);
+    return genActions([searchButton, ...actions]);
   }
 
   Widget _buildAppBarWrap(Widget child) {
@@ -347,8 +314,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final backgroundUrl =
-        widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
+    final backgroundUrl = widget.disableBackground
+        ? null
+        : ref.watch(backgroundUrlProvider);
     final isTransparent = backgroundUrl != null;
 
     return PreferredSize(
@@ -360,12 +328,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               statusBarColor: Colors.transparent,
               statusBarIconBrightness:
                   Theme.of(context).brightness == Brightness.dark
-                      ? Brightness.light
-                      : Brightness.dark,
+                  ? Brightness.light
+                  : Brightness.dark,
               systemNavigationBarIconBrightness:
                   Theme.of(context).brightness == Brightness.dark
-                      ? Brightness.light
-                      : Brightness.dark,
+                  ? Brightness.light
+                  : Brightness.dark,
               systemNavigationBarColor: widget.bottomNavigationBar != null
                   ? context.colorScheme.surfaceContainer
                   : context.colorScheme.surface,
@@ -381,8 +349,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                   valueListenable: _appBarState,
                   builder: (_, state, _) => _buildAppBarWrap(
                     AppBar(
-                      backgroundColor:
-                          isTransparent ? Colors.transparent : null,
+                      backgroundColor: isTransparent
+                          ? Colors.transparent
+                          : null,
                       elevation: isTransparent ? 0 : null,
                       centerTitle: widget.centerTitle ?? false,
                       automaticallyImplyLeading:
@@ -460,8 +429,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   @override
   Widget build(BuildContext context) {
     assert(widget.appBar != null || widget.title != null);
-    final backgroundUrl =
-        widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
+    final backgroundUrl = widget.disableBackground
+        ? null
+        : ref.watch(backgroundUrlProvider);
 
     final body = SafeArea(
       child: Column(
@@ -500,9 +470,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               );
             },
           ),
-          Expanded(
-            child: widget.body,
-          ),
+          Expanded(child: widget.body),
         ],
       ),
     );
@@ -511,16 +479,16 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       appBar: _buildAppBar(),
       body: body,
       resizeToAvoidBottomInset: true,
-      backgroundColor:
-          backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
-      floatingActionButton: widget.floatingActionButton ??
+      backgroundColor: backgroundUrl != null
+          ? Colors.transparent
+          : widget.backgroundColor,
+      floatingActionButton:
+          widget.floatingActionButton ??
           ValueListenableBuilder<Widget?>(
             valueListenable: _floatingActionButton,
             builder: (_, value, _) => IntrinsicWidth(
               child: IntrinsicHeight(
-                child: FadeScaleBox(
-                  child: value ?? const SizedBox(),
-                ),
+                child: FadeScaleBox(child: value ?? const SizedBox()),
               ),
             ),
           ),
@@ -547,10 +515,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _sideNavigationBar!,
-              Expanded(
-                flex: 1,
-                child: scaffoldWithBackground,
-              ),
+              Expanded(flex: 1, child: scaffoldWithBackground),
             ],
           )
         : scaffoldWithBackground;
@@ -558,12 +523,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 }
 
 List<Widget> genActions(List<Widget> actions, {double? space}) => <Widget>[
-      ...actions.separated(
-        SizedBox(
-          width: space ?? 4,
-        ),
-      ),
-      const SizedBox(
-        width: 8,
-      )
-    ];
+  ...actions.separated(SizedBox(width: space ?? 4)),
+  const SizedBox(width: 8),
+];

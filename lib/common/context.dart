@@ -9,24 +9,13 @@ extension BuildContextExtension on BuildContext {
   Future<void>? showNotifier(String text) =>
       findAncestorStateOfType<MessageManagerState>()?.message(text);
 
-  void showSnackBar(
-    String message, {
-    SnackBarAction? action,
-  }) {
+  void showSnackBar(String message, {SnackBarAction? action}) {
     final width = viewWidth;
     EdgeInsets margin;
     if (width < 600) {
-      margin = const EdgeInsets.only(
-        bottom: 16,
-        right: 16,
-        left: 16,
-      );
+      margin = const EdgeInsets.only(bottom: 16, right: 16, left: 16);
     } else {
-      margin = EdgeInsets.only(
-        bottom: 16,
-        left: 16,
-        right: width - 316,
-      );
+      margin = EdgeInsets.only(bottom: 16, left: 16, right: width - 316);
     }
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(

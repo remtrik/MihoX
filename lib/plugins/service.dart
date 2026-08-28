@@ -1,38 +1,27 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:flutter/services.dart';
-import 'package:mihox/state.dart';
-
-import '../mihomo/lib.dart';
+import 'package:mihox/mihomo/lib.dart';
 
 class Service {
-  factory Service() {
-    _instance ??= Service._internal();
-    return _instance!;
-  }
+  factory Service() => _instance ??= Service._();
+  Service._();
 
-  Service._internal() {
-    methodChannel = const MethodChannel("service");
-  }
   static Service? _instance;
-  late MethodChannel methodChannel;
-  ReceivePort? receiver;
 
-  Future<bool?> init() async => methodChannel.invokeMethod<bool>("init");
+  Future<bool?> init() async {
+    await mihomoLib?.preload();
+    return true;
+  }
 
-  Future<bool?> destroy() async => methodChannel.invokeMethod<bool>("destroy");
+  Future<bool?> destroy() async => mihomoLib?.destroy();
 
   Future<bool?> startVpn() async {
-    final options = await mihomoLib?.getAndroidVpnOptions() ?? "";
-    return methodChannel.invokeMethod<bool>("startVpn", {
-      'data': options,
-    });
+    final rt = await mihomoLib?.startVpn() ?? 0;
+    return rt != 0;
   }
 
-  Future<bool?> stopVpn() async => methodChannel.invokeMethod<bool>("stopVpn");
+  Future<bool?> stopVpn() async => mihomoLib?.stopVpn();
 }
 
-Service? get service =>
-    Platform.isAndroid && !globalState.isService ? Service() : null;
+Service? get service => Platform.isAndroid ? Service() : null;

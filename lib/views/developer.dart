@@ -20,40 +20,39 @@ class DeveloperView extends ConsumerWidget {
           ListItem(
             title: Text(appLocalizations.messageTest),
             onTap: () {
-              context.showNotifier(
-                appLocalizations.messageTestTip,
-              );
+              context.showNotifier(appLocalizations.messageTestTip);
             },
           ),
           ListItem(
             title: Text(appLocalizations.logsTest),
             onTap: () {
               for (var i = 0; i < 1000; i++) {
-                ref.read(requestsProvider.notifier).addRequest(Connection(
-                      id: utils.id,
-                      start: DateTime.now(),
-                      metadata: Metadata(
-                        uid: i * i,
-                        network: utils.generateRandomString(
-                          maxLength: 1000,
-                          minLength: 20,
+                ref
+                    .read(requestsProvider.notifier)
+                    .addRequest(
+                      Connection(
+                        id: utils.id,
+                        start: DateTime.now(),
+                        metadata: Metadata(
+                          uid: i * i,
+                          network: utils.generateRandomString(
+                            maxLength: 1000,
+                            minLength: 20,
+                          ),
+                          sourceIP: '',
+                          sourcePort: '',
+                          destinationIP: '',
+                          destinationPort: '',
+                          host: '',
+                          process: '',
+                          remoteDestination: "",
                         ),
-                        sourceIP: '',
-                        sourcePort: '',
-                        destinationIP: '',
-                        destinationPort: '',
-                        host: '',
-                        process: '',
-                        remoteDestination: "",
+                        chains: ["chains"],
                       ),
-                      chains: ["chains"],
-                    ));
+                    );
                 globalState.appController.addLog(
                   Log.app(
-                    utils.generateRandomString(
-                      maxLength: 200,
-                      minLength: 20,
-                    ),
+                    utils.generateRandomString(maxLength: 200, minLength: 20),
                   ),
                 );
               }
@@ -70,16 +69,14 @@ class DeveloperView extends ConsumerWidget {
             onTap: () async {
               await globalState.appController.handleClear();
             },
-          )
+          ),
         ],
       );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enable = ref.watch(
-      appSettingProvider.select(
-        (state) => state.developerMode,
-      ),
+      appSettingProvider.select((state) => state.developerMode),
     );
     return SingleChildScrollView(
       padding: baseInfoEdgeInsets,
@@ -89,27 +86,22 @@ class DeveloperView extends ConsumerWidget {
             type: CommonCardType.filled,
             radius: 18,
             child: ListItem.switchItem(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-              ),
+              padding: const EdgeInsets.only(left: 16, right: 16),
               title: Text(appLocalizations.developerMode),
               delegate: SwitchDelegate(
                 value: enable,
                 onChanged: (value) {
-                  ref.read(appSettingProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          developerMode: value,
-                        ),
+                  ref
+                      .read(appSettingProvider.notifier)
+                      .updateState(
+                        (state) => state.copyWith(developerMode: value),
                       );
                 },
               ),
             ),
           ),
-          const SizedBox(
-            height: 16,
-          ),
-          _getDeveloperList(context, ref)
+          const SizedBox(height: 16),
+          _getDeveloperList(context, ref),
         ],
       ),
     );

@@ -5,10 +5,8 @@ import 'package:mihox/common/common.dart';
 
 @immutable
 class DonutChartData {
-  const DonutChartData({
-    required double value,
-    required this.color,
-  }) : _value = value + 1;
+  const DonutChartData({required double value, required this.color})
+    : _value = value + 1;
   final double _value;
   final Color color;
 
@@ -74,15 +72,15 @@ class _DonutChartState extends State<DonutChart>
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) => CustomPaint(
-          painter: DonutChartPainter(
-            _oldData,
-            widget.data,
-            _animationController.value,
-          ),
-        ),
-      );
+    animation: _animationController,
+    builder: (context, child) => CustomPaint(
+      painter: DonutChartPainter(
+        _oldData,
+        widget.data,
+        _animationController.value,
+      ),
+    ),
+  );
 }
 
 class DonutChartPainter extends CustomPainter {
@@ -134,10 +132,7 @@ class DonutChartPainter extends CustomPainter {
     final gapAngle = 2 * asin(strokeWidth * 1 / (2 * radius)) * 1.2;
 
     final data = interpolatedData;
-    final total = data.fold<double>(
-      0,
-      (sum, item) => sum + item.value,
-    );
+    final total = data.fold<double>(0, (sum, item) => sum + item.value);
 
     if (total <= 0) return;
 

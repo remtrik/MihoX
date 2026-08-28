@@ -34,28 +34,18 @@ class CommonDialog extends ConsumerWidget {
           backgroundColor ?? colorScheme.surface.withValues(alpha: 0.92),
       content: Container(
         constraints: BoxConstraints(
-          maxHeight: min(
-            size.height - 40,
-            500,
-          ),
+          maxHeight: min(size.height - 40, 500),
           maxWidth: 300,
         ),
         width: size.width - 40,
-        child: !overrideScroll
-            ? SingleChildScrollView(
-                child: child,
-              )
-            : child,
+        child: !overrideScroll ? SingleChildScrollView(child: child) : child,
       ),
     );
   }
 }
 
 class CommonModal extends ConsumerWidget {
-  const CommonModal({
-    super.key,
-    this.child,
-  });
+  const CommonModal({super.key, this.child});
   final Widget? child;
 
   @override

@@ -5,9 +5,7 @@ part 'generated/widget.freezed.dart';
 
 @freezed
 abstract class ActivateState with _$ActivateState {
-  const factory ActivateState({
-    required bool active,
-  }) = _ActivateState;
+  const factory ActivateState({required bool active}) = _ActivateState;
 }
 
 @freezed

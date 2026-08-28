@@ -28,7 +28,7 @@ class MihoXHttpOverrides extends HttpOverrides {
     final tunHandlesTraffic =
         Platform.isAndroid || globalState.appState.realTunEnable;
     if (tunHandlesTraffic) return "DIRECT";
-    
+
     final port = globalState.config.patchMihomoConfig.mixedPort;
     if (port == 0) {
       // Mixed-port is disabled and TUN isn't handling traffic — we have no
@@ -43,7 +43,8 @@ class MihoXHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     // ignore: cascade_invocations
-    client.badCertificateCallback = (cert, host, port) => host == "localhost" ? true : false;
+    client.badCertificateCallback = (cert, host, port) =>
+        host == "localhost" ? true : false;
     // ignore: cascade_invocations
     client.findProxy = handleFindProxy;
     return client;

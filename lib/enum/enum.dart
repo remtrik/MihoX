@@ -28,10 +28,7 @@ enum SupportPlatform {
   }
 }
 
-const desktopPlatforms = [
-  SupportPlatform.Linux,
-  SupportPlatform.Windows,
-];
+const desktopPlatforms = [SupportPlatform.Linux, SupportPlatform.Windows];
 
 enum GroupType {
   Selector,
@@ -41,23 +38,20 @@ enum GroupType {
   Relay;
 
   static GroupType parseProfileType(String type) => switch (type) {
-        "url-test" => URLTest,
-        "select" => Selector,
-        "fallback" => Fallback,
-        "load-balance" => LoadBalance,
-        "relay" => Relay,
-        String() => throw UnimplementedError(),
-      };
+    "url-test" => URLTest,
+    "select" => Selector,
+    "fallback" => Fallback,
+    "load-balance" => LoadBalance,
+    "relay" => Relay,
+    String() => throw UnimplementedError(),
+  };
 }
 
 enum GroupName { GLOBAL, Proxy, Auto, Fallback }
 
 extension GroupTypeExtension on GroupType {
-  static List<String> get valueList => GroupType.values
-      .map(
-        (e) => e.toString().split(".").last,
-      )
-      .toList();
+  static List<String> get valueList =>
+      GroupType.values.map((e) => e.toString().split(".").last).toList();
 
   bool get isComputedSelected =>
       [GroupType.URLTest, GroupType.Fallback].contains(this);
@@ -74,11 +68,8 @@ extension GroupTypeExtension on GroupType {
 enum UsedProxy { GLOBAL, DIRECT, REJECT }
 
 extension UsedProxyExtension on UsedProxy {
-  static List<String> get valueList => UsedProxy.values
-      .map(
-        (e) => e.toString().split(".").last,
-      )
-      .toList();
+  static List<String> get valueList =>
+      UsedProxy.values.map((e) => e.toString().split(".").last).toList();
 
   String get value => UsedProxyExtension.valueList[index];
 }
@@ -87,14 +78,7 @@ enum Mode { rule, global, direct }
 
 enum ViewMode { mobile, laptop, desktop }
 
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-  silent,
-  app,
-}
+enum LogLevel { debug, info, warning, error, silent, app }
 
 enum TransportProtocol { udp, tcp }
 
@@ -121,24 +105,13 @@ enum ResultType {
   error,
 }
 
-enum AppMessageType {
-  log,
-  delay,
-  request,
-  loaded,
-}
+enum AppMessageType { log, delay, request, loaded }
 
-enum InvokeMessageType {
-  protect,
-  process,
-}
+enum InvokeMessageType { protect, process }
 
 enum FindProcessMode { always, off, strict }
 
-enum RecoveryOption {
-  all,
-  onlyProfiles,
-}
+enum RecoveryOption { all, onlyProfiles }
 
 enum ChipType { action, delete }
 
@@ -156,7 +129,7 @@ enum DnsMode {
   fakeIp,
   @JsonValue("redir-host")
   redirHost,
-  hosts
+  hosts,
 }
 
 enum ExternalControllerStatus {
@@ -171,28 +144,12 @@ enum ExternalControllerStatus {
 }
 
 enum KeyboardModifier {
-  alt([
-    PhysicalKeyboardKey.altLeft,
-    PhysicalKeyboardKey.altRight,
-  ]),
-  capsLock([
-    PhysicalKeyboardKey.capsLock,
-  ]),
-  control([
-    PhysicalKeyboardKey.controlLeft,
-    PhysicalKeyboardKey.controlRight,
-  ]),
-  fn([
-    PhysicalKeyboardKey.fn,
-  ]),
-  meta([
-    PhysicalKeyboardKey.metaLeft,
-    PhysicalKeyboardKey.metaRight,
-  ]),
-  shift([
-    PhysicalKeyboardKey.shiftLeft,
-    PhysicalKeyboardKey.shiftRight,
-  ]);
+  alt([PhysicalKeyboardKey.altLeft, PhysicalKeyboardKey.altRight]),
+  capsLock([PhysicalKeyboardKey.capsLock]),
+  control([PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight]),
+  fn([PhysicalKeyboardKey.fn]),
+  meta([PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight]),
+  shift([PhysicalKeyboardKey.shiftLeft, PhysicalKeyboardKey.shiftRight]);
 
   const KeyboardModifier(this.physicalKeys);
 
@@ -201,27 +158,18 @@ enum KeyboardModifier {
 
 extension KeyboardModifierExt on KeyboardModifier {
   HotKeyModifier toHotKeyModifier() => switch (this) {
-        KeyboardModifier.alt => HotKeyModifier.alt,
-        KeyboardModifier.capsLock => HotKeyModifier.capsLock,
-        KeyboardModifier.control => HotKeyModifier.control,
-        KeyboardModifier.fn => HotKeyModifier.fn,
-        KeyboardModifier.meta => HotKeyModifier.meta,
-        KeyboardModifier.shift => HotKeyModifier.shift,
-      };
+    KeyboardModifier.alt => HotKeyModifier.alt,
+    KeyboardModifier.capsLock => HotKeyModifier.capsLock,
+    KeyboardModifier.control => HotKeyModifier.control,
+    KeyboardModifier.fn => HotKeyModifier.fn,
+    KeyboardModifier.meta => HotKeyModifier.meta,
+    KeyboardModifier.shift => HotKeyModifier.shift,
+  };
 }
 
-enum HotAction {
-  start,
-  view,
-  mode,
-  proxy,
-  tun,
-}
+enum HotAction { start, view, mode, proxy, tun }
 
-enum ProxiesIconStyle {
-  icon,
-  none,
-}
+enum ProxiesIconStyle { icon, none }
 
 enum FontFamily {
   twEmoji("Twemoji"),
@@ -233,10 +181,7 @@ enum FontFamily {
   final String value;
 }
 
-enum RouteMode {
-  bypassPrivate,
-  config,
-}
+enum RouteMode { bypassPrivate, config }
 
 enum ActionMethod {
   message,
@@ -270,7 +215,9 @@ enum ActionMethod {
   getMemory,
   crash,
   setupConfig,
+  getCoreVersion,
   healthCheck,
+  setUiActive,
   convertV2ray,
 
   ///Android,
@@ -285,11 +232,7 @@ enum ActionMethod {
 
 enum AuthorizeCode { none, success, error }
 
-enum WindowsHelperServiceStatus {
-  none,
-  presence,
-  running,
-}
+enum WindowsHelperServiceStatus { none, presence, running }
 
 enum FunctionTag {
   updateMihomoConfig,
@@ -314,100 +257,34 @@ enum FunctionTag {
 }
 
 enum DashboardWidget {
-  networkSpeed(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: NetworkSpeed(),
-    ),
-  ),
-  outboundModeV2(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: OutboundModeV2(),
-    ),
-  ),
-  outboundMode(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: OutboundMode(),
-    ),
-  ),
-  trafficUsage(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: TrafficUsage(),
-    ),
-  ),
-  announce(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: AnnounceWidget(),
-    ),
-  ),
-  metainfo(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: MetainfoWidget(),
-    ),
-  ),
-  networkDetection(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: NetworkDetection(),
-    ),
-  ),
+  networkSpeed(GridItem(crossAxisCellCount: 8, child: NetworkSpeed())),
+  outboundModeV2(GridItem(crossAxisCellCount: 8, child: OutboundModeV2())),
+  outboundMode(GridItem(crossAxisCellCount: 4, child: OutboundMode())),
+  trafficUsage(GridItem(crossAxisCellCount: 4, child: TrafficUsage())),
+  announce(GridItem(crossAxisCellCount: 8, child: AnnounceWidget())),
+  metainfo(GridItem(crossAxisCellCount: 8, child: MetainfoWidget())),
+  networkDetection(GridItem(crossAxisCellCount: 4, child: NetworkDetection())),
   tunButton(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: TUNButton(),
-    ),
+    GridItem(crossAxisCellCount: 4, child: TUNButton()),
     platforms: desktopPlatforms,
   ),
   vpnButton(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: VpnButton(),
-    ),
-    platforms: [
-      SupportPlatform.Android,
-    ],
+    GridItem(crossAxisCellCount: 4, child: VpnButton()),
+    platforms: [SupportPlatform.Android],
   ),
   systemProxyButton(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: SystemProxyButton(),
-    ),
+    GridItem(crossAxisCellCount: 4, child: SystemProxyButton()),
     platforms: desktopPlatforms,
   ),
-  intranetIp(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: IntranetIP(),
-    ),
-  ),
-  memoryInfo(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: MemoryInfo(),
-    ),
-  ),
+  intranetIp(GridItem(crossAxisCellCount: 4, child: IntranetIP())),
+  memoryInfo(GridItem(crossAxisCellCount: 4, child: MemoryInfo())),
   changeServerButton(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: ChangeServerButton(),
-    ),
+    GridItem(crossAxisCellCount: 8, child: ChangeServerButton()),
   ),
-  serviceInfo(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: ServiceInfoWidget(),
-    ),
-  );
+  serviceInfo(GridItem(crossAxisCellCount: 8, child: ServiceInfoWidget())),
+  zashboardButton(GridItem(crossAxisCellCount: 4, child: ZashboardButton()));
 
-  const DashboardWidget(
-    this.widget, {
-    this.platforms = SupportPlatform.values,
-  });
+  const DashboardWidget(this.widget, {this.platforms = SupportPlatform.values});
 
   final GridItem widget;
   final List<SupportPlatform> platforms;
@@ -427,8 +304,10 @@ extension DashboardWidgetParser on DashboardWidget {
       return [];
     }
 
-    final widgetNames =
-        layoutString.split(',').map((e) => e.trim().toLowerCase()).toList();
+    final widgetNames = layoutString
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .toList();
     final result = <DashboardWidget>[];
 
     for (final name in widgetNames) {
@@ -445,10 +324,7 @@ extension DashboardWidgetParser on DashboardWidget {
   }
 }
 
-enum GeodataLoader {
-  standard,
-  memconservative,
-}
+enum GeodataLoader { standard, memconservative }
 
 enum PageLabel {
   dashboard,
@@ -466,6 +342,7 @@ enum RuleAction {
   DOMAIN_SUFFIX("DOMAIN-SUFFIX"),
   DOMAIN_KEYWORD("DOMAIN-KEYWORD"),
   DOMAIN_REGEX("DOMAIN-REGEX"),
+  DOMAIN_WILDCARD("DOMAIN-WILDCARD"),
   GEOSITE("GEOSITE"),
   IP_CIDR("IP-CIDR"),
   IP_CIDR6("IP-CIDR6"),
@@ -482,10 +359,13 @@ enum RuleAction {
   IN_TYPE("IN-TYPE"),
   IN_USER("IN-USER"),
   IN_NAME("IN-NAME"),
+  REMATCH_NAME("REMATCH-NAME"),
   PROCESS_PATH("PROCESS-PATH"),
   PROCESS_PATH_REGEX("PROCESS-PATH-REGEX"),
+  PROCESS_PATH_WILDCARD("PROCESS-PATH-WILDCARD"),
   PROCESS_NAME("PROCESS-NAME"),
   PROCESS_NAME_REGEX("PROCESS-NAME-REGEX"),
+  PROCESS_NAME_WILDCARD("PROCESS-NAME-WILDCARD"),
   UID("UID"),
   NETWORK("NETWORK"),
   DSCP("DSCP"),
@@ -503,43 +383,24 @@ enum RuleAction {
 
 extension RuleActionExt on RuleAction {
   bool get hasParams => [
-        RuleAction.GEOIP,
-        RuleAction.IP_ASN,
-        RuleAction.SRC_IP_ASN,
-        RuleAction.IP_CIDR,
-        RuleAction.IP_CIDR6,
-        RuleAction.IP_SUFFIX,
-        RuleAction.RULE_SET,
-      ].contains(this);
+    RuleAction.GEOIP,
+    RuleAction.IP_ASN,
+    RuleAction.SRC_IP_ASN,
+    RuleAction.IP_CIDR,
+    RuleAction.IP_CIDR6,
+    RuleAction.IP_SUFFIX,
+    RuleAction.RULE_SET,
+  ].contains(this);
 }
 
-enum OverrideRuleType {
-  override,
-  added,
-}
+enum OverrideRuleType { override, added }
 
-enum RuleTarget {
-  DIRECT,
-  REJECT,
-}
+enum RuleTarget { DIRECT, REJECT }
 
-enum RecoveryStrategy {
-  compatible,
-  override,
-}
+enum RecoveryStrategy { compatible, override }
 
-enum CacheTag {
-  logs,
-  rules,
-  requests,
-}
+enum CacheTag { logs, rules, requests }
 
-enum Language {
-  yaml,
-  javaScript,
-}
+enum Language { yaml, javaScript }
 
-enum ImportOption {
-  file,
-  url,
-}
+enum ImportOption { file, url }

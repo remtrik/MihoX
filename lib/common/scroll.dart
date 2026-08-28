@@ -8,13 +8,13 @@ import 'package:mihox/widgets/scroll.dart';
 class BaseScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.stylus,
-        PointerDeviceKind.invertedStylus,
-        PointerDeviceKind.trackpad,
-        if (system.isDesktop) PointerDeviceKind.mouse,
-        PointerDeviceKind.unknown,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.trackpad,
+    if (system.isDesktop) PointerDeviceKind.mouse,
+    PointerDeviceKind.unknown,
+  };
 }
 
 class HiddenBarScrollBehavior extends BaseScrollBehavior {
@@ -23,8 +23,7 @@ class HiddenBarScrollBehavior extends BaseScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      child;
+  ) => child;
 }
 
 class ShowBarScrollBehavior extends BaseScrollBehavior {
@@ -33,11 +32,7 @@ class ShowBarScrollBehavior extends BaseScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      CommonAutoHiddenScrollBar(
-        controller: details.controller,
-        child: child,
-      );
+  ) => CommonAutoHiddenScrollBar(controller: details.controller, child: child);
 }
 
 class NextClampingScrollPhysics extends ClampingScrollPhysics {
@@ -49,7 +44,9 @@ class NextClampingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   Simulation? createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
+    ScrollMetrics position,
+    double velocity,
+  ) {
     final tolerance = toleranceFor(position);
     if (position.outOfRange) {
       final end = position.pixels > position.maxScrollExtent
@@ -90,15 +87,14 @@ class ReverseScrollController extends ScrollController {
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition? oldPosition,
-  ) =>
-      ReverseScrollPosition(
-        physics: physics,
-        context: context,
-        initialPixels: initialScrollOffset,
-        keepScrollOffset: keepScrollOffset,
-        oldPosition: oldPosition,
-        debugLabel: debugLabel,
-      );
+  ) => ReverseScrollPosition(
+    physics: physics,
+    context: context,
+    initialPixels: initialScrollOffset,
+    keepScrollOffset: keepScrollOffset,
+    oldPosition: oldPosition,
+    debugLabel: debugLabel,
+  );
 }
 
 class ReverseScrollPosition extends ScrollPositionWithSingleContext {

@@ -5,10 +5,7 @@ import 'package:mihox/plugins/app.dart';
 import 'package:mihox/providers/config.dart';
 
 class AndroidManager extends ConsumerStatefulWidget {
-  const AndroidManager({
-    super.key,
-    required this.child,
-  });
+  const AndroidManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -20,8 +17,10 @@ class _AndroidContainerState extends ConsumerState<AndroidManager> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    ref.listenManual(appSettingProvider.select((state) => state.hidden),
-        (prev, next) {
+    ref.listenManual(appSettingProvider.select((state) => state.hidden), (
+      prev,
+      next,
+    ) {
       app?.updateExcludeFromRecents(value: next);
     }, fireImmediately: true);
   }

@@ -5,18 +5,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mihox/common/common.dart';
 
 class CommonTargetIcon extends StatelessWidget {
-  const CommonTargetIcon({
-    super.key,
-    required this.src,
-    required this.size,
-  });
+  const CommonTargetIcon({super.key, required this.src, required this.size});
   final String src;
   final double size;
 
-  Widget _defaultIcon() => Icon(
-        IconsExt.target,
-        size: size,
-      );
+  Widget _defaultIcon() => Icon(IconsExt.target, size: size);
 
   Widget _buildIcon() {
     if (src.isEmpty) {
@@ -65,9 +58,6 @@ class CommonTargetIcon extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        width: size,
-        height: size,
-        child: _buildIcon(),
-      );
+  Widget build(BuildContext context) =>
+      SizedBox(width: size, height: size, child: _buildIcon());
 }

@@ -8,10 +8,7 @@ import 'package:mihox/widgets/widgets.dart';
 import 'receive_profile_dialog.dart';
 
 class AddProfileView extends StatelessWidget {
-  const AddProfileView({
-    super.key,
-    required this.context,
-  });
+  const AddProfileView({super.key, required this.context});
   final BuildContext context;
 
   Future<void> _handleAddProfileFormFile() async {
@@ -27,10 +24,7 @@ class AddProfileView extends StatelessWidget {
       await globalState.appController.addProfileFormQrCode();
       return;
     }
-    final url = await BaseNavigator.push(
-      context,
-      const ScanPage(),
-    );
+    final url = await BaseNavigator.push(context, const ScanPage());
     if (url != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _handleAddProfileFormURL(url);
@@ -59,40 +53,40 @@ class AddProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<bool>(
-        future: system.isAndroidTV,
-        builder: (context, snapshot) {
-          final isTV = snapshot.data ?? false;
-          return ListView(
-            children: [
-              if (isTV)
-                ListItem(
-                  leading: const Icon(Icons.tv_outlined),
-                  title: Text(appLocalizations.addFromPhoneTitle),
-                  subtitle: Text(appLocalizations.addFromPhoneSubtitle),
-                  onTap: _handleReceiveFromPhone,
-                ),
-              ListItem(
-                leading: const Icon(Icons.qr_code_sharp),
-                title: Text(appLocalizations.qrcode),
-                subtitle: Text(appLocalizations.qrcodeDesc),
-                onTap: _toScan,
-              ),
-              ListItem(
-                leading: const Icon(Icons.upload_file_sharp),
-                title: Text(appLocalizations.file),
-                subtitle: Text(appLocalizations.fileDesc),
-                onTap: _handleAddProfileFormFile,
-              ),
-              ListItem(
-                leading: const Icon(Icons.cloud_download_sharp),
-                title: Text(appLocalizations.url),
-                subtitle: Text(appLocalizations.urlDesc),
-                onTap: _toAdd,
-              ),
-            ],
-          );
-        },
+    future: system.isAndroidTV,
+    builder: (context, snapshot) {
+      final isTV = snapshot.data ?? false;
+      return ListView(
+        children: [
+          if (isTV)
+            ListItem(
+              leading: const Icon(Icons.tv_outlined),
+              title: Text(appLocalizations.addFromPhoneTitle),
+              subtitle: Text(appLocalizations.addFromPhoneSubtitle),
+              onTap: _handleReceiveFromPhone,
+            ),
+          ListItem(
+            leading: const Icon(Icons.qr_code_sharp),
+            title: Text(appLocalizations.qrcode),
+            subtitle: Text(appLocalizations.qrcodeDesc),
+            onTap: _toScan,
+          ),
+          ListItem(
+            leading: const Icon(Icons.upload_file_sharp),
+            title: Text(appLocalizations.file),
+            subtitle: Text(appLocalizations.fileDesc),
+            onTap: _handleAddProfileFormFile,
+          ),
+          ListItem(
+            leading: const Icon(Icons.cloud_download_sharp),
+            title: Text(appLocalizations.url),
+            subtitle: Text(appLocalizations.urlDesc),
+            onTap: _toAdd,
+          ),
+        ],
       );
+    },
+  );
 }
 
 class URLFormDialog extends StatefulWidget {
@@ -121,32 +115,32 @@ class _URLFormDialogState extends State<URLFormDialog> {
 
   @override
   Widget build(BuildContext context) => CommonDialog(
-        title: appLocalizations.importFromURL,
-        actions: [
-          TextButton(
-            onPressed: _handlePaste,
-            child: Text(appLocalizations.pasteFromClipboard),
-          ),
-          const SizedBox(width: 8),
-          FilledButton(
-            onPressed: _handleSubmit,
-            child: Text(appLocalizations.submit),
-          ),
-        ],
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: TextField(
-            controller: urlController,
-            keyboardType: TextInputType.url,
-            autofocus: true,
-            minLines: 1,
-            maxLines: 5,
-            onSubmitted: (_) => _handleSubmit(),
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.url,
-            ),
-          ),
+    title: appLocalizations.importFromURL,
+    actions: [
+      TextButton(
+        onPressed: _handlePaste,
+        child: Text(appLocalizations.pasteFromClipboard),
+      ),
+      const SizedBox(width: 8),
+      FilledButton(
+        onPressed: _handleSubmit,
+        child: Text(appLocalizations.submit),
+      ),
+    ],
+    child: Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: TextField(
+        controller: urlController,
+        keyboardType: TextInputType.url,
+        autofocus: true,
+        minLines: 1,
+        maxLines: 5,
+        onSubmitted: (_) => _handleSubmit(),
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.url,
         ),
-      );
+      ),
+    ),
+  );
 }

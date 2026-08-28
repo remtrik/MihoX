@@ -11,7 +11,8 @@ extension CompleterExt<T> on Completer<T> {
     required String functionName,
   }) {
     final realTimeout = timeout ?? const Duration(seconds: 30);
-    Timer(realTimeout + commonDuration, () {
+    Timer? timer;
+    timer = Timer(realTimeout + commonDuration, () {
       if (onLast != null) {
         onLast();
       }
@@ -20,7 +21,9 @@ extension CompleterExt<T> on Completer<T> {
       timeout: realTimeout,
       functionName: functionName,
       onTimeout: onTimeout,
-    );
+    ).whenComplete(() {
+      timer?.cancel();
+    });
   }
 }
 
@@ -29,15 +32,14 @@ extension FutureExt<T> on Future<T> {
     required Duration timeout,
     required String functionName,
     FutureOr<T> Function()? onTimeout,
-  }) =>
-      this.timeout(
-        timeout,
-        onTimeout: () async {
-          if (onTimeout != null) {
-            return onTimeout();
-          } else {
-            throw TimeoutException('$functionName timeout');
-          }
-        },
-      );
+  }) => this.timeout(
+    timeout,
+    onTimeout: () async {
+      if (onTimeout != null) {
+        return onTimeout();
+      } else {
+        throw TimeoutException('$functionName timeout');
+      }
+    },
+  );
 }

@@ -107,12 +107,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
         key: "mmdb",
         geoType: "MMDB",
       ),
-      GeoItem(
-        label: "ASN",
-        fileName: asnFileName,
-        key: "asn",
-        geoType: "ASN",
-      ),
+      GeoItem(label: "ASN", fileName: asnFileName, key: "asn", geoType: "ASN"),
     ];
 
     return Column(
@@ -128,9 +123,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
                 onUpdateStatusChanged: _setFileUpdating,
               );
             },
-            separatorBuilder: (context, index) => const Divider(
-              height: 0,
-            ),
+            separatorBuilder: (context, index) => const Divider(height: 0),
             itemCount: geoItems.length,
           ),
         ),
@@ -166,10 +159,10 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
                   label: Text(AppLocalizations.of(context).updateAllGeoData),
                   onPressed:
                       (_isUpdatingAll || _individuallyUpdating.isNotEmpty)
-                          ? null
-                          : () async {
-                              await globalState.safeRun(_updateAllGeoFiles);
-                            },
+                      ? null
+                      : () async {
+                          await globalState.safeRun(_updateAllGeoFiles);
+                        },
                 ),
               ),
             ),
@@ -192,7 +185,7 @@ class GeoDataListItem extends StatefulWidget {
   final bool isGlobalUpdating;
   final String? currentlyUpdatingFile;
   final void Function(String fileName, {required bool isUpdating})
-      onUpdateStatusChanged;
+  onUpdateStatusChanged;
 
   @override
   State<GeoDataListItem> createState() => _GeoDataListItemState();
@@ -207,10 +200,7 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
     final file = File(join(homePath, fileName));
     final lastModified = file.lastModifiedSync();
     final size = file.lengthSync();
-    return FileInfo(
-      size: size,
-      lastModified: lastModified,
-    );
+    return FileInfo(size: size, lastModified: lastModified);
   }
 
   Future<void> _updateGeoFile() async {
@@ -262,8 +252,9 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
     try {
       final currentProfileId = ref.watch(currentProfileIdProvider);
       if (currentProfileId != null) {
-        final profileConfig =
-            await globalState.getProfileConfig(currentProfileId);
+        final profileConfig = await globalState.getProfileConfig(
+          currentProfileId,
+        );
         final geoXUrl = profileConfig["geox-url"];
         if (geoXUrl != null && geoXUrl is Map) {
           return switch (geoItem.key) {
@@ -275,76 +266,70 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
       }
     } catch (e) {}
 
-    return ref.read(patchMihomoConfigProvider
-        .select((state) => state.geoXUrl.toJson()[geoItem.key]));
+    return ref.read(
+      patchMihomoConfigProvider.select(
+        (state) => state.geoXUrl.toJson()[geoItem.key],
+      ),
+    );
   }
 
   Widget _buildSubtitle() => Consumer(
-        builder: (_, ref, _) => FutureBuilder<String?>(
-          future: _getActiveGeoUrl(ref),
-          builder: (context, urlSnapshot) {
-            final url = urlSnapshot.data;
+    builder: (_, ref, _) => FutureBuilder<String?>(
+      future: _getActiveGeoUrl(ref),
+      builder: (context, urlSnapshot) {
+        final url = urlSnapshot.data;
 
-            if (url == null) {
-              return const SizedBox();
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 4,
-                ),
-                FutureBuilder<FileInfo>(
-                  future: _getGeoFileLastModified(geoItem.fileName),
-                  builder: (_, snapshot) {
-                    final height = globalState.measure.bodyMediumHeight;
-                    return SizedBox(
-                      height: height,
-                      child: snapshot.data == null
-                          ? SizedBox(
-                              width: height,
-                              height: height,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              snapshot.data!.desc,
-                              style: context.textTheme.bodyMedium,
-                            ),
-                    );
-                  },
-                ),
-                Text(
-                  url,
-                  style: context.textTheme.bodyMedium?.toLight,
-                ),
-              ],
-            );
-          },
-        ),
-      );
+        if (url == null) {
+          return const SizedBox();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            FutureBuilder<FileInfo>(
+              future: _getGeoFileLastModified(geoItem.fileName),
+              builder: (_, snapshot) {
+                final height = globalState.measure.bodyMediumHeight;
+                return SizedBox(
+                  height: height,
+                  child: snapshot.data == null
+                      ? SizedBox(
+                          width: height,
+                          height: height,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          snapshot.data!.desc,
+                          style: context.textTheme.bodyMedium,
+                        ),
+                );
+              },
+            ),
+            Text(url, style: context.textTheme.bodyMedium?.toLight),
+          ],
+        );
+      },
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final isThisFileUpdating = widget.isGlobalUpdating &&
+    final isThisFileUpdating =
+        widget.isGlobalUpdating &&
         widget.currentlyUpdatingFile == geoItem.fileName;
     final isDisabled = widget.isGlobalUpdating || _isUpdating;
 
     return ListItem(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text(geoItem.label),
       subtitle: _buildSubtitle(),
       trailing: (_isUpdating || isThisFileUpdating)
           ? const SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             )
           : IconButton(
               icon: const Icon(Icons.sync),
@@ -356,8 +341,12 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
 }
 
 class UpdateGeoUrlFormDialog extends StatefulWidget {
-  const UpdateGeoUrlFormDialog(
-      {super.key, required this.title, required this.url, this.defaultValue});
+  const UpdateGeoUrlFormDialog({
+    super.key,
+    required this.title,
+    required this.url,
+    this.defaultValue,
+  });
   final String title;
   final String url;
   final String? defaultValue;
@@ -390,35 +379,31 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
 
   @override
   Widget build(BuildContext context) => CommonDialog(
-        title: widget.title,
-        actions: [
-          if (widget.defaultValue != null &&
-              urlController.value.text != widget.defaultValue) ...[
-            TextButton(
-              onPressed: _handleReset,
-              child: Text(appLocalizations.reset),
-            ),
-            const SizedBox(
-              width: 4,
-            ),
-          ],
-          TextButton(
-            onPressed: _handleUpdate,
-            child: Text(appLocalizations.submit),
-          )
-        ],
-        child: Wrap(
-          runSpacing: 16,
-          children: [
-            TextField(
-              maxLines: 5,
-              minLines: 1,
-              controller: urlController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+    title: widget.title,
+    actions: [
+      if (widget.defaultValue != null &&
+          urlController.value.text != widget.defaultValue) ...[
+        TextButton(
+          onPressed: _handleReset,
+          child: Text(appLocalizations.reset),
         ),
-      );
+        const SizedBox(width: 4),
+      ],
+      TextButton(
+        onPressed: _handleUpdate,
+        child: Text(appLocalizations.submit),
+      ),
+    ],
+    child: Wrap(
+      runSpacing: 16,
+      children: [
+        TextField(
+          maxLines: 5,
+          minLines: 1,
+          controller: urlController,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+      ],
+    ),
+  );
 }

@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mihox/common/common.dart';
 import 'package:mihox/models/models.dart';
+import 'package:mihox/plugins/app.dart';
 import 'package:mihox/providers/config.dart';
 import 'package:mihox/state.dart';
+import 'package:mihox/views/zashboard.dart';
 import 'package:mihox/widgets/widgets.dart';
 import 'package:path/path.dart';
 
@@ -27,10 +30,9 @@ class _AppSettingSwitchItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(appSettingProvider.select(select));
-    final isEnabled = !requiresOverride ||
-        ref.watch(
-          appSettingProvider.select((s) => s.overrideProviderSettings),
-        );
+    final isEnabled =
+        !requiresOverride ||
+        ref.watch(appSettingProvider.select((s) => s.overrideProviderSettings));
 
     return Opacity(
       opacity: isEnabled ? 1.0 : 0.5,
@@ -41,8 +43,8 @@ class _AppSettingSwitchItem extends ConsumerWidget {
           value: value,
           onChanged: isEnabled
               ? (v) => ref
-                  .read(appSettingProvider.notifier)
-                  .updateState((s) => update(s, value: v))
+                    .read(appSettingProvider.notifier)
+                    .updateState((s) => update(s, value: v))
               : null,
         ),
       ),
@@ -69,7 +71,9 @@ class OverrideProviderSettingsItem extends ConsumerWidget {
           delegate: SwitchDelegate(
             value: overrideProviderSettings,
             onChanged: (value) {
-              ref.read(appSettingProvider.notifier).updateState(
+              ref
+                  .read(appSettingProvider.notifier)
+                  .updateState(
                     (s) => s.copyWith(overrideProviderSettings: value),
                   );
             },
@@ -82,7 +86,11 @@ class OverrideProviderSettingsItem extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: colorScheme.primary),
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -108,12 +116,12 @@ class MinimizeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.minimizeOnExit,
-        subtitle: appLocalizations.minimizeOnExitDesc,
-        select: (s) => s.minimizeOnExit,
-        update: (s, {required value}) => s.copyWith(minimizeOnExit: value),
-        requiresOverride: true,
-      );
+    title: appLocalizations.minimizeOnExit,
+    subtitle: appLocalizations.minimizeOnExitDesc,
+    select: (s) => s.minimizeOnExit,
+    update: (s, {required value}) => s.copyWith(minimizeOnExit: value),
+    requiresOverride: true,
+  );
 }
 
 class AutoLaunchItem extends StatelessWidget {
@@ -121,12 +129,12 @@ class AutoLaunchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.autoLaunch,
-        subtitle: appLocalizations.autoLaunchDesc,
-        select: (s) => s.autoLaunch,
-        update: (s, {required value}) => s.copyWith(autoLaunch: value),
-        requiresOverride: true,
-      );
+    title: appLocalizations.autoLaunch,
+    subtitle: appLocalizations.autoLaunchDesc,
+    select: (s) => s.autoLaunch,
+    update: (s, {required value}) => s.copyWith(autoLaunch: value),
+    requiresOverride: true,
+  );
 }
 
 class SilentLaunchItem extends StatelessWidget {
@@ -134,12 +142,12 @@ class SilentLaunchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.silentLaunch,
-        subtitle: appLocalizations.silentLaunchDesc,
-        select: (s) => s.silentLaunch,
-        update: (s, {required value}) => s.copyWith(silentLaunch: value),
-        requiresOverride: true,
-      );
+    title: appLocalizations.silentLaunch,
+    subtitle: appLocalizations.silentLaunchDesc,
+    select: (s) => s.silentLaunch,
+    update: (s, {required value}) => s.copyWith(silentLaunch: value),
+    requiresOverride: true,
+  );
 }
 
 class AutoRunItem extends StatelessWidget {
@@ -147,12 +155,12 @@ class AutoRunItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.autoRun,
-        subtitle: appLocalizations.autoRunDesc,
-        select: (s) => s.autoRun,
-        update: (s, {required value}) => s.copyWith(autoRun: value),
-        requiresOverride: true,
-      );
+    title: appLocalizations.autoRun,
+    subtitle: appLocalizations.autoRunDesc,
+    select: (s) => s.autoRun,
+    update: (s, {required value}) => s.copyWith(autoRun: value),
+    requiresOverride: true,
+  );
 }
 
 class AutoCheckUpdateItem extends StatelessWidget {
@@ -160,12 +168,12 @@ class AutoCheckUpdateItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.autoCheckUpdate,
-        subtitle: appLocalizations.autoCheckUpdateDesc,
-        select: (s) => s.autoCheckUpdate,
-        update: (s, {required value}) => s.copyWith(autoCheckUpdate: value),
-        requiresOverride: true,
-      );
+    title: appLocalizations.autoCheckUpdate,
+    subtitle: appLocalizations.autoCheckUpdateDesc,
+    select: (s) => s.autoCheckUpdate,
+    update: (s, {required value}) => s.copyWith(autoCheckUpdate: value),
+    requiresOverride: true,
+  );
 }
 
 class CloseConnectionsItem extends StatelessWidget {
@@ -173,11 +181,11 @@ class CloseConnectionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.autoCloseConnections,
-        subtitle: appLocalizations.autoCloseConnectionsDesc,
-        select: (s) => s.closeConnections,
-        update: (s, {required value}) => s.copyWith(closeConnections: value),
-      );
+    title: appLocalizations.autoCloseConnections,
+    subtitle: appLocalizations.autoCloseConnectionsDesc,
+    select: (s) => s.closeConnections,
+    update: (s, {required value}) => s.copyWith(closeConnections: value),
+  );
 }
 
 class UsageItem extends StatelessWidget {
@@ -185,11 +193,11 @@ class UsageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.onlyStatisticsProxy,
-        subtitle: appLocalizations.onlyStatisticsProxyDesc,
-        select: (s) => s.onlyStatisticsProxy,
-        update: (s, {required value}) => s.copyWith(onlyStatisticsProxy: value),
-      );
+    title: appLocalizations.onlyStatisticsProxy,
+    subtitle: appLocalizations.onlyStatisticsProxyDesc,
+    select: (s) => s.onlyStatisticsProxy,
+    update: (s, {required value}) => s.copyWith(onlyStatisticsProxy: value),
+  );
 }
 
 class HiddenItem extends StatelessWidget {
@@ -197,11 +205,84 @@ class HiddenItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.exclude,
-        subtitle: appLocalizations.excludeDesc,
-        select: (s) => s.hidden,
-        update: (s, {required value}) => s.copyWith(hidden: value),
-      );
+    title: appLocalizations.exclude,
+    subtitle: appLocalizations.excludeDesc,
+    select: (s) => s.hidden,
+    update: (s, {required value}) => s.copyWith(hidden: value),
+  );
+}
+
+class BatteryOptimizationItem extends ConsumerStatefulWidget {
+  const BatteryOptimizationItem({super.key});
+
+  @override
+  ConsumerState<BatteryOptimizationItem> createState() =>
+      _BatteryOptimizationItemState();
+}
+
+class _BatteryOptimizationItemState
+    extends ConsumerState<BatteryOptimizationItem>
+    with WidgetsBindingObserver {
+  bool _ignoring = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_refresh());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-read once the user returns from the system exemption dialog/settings.
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refresh());
+    }
+  }
+
+  Future<void> _refresh() async {
+    final ignoring = await app?.isIgnoringBatteryOptimizations() ?? true;
+    if (mounted) {
+      setState(() {
+        _ignoring = ignoring;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListItem(
+    title: Text(appLocalizations.batteryOptimization),
+    subtitle: Text(appLocalizations.batteryOptimizationDesc),
+    trailing: _ignoring
+        ? Icon(Icons.check_circle, color: context.colorScheme.primary)
+        : const Icon(Icons.arrow_forward_ios, size: 16),
+    onTap: _ignoring
+        ? null
+        : () async {
+            await app?.requestIgnoreBatteryOptimizations();
+            await _refresh();
+          },
+  );
+}
+
+class AutoStartItem extends ConsumerWidget {
+  const AutoStartItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => ListItem(
+    title: Text(appLocalizations.autoStart),
+    subtitle: Text(appLocalizations.autoStartDesc),
+    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    onTap: () {
+      unawaited(app?.openAutoStartSettings());
+    },
+  );
 }
 
 class AnimateTabItem extends StatelessWidget {
@@ -209,11 +290,11 @@ class AnimateTabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.tabAnimation,
-        subtitle: appLocalizations.tabAnimationDesc,
-        select: (s) => s.isAnimateToPage,
-        update: (s, {required value}) => s.copyWith(isAnimateToPage: value),
-      );
+    title: appLocalizations.tabAnimation,
+    subtitle: appLocalizations.tabAnimationDesc,
+    select: (s) => s.isAnimateToPage,
+    update: (s, {required value}) => s.copyWith(isAnimateToPage: value),
+  );
 }
 
 class OpenLogsItem extends StatelessWidget {
@@ -221,11 +302,11 @@ class OpenLogsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _AppSettingSwitchItem(
-        title: appLocalizations.logcat,
-        subtitle: appLocalizations.logcatDesc,
-        select: (s) => s.openLogs,
-        update: (s, {required value}) => s.copyWith(openLogs: value),
-      );
+    title: appLocalizations.logcat,
+    subtitle: appLocalizations.logcatDesc,
+    select: (s) => s.openLogs,
+    update: (s, {required value}) => s.copyWith(openLogs: value),
+  );
 }
 
 class OpenLogsFolderItem extends ConsumerWidget {
@@ -262,11 +343,11 @@ class OpenLogsFolderItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => ListItem(
-        title: Text(appLocalizations.openLogsFolder),
-        leading: const Icon(Icons.folder_open),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: _openLogsFolder,
-      );
+    title: Text(appLocalizations.openLogsFolder),
+    leading: const Icon(Icons.folder_open),
+    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    onTap: _openLogsFolder,
+  );
 }
 
 class ResetAppItem extends ConsumerWidget {
@@ -278,10 +359,7 @@ class ResetAppItem extends ConsumerWidget {
     return ListItem(
       title: Text(
         appLocalizations.clearData,
-        style: TextStyle(
-          color: colorScheme.error,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
       ),
       leading: Icon(Icons.delete_forever, color: colorScheme.error),
       onTap: () async {
@@ -300,6 +378,29 @@ class ResetAppItem extends ConsumerWidget {
   }
 }
 
+class ZashboardInAppItem extends ConsumerWidget {
+  const ZashboardInAppItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final zashboardInApp = ref.watch(
+      appSettingProvider.select((state) => state.zashboardInApp),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.zashboardInApp),
+      subtitle: Text(appLocalizations.zashboardInAppDesc),
+      delegate: SwitchDelegate(
+        value: zashboardInApp,
+        onChanged: (value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(zashboardInApp: value));
+        },
+      ),
+    );
+  }
+}
+
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -313,11 +414,18 @@ class ApplicationSettingView extends StatelessWidget {
         const SilentLaunchItem(),
       ],
       const AutoRunItem(),
-      if (Platform.isAndroid) const HiddenItem(),
+      if (Platform.isAndroid) ...[
+        const HiddenItem(),
+        const BatteryOptimizationItem(),
+        const AutoStartItem(),
+      ],
       const AnimateTabItem(),
       const OpenLogsItem(),
       const CloseConnectionsItem(),
       const AutoCheckUpdateItem(),
+      // The in-app webview has no Windows/Linux implementation — hide the
+      // toggle where it could never take effect.
+      if (ZashboardWebViewPage.supported) const ZashboardInAppItem(),
       if (system.isDesktop)
         const Padding(
           padding: EdgeInsets.only(top: 16),

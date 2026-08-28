@@ -9,7 +9,7 @@ import 'package:window_manager/window_manager.dart';
 class Window {
   Future<void> init(int version) async {
     final props = globalState.config.windowProps;
-    
+
     if (!await singleInstanceLock.acquire()) {
       exit(0);
     }
@@ -31,7 +31,9 @@ class Window {
 
     final windowOptions = WindowOptions(
       size: Size(props.width, props.height),
-      minimumSize: const Size(380, 400),
+      // Lock the minimum window size to 380×600 so it can't be shrunk below that
+      // in either dimension — only grown.
+      minimumSize: const Size(380, 600),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.setPreventClose(true);

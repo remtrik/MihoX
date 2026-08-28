@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:mihox/common/file_logger.dart';
+import 'package:mihox/enum/enum.dart';
 import 'package:mihox/models/models.dart';
 import 'package:mihox/state.dart';
 
@@ -12,19 +13,34 @@ class CommonPrint {
   CommonPrint._internal();
   static CommonPrint? _instance;
 
+  static const _levelPriority = {
+    LogLevel.debug: 0,
+    LogLevel.info: 1,
+    LogLevel.warning: 2,
+    LogLevel.error: 3,
+    LogLevel.silent: 4,
+    LogLevel.app: 0,
+  };
+
   void log(String? text) {
     final payload = "[MihoX] $text";
     debugPrint(payload);
 
-    // Write to file log
     fileLogger.log(payload);
 
     if (!globalState.isInit) {
       return;
     }
-    globalState.appController.addLog(
-      Log.app(payload),
-    );
+    final configuredLevel = globalState.effectiveLogLevel.value;
+    final threshold = LogLevel.values
+        .where((l) => l.name == configuredLevel)
+        .firstOrNull;
+    if (threshold != null &&
+        (_levelPriority[LogLevel.app] ?? 0) <
+            (_levelPriority[threshold] ?? 0)) {
+      return;
+    }
+    globalState.appController.addLog(Log.app(payload));
   }
 }
 

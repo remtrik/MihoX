@@ -14,9 +14,8 @@ class LinuxAutoLaunch implements AutoLaunch {
 
   @override
   Future<bool> enable() async {
-    Directory(
-      '${Platform.environment['HOME']}/.config/autostart',
-    ).createSync(recursive: true);
+    Directory('${Platform.environment['HOME']}/.config/autostart')
+        .createSync(recursive: true);
 
     File(_desktopFile).writeAsStringSync('''
 [Desktop Entry]
@@ -43,9 +42,7 @@ X-GNOME-Autostart-enabled=true
   }
 
   @override
-  Future<void> updateStatus({
-    required bool isAutoLaunch,
-  }) async {
+  Future<void> updateStatus({required bool isAutoLaunch}) async {
     if (await isEnable == isAutoLaunch) return;
 
     if (isAutoLaunch) {

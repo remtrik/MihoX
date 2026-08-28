@@ -92,10 +92,7 @@ class ServiceInfoWidget extends ConsumerWidget {
               }
             : null,
         child: Container(
-          padding: baseInfoEdgeInsets.copyWith(
-            top: 8,
-            bottom: 8,
-          ),
+          padding: baseInfoEdgeInsets.copyWith(top: 8, bottom: 8),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,7 +127,7 @@ class ServiceInfoWidget extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    Icons.support_agent,
+                    Icons.contact_support,
                     size: 28,
                     color: context.colorScheme.onPrimary,
                   ),

@@ -11,10 +11,7 @@ import 'package:window_ext/window_ext.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowManager extends ConsumerStatefulWidget {
-  const WindowManager({
-    super.key,
-    required this.child,
-  });
+  const WindowManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -29,19 +26,16 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      appSettingProvider.select((state) => state.autoLaunch),
-      (prev, next) {
-        if (prev != next) {
-          debouncer.call(
-            FunctionTag.autoLaunch,
-            () {
-              autoLaunch?.updateStatus(isAutoLaunch: next);
-            },
-          );
-        }
-      },
-    );
+    ref.listenManual(appSettingProvider.select((state) => state.autoLaunch), (
+      prev,
+      next,
+    ) {
+      if (prev != next) {
+        debouncer.call(FunctionTag.autoLaunch, () {
+          autoLaunch?.updateStatus(isAutoLaunch: next);
+        });
+      }
+    });
     windowExtManager.addListener(this);
     windowManager.addListener(this);
   }
@@ -69,11 +63,10 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   Future<void> onWindowMoved() async {
     super.onWindowMoved();
     final offset = await windowManager.getPosition();
-    ref.read(windowSettingProvider.notifier).updateState(
-          (state) => state.copyWith(
-            top: offset.dy,
-            left: offset.dx,
-          ),
+    ref
+        .read(windowSettingProvider.notifier)
+        .updateState(
+          (state) => state.copyWith(top: offset.dy, left: offset.dx),
         );
   }
 
@@ -81,11 +74,10 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   Future<void> onWindowResized() async {
     super.onWindowResized();
     final size = await windowManager.getSize();
-    ref.read(windowSettingProvider.notifier).updateState(
-          (state) => state.copyWith(
-            width: size.width,
-            height: size.height,
-          ),
+    ref
+        .read(windowSettingProvider.notifier)
+        .updateState(
+          (state) => state.copyWith(width: size.width, height: size.height),
         );
   }
 
@@ -113,33 +105,30 @@ class _WindowContainerState extends ConsumerState<WindowManager>
 }
 
 class WindowHeaderContainer extends StatelessWidget {
-  const WindowHeaderContainer({
-    super.key,
-    required this.child,
-  });
+  const WindowHeaderContainer({super.key, required this.child});
   final Widget child;
 
   @override
   Widget build(BuildContext context) => Consumer(
-        builder: (_, ref, child) => Stack(
+    builder: (_, ref, child) => Stack(
+      children: [
+        Column(
           children: [
-            Column(
-              children: [
-                SizedBox(
-                  height: kHeaderHeight,
-                ),
-                Expanded(
-                  flex: 1,
-                  child: child!,
-                ),
-              ],
-            ),
-            const WindowHeader(),
+            SizedBox(height: kHeaderHeight),
+            Expanded(flex: 1, child: child!),
           ],
         ),
-        child: child,
-      );
+        const WindowHeader(),
+      ],
+    ),
+    child: child,
+  );
 }
+
+// Width of the top resize grab strip. The header's drag region is inset by this
+// amount so the very top edge stays available for resizing the window vertically
+// (the native frameless resize border is too thin to catch reliably).
+const double _kWindowResizeEdge = 8;
 
 class WindowHeader extends StatefulWidget {
   const WindowHeader({super.key});
@@ -195,13 +184,12 @@ class _WindowHeaderState extends State<WindowHeader> {
     required VoidCallback onPressed,
     Color? hoverColor,
     Color? hoverIconColor,
-  }) =>
-      _WindowControlButton(
-        icon: icon,
-        onPressed: onPressed,
-        hoverColor: hoverColor,
-        hoverIconColor: hoverIconColor,
-      );
+  }) => _WindowControlButton(
+    icon: icon,
+    onPressed: onPressed,
+    hoverColor: hoverColor,
+    hoverIconColor: hoverIconColor,
+  );
 
   Widget _buildActions(BuildContext context) {
     final colorScheme = context.colorScheme;
@@ -275,12 +263,33 @@ class _WindowHeaderState extends State<WindowHeader> {
         ),
         child: Stack(
           children: [
-            // Draggable area
-            Positioned.fill(
+            // Draggable area — inset from the very top so the top resize strip can
+            // sit above it; otherwise the drag region swallows the thin native
+            // resize border and the window can't be stretched from the top.
+            Positioned(
+              top: _kWindowResizeEdge,
+              left: 0,
+              right: 0,
+              bottom: 0,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onPanStart: (_) => windowManager.startDragging(),
                 onDoubleTap: _updateMaximized,
+              ),
+            ),
+            // Top resize handle: reliable, comfortably-sized grab zone to resize
+            // the window from the top edge.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: _kWindowResizeEdge,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeUpDown,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanStart: (_) => windowManager.startResizing(ResizeEdge.top),
+                ),
               ),
             ),
             // Content
@@ -303,7 +312,6 @@ class _WindowHeaderState extends State<WindowHeader> {
 
 // Windows 11 style control button with hover effect
 class _WindowControlButton extends StatefulWidget {
-
   const _WindowControlButton({
     required this.icon,
     required this.onPressed,
@@ -368,11 +376,13 @@ class _ConnectionStatusIndicator extends ConsumerWidget {
 
     final statusColor = isStart
         ? const Color(0xFF4CAF50) // Green when connected
-        : colorScheme.onSurface
-            .withValues(alpha: 0.3); // Gray when disconnected
+        : colorScheme.onSurface.withValues(
+            alpha: 0.3,
+          ); // Gray when disconnected
 
-    final statusText =
-        isStart ? appLocalizations.running : appLocalizations.stopped;
+    final statusText = isStart
+        ? appLocalizations.running
+        : appLocalizations.stopped;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -412,24 +422,20 @@ class AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(left: 8),
-        child: const Row(
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircleAvatar(
-                foregroundImage: AssetImage("assets/images/icon.png"),
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-            SizedBox(
-              width: 8,
-            ),
-            Text(
-              appName,
-            ),
-          ],
+    margin: const EdgeInsets.only(left: 8),
+    child: const Row(
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: CircleAvatar(
+            foregroundImage: AssetImage("assets/images/icon.png"),
+            backgroundColor: Colors.transparent,
+          ),
         ),
-      );
+        SizedBox(width: 8),
+        Text(appName),
+      ],
+    ),
+  );
 }

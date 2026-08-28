@@ -18,7 +18,6 @@ type ActionResult struct {
 	Method   Method         `json:"method"`
 	Data     interface{}    `json:"data"`
 	Code     int            `json:"code"`
-	Port     int64          `json:"-"`
 	Callback unsafe.Pointer `json:"-"`
 }
 
@@ -41,70 +40,134 @@ func (result ActionResult) error(data interface{}) {
 
 func handleAction(action *Action, result ActionResult) {
 	switch action.Method {
-	case initMihomoMethod:
-		paramsString := action.Data.(string)
-		result.success(handleInitMihomo(paramsString))
+	case initClashMethod:
+		paramsString, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
+		result.success(handleInitClash(paramsString))
+		return
 	case getIsInitMethod:
 		result.success(handleGetIsInit())
+		return
 	case forceGcMethod:
 		handleForceGc()
 		result.success(true)
+		return
 	case shutdownMethod:
 		result.success(handleShutdown())
+		return
 	case validateConfigMethod:
-		data := []byte(action.Data.(string))
+		s, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
+		data := []byte(s)
 		result.success(handleValidateConfig(data))
+		return
 	case updateConfigMethod:
-		data := []byte(action.Data.(string))
+		s, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
+		data := []byte(s)
 		result.success(handleUpdateConfig(data))
+		return
 	case setupConfigMethod:
-		data := []byte(action.Data.(string))
+		s, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
+		data := []byte(s)
 		result.success(handleSetupConfig(data))
+		return
 	case getProxiesMethod:
 		result.success(handleGetProxies())
+		return
 	case changeProxyMethod:
-		data := action.Data.(string)
+		data, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		handleChangeProxy(data, func(value string) {
 			result.success(value)
 		})
+		return
 	case getTrafficMethod:
 		result.success(handleGetTraffic())
+		return
 	case getTotalTrafficMethod:
 		result.success(handleGetTotalTraffic())
+		return
 	case resetTrafficMethod:
 		handleResetTraffic()
 		result.success(true)
+		return
 	case asyncTestDelayMethod:
-		data := action.Data.(string)
+		data, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		handleAsyncTestDelay(data, func(value string) {
 			result.success(value)
 		})
+		return
 	case getConnectionsMethod:
 		result.success(handleGetConnections())
+		return
 	case closeConnectionsMethod:
 		result.success(handleCloseConnections())
+		return
 	case resetConnectionsMethod:
 		result.success(handleResetConnections())
+		return
 	case getConfigMethod:
-		path := action.Data.(string)
+		path, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		config, err := handleGetConfig(path)
 		if err != nil {
 			result.error(err)
 			return
 		}
 		result.success(config)
+		return
 	case getCoreVersionMethod:
 		result.success(constant.Version)
+		return
 	case closeConnectionMethod:
-		id := action.Data.(string)
+		id, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		result.success(handleCloseConnection(id))
+		return
 	case getExternalProvidersMethod:
 		result.success(handleGetExternalProviders())
+		return
 	case getExternalProviderMethod:
-		externalProviderName := action.Data.(string)
+		externalProviderName, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		result.success(handleGetExternalProvider(externalProviderName))
+		return
 	case updateGeoDataMethod:
-		paramsString := action.Data.(string)
+		paramsString, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		var params = map[string]string{}
 		err := json.Unmarshal([]byte(paramsString), &params)
 		if err != nil {
@@ -116,13 +179,23 @@ func handleAction(action *Action, result ActionResult) {
 		handleUpdateGeoData(geoType, geoName, func(value string) {
 			result.success(value)
 		})
+		return
 	case updateExternalProviderMethod:
-		providerName := action.Data.(string)
+		providerName, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		handleUpdateExternalProvider(providerName, func(value string) {
 			result.success(value)
 		})
+		return
 	case sideLoadExternalProviderMethod:
-		paramsString := action.Data.(string)
+		paramsString, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		var params = map[string]string{}
 		err := json.Unmarshal([]byte(paramsString), &params)
 		if err != nil {
@@ -134,41 +207,72 @@ func handleAction(action *Action, result ActionResult) {
 		handleSideLoadExternalProvider(providerName, []byte(data), func(value string) {
 			result.success(value)
 		})
+		return
 	case startLogMethod:
 		handleStartLog()
 		result.success(true)
+		return
 	case stopLogMethod:
 		handleStopLog()
 		result.success(true)
+		return
 	case startListenerMethod:
 		result.success(handleStartListener())
+		return
 	case stopListenerMethod:
 		result.success(handleStopListener())
+		return
 	case getCountryCodeMethod:
-		ip := action.Data.(string)
+		ip, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		handleGetCountryCode(ip, func(value string) {
 			result.success(value)
 		})
+		return
 	case getMemoryMethod:
 		handleGetMemory(func(value string) {
 			result.success(value)
 		})
+		return
 	case setStateMethod:
-		data := action.Data.(string)
+		data, ok := action.Data.(string)
+		if !ok {
+			result.error("invalid data type")
+			return
+		}
 		handleSetState(data)
 		result.success(true)
+		return
 	case healthCheckMethod:
 		groupName, _ := action.Data.(string)
 		handleHealthCheck(groupName, func(value string) {
 			result.success(value)
 		})
-	case convertV2rayMethod:
-		data := action.Data.(string)
-		result.success(handleConvertV2ray(data))
+		return
+	case healthProbeMethod:
+		handleHealthProbe(func(value string) {
+			result.success(value)
+		})
+		return
+	case setUiActiveMethod:
+		active, _ := action.Data.(bool)
+		handleSetUiActive(active)
+		result.success(true)
+		return
+	case setScreenActiveMethod:
+		active, _ := action.Data.(bool)
+		handleSetScreenActive(active)
+		result.success(true)
+		return
 	case crashMethod:
 		result.success(true)
 		handleCrash()
 	default:
-		nextHandle(action, result)
+		if !nextHandle(action, result) {
+			result.error("unknown method: " + string(action.Method))
+		}
 	}
 }

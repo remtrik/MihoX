@@ -76,6 +76,8 @@ abstract class AndroidVpnOptions with _$AndroidVpnOptions {
     required String ipv6Address,
     @Default([]) List<String> routeAddress,
     required String dnsServerAddress,
+    @Default([]) List<String> includePackage,
+    @Default([]) List<String> excludePackage,
   }) = _AndroidVpnOptions;
 
   factory AndroidVpnOptions.fromJson(Map<String, Object?> json) =>
@@ -117,10 +119,8 @@ abstract class UpdateGeoDataParams with _$UpdateGeoDataParams {
 
 @freezed
 abstract class AppMessage with _$AppMessage {
-  const factory AppMessage({
-    required AppMessageType type,
-    dynamic data,
-  }) = _AppMessage;
+  const factory AppMessage({required AppMessageType type, dynamic data}) =
+      _AppMessage;
 
   factory AppMessage.fromJson(Map<String, Object?> json) =>
       _$AppMessageFromJson(json);
@@ -128,10 +128,8 @@ abstract class AppMessage with _$AppMessage {
 
 @freezed
 abstract class InvokeMessage with _$InvokeMessage {
-  const factory InvokeMessage({
-    required InvokeMessageType type,
-    dynamic data,
-  }) = _InvokeMessage;
+  const factory InvokeMessage({required InvokeMessageType type, dynamic data}) =
+      _InvokeMessage;
 
   factory InvokeMessage.fromJson(Map<String, Object?> json) =>
       _$InvokeMessageFromJson(json);
@@ -139,21 +137,15 @@ abstract class InvokeMessage with _$InvokeMessage {
 
 @freezed
 abstract class Delay with _$Delay {
-  const factory Delay({
-    required String name,
-    required String url,
-    int? value,
-  }) = _Delay;
+  const factory Delay({required String name, required String url, int? value}) =
+      _Delay;
 
   factory Delay.fromJson(Map<String, Object?> json) => _$DelayFromJson(json);
 }
 
 @freezed
 abstract class Now with _$Now {
-  const factory Now({
-    required String name,
-    required String value,
-  }) = _Now;
+  const factory Now({required String name, required String value}) = _Now;
 
   factory Now.fromJson(Map<String, Object?> json) => _$NowFromJson(json);
 }

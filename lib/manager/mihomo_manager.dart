@@ -10,10 +10,7 @@ import 'package:mihox/providers/state.dart';
 import 'package:mihox/state.dart';
 
 class MihomoManager extends ConsumerStatefulWidget {
-  const MihomoManager({
-    super.key,
-    required this.child,
-  });
+  const MihomoManager({super.key, required this.child});
   final Widget child;
 
   @override
@@ -45,16 +42,16 @@ class _MihomoContainerState extends ConsumerState<MihomoManager>
           globalState.appController.updateMihomoConfigDebounce();
         }
       })
-      ..listenManual(
-        appSettingProvider.select((state) => state.openLogs),
-        (prev, next) {
-          if (next) {
-            mihomoCore.startLog();
-          } else {
-            mihomoCore.stopLog();
-          }
-        },
-      );
+      ..listenManual(appSettingProvider.select((state) => state.openLogs), (
+        prev,
+        next,
+      ) {
+        if (next) {
+          mihomoCore.startLog();
+        } else {
+          mihomoCore.stopLog();
+        }
+      });
   }
 
   @override
@@ -67,13 +64,9 @@ class _MihomoContainerState extends ConsumerState<MihomoManager>
   Future<void> onDelay(Delay delay) async {
     super.onDelay(delay);
     final appController = globalState.appController..setDelay(delay);
-    debouncer.call(
-      FunctionTag.updateDelay,
-      () async {
-        appController.updateGroupsDebounce();
-      },
-      duration: const Duration(milliseconds: 5000),
-    );
+    debouncer.call(FunctionTag.updateDelay, () async {
+      appController.updateGroupsDebounce();
+    }, duration: const Duration(milliseconds: 5000));
   }
 
   @override
@@ -97,11 +90,9 @@ class _MihomoContainerState extends ConsumerState<MihomoManager>
 
   @override
   Future<void> onLoaded(String providerName) async {
-    ref.read(providersProvider.notifier).setProvider(
-          await mihomoCore.getExternalProvider(
-            providerName,
-          ),
-        );
+    ref
+        .read(providersProvider.notifier)
+        .setProvider(await mihomoCore.getExternalProvider(providerName));
     globalState.appController.updateGroupsDebounce();
     super.onLoaded(providerName);
   }

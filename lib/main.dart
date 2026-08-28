@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -21,10 +19,8 @@ import 'models/core.dart' as core_models show Action;
 import 'models/models.dart';
 
 Future<void> main() async {
-  globalState.isService = false;
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Enable Skia graphics for better performance on desktop
   if (Platform.isWindows || Platform.isLinux) {
     DartPluginRegistrant.ensureInitialized();
   }
@@ -35,387 +31,159 @@ Future<void> main() async {
   await android?.init();
   await window?.init(version);
 
-  // Initialize VPN plugin on Android to handle method channel calls from VPN service
   if (Platform.isAndroid) {
-    vpn; // Accessing the getter initializes the singleton
+    // Accessing the singletons wires up method channel handlers.
+    vpn;
+    _wireAndroidTileListener();
   }
   HttpOverrides.global = MihoXHttpOverrides();
-  runApp(const ProviderScope(
-    child: Application(),
-  ));
+  runApp(const ProviderScope(child: Application()));
 }
 
-@pragma('vm:entry-point')
-Future<void> _service(List<String> flags) async {
-  commonPrint.log("=== [DART] _service entrypoint started, flags: $flags");
-
-  globalState.isService = true;
-  commonPrint.log("[DART] Setting isService = true");
-
-  WidgetsFlutterBinding.ensureInitialized();
-  // Flush any logs that were queued before bindings were initialized
-  fileLogger.flushPendingLogs();
-  commonPrint.log("[DART] WidgetsFlutterBinding initialized");
-
-  final quickStart = flags.contains("quick");
-  commonPrint.log("[DART] quickStart = $quickStart");
-
-  final mihomoLibHandler = MihomoLibHandler();
-  commonPrint.log("[DART] MihomoLibHandler created");
-
-  try {
-    commonPrint.log("[DART] Calling globalState.init()...");
-    await globalState.init();
-    commonPrint.log("[DART] globalState.init() completed");
-  } catch (e, stackTrace) {
-    commonPrint
-      ..log("=== [DART] _service ERROR during globalState.init() ===")
-      ..log("[DART] Error: $e")
-      ..log("[DART] StackTrace: $stackTrace")
-      ..log("[DART] Continuing execution anyway...");
-    // Don't rethrow - continue to add listeners
-  }
-
-  commonPrint.log("[DART] Adding tile listener...");
-  tile?.addListener(
-    _TileListenerWithService(
-      onChangeMode: (mode) async {
-        commonPrint.log("[DART] TileService onChangeMode: $mode");
-        try {
-          final modeEnum = Mode.values.byName(mode);
-          final patched = globalState.config.patchMihomoConfig.copyWith(
-            mode: modeEnum,
-          );
-          globalState.config = globalState.config.copyWith(
-            patchMihomoConfig: patched,
-          );
-          await preferences.saveConfig(globalState.config);
-
-          // Try to apply to running core so the switch is immediate.
-          try {
-            final updateParams = UpdateParams(
-              tun: patched.tun
-                  .getRealTun(globalState.config.networkProps.routeMode),
-              allowLan: patched.allowLan,
-              findProcessMode: patched.findProcessMode,
-              mode: modeEnum,
-              logLevel: patched.logLevel,
-              ipv6: patched.ipv6,
-              tcpConcurrent: patched.tcpConcurrent,
-              externalController: patched.externalController,
-              unifiedDelay: patched.unifiedDelay,
-              mixedPort: patched.mixedPort,
-            );
-            final actionJson = json.encode(
-              core_models.Action(
-                id: "${ActionMethod.updateConfig.name}#${utils.id}",
-                method: ActionMethod.updateConfig,
-                data: json.encode(updateParams),
-              ),
-            );
-            final handler = mihomoLibHandler;
-            unawaited(handler.invokeAction(actionJson));
-          } catch (e) {
-            debugPrint("onChangeMode: live updateConfig error: $e");
-          }
-
-          unawaited(tile?.updateMode(mode));
-        } catch (e) {
-          debugPrint("onChangeMode error: $e");
-        }
-      },
-      onStart: () async {
-        commonPrint.log("=== [DART] TileService onStart called ===");
-        debugPrint("=== TileService onStart called ===");
-        try {
-          commonPrint.log("TileService: Showing start notification");
-          unawaited(app?.tip(appLocalizations.startVpn));
-
-          // Initialize GeoIP/GeoSite only if profile enables it (geodata-mode == true)
-          try {
-            final currentProfileId = globalState.config.currentProfileId;
-            if (currentProfileId != null) {
-              final profileConfig =
-                  await globalState.getProfileConfig(currentProfileId);
-              final geodataMode = profileConfig["geodata-mode"];
-              if (geodataMode == true) {
-                commonPrint.log(
-                    "TileService: Initializing GeoIP/GeoSite (geodata-mode=true)...");
-                await MihomoCore.initGeo();
-                commonPrint.log("TileService: GeoIP/GeoSite initialized");
-              } else {
-                commonPrint.log(
-                    "TileService: Skipping Geo init (geodata-mode != true)");
-              }
-            } else {
-              commonPrint
-                  .log("TileService: Skipping Geo init (no current profile)");
-            }
-          } catch (e) {
-            commonPrint.log("TileService: Skipping Geo init due to error: $e");
-          }
-
-          commonPrint.log("TileService: Getting paths...");
-          final homeDirPath = await appPath.homeDirPath;
-          final version = await system.version;
-          commonPrint
-            ..log("TileService: homeDirPath=$homeDirPath, version=$version")
-            ..log("TileService: Creating config...");
-          final mihomoConfig =
-              globalState.config.patchMihomoConfig.copyWith.tun(
-            enable: false,
-          );
-
-          final profileId = globalState.config.currentProfileId;
-          commonPrint.log("TileService: currentProfileId=$profileId");
-          if (profileId == null) {
-            commonPrint.log("TileService: No profile selected, aborting");
-            unawaited(app?.tip("No profile selected"));
-            return;
-          }
-          commonPrint.log("TileService: Getting setup params");
-          final params = await globalState.getSetupParams(
-            pathConfig: mihomoConfig,
-          );
-          commonPrint
-            ..log("TileService: Setup params ready")
-            ..log("TileService: Starting MihomoCore with quickStart");
-          final res = await mihomoLibHandler.quickStart(
-            InitParams(
-              homeDir: homeDirPath,
-              version: version,
-            ),
-            params,
-            globalState.getCoreState(),
-          );
-          commonPrint.log("TileService: quickStart result: $res");
-
-          if (res.isNotEmpty) {
-            commonPrint.log("TileService: Start failed with error: $res");
-            unawaited(app?.tip("Start failed: $res"));
-            try {
-              await vpn?.stop();
-            } catch (e) {
-              debugPrint("Tile vpn.stop() error (ignored): $e");
-            }
-            exit(0);
-          }
-
-          commonPrint.log("TileService: Starting VPN service");
-          try {
-            await vpn?.start(
-              mihomoLibHandler.getAndroidVpnOptions(),
-            );
-            commonPrint.log("TileService: VPN service started");
-          } catch (e) {
-            // MissingPluginException may occur if VpnPlugin not yet attached
-            // VPN is started by native side via VpnPlugin.handleStart()
-            commonPrint.log(
-                "TileService: vpn.start() error (may be handled by native): $e");
-          }
-
-          commonPrint.log("TileService: Starting listener");
-          await mihomoLibHandler.startListener();
-          commonPrint.log("=== TileService onStart completed successfully ===");
-        } catch (e, stackTrace) {
-          commonPrint
-            ..log("=== TileService onStart ERROR ===")
-            ..log("Error: $e")
-            ..log("StackTrace: $stackTrace");
-          unawaited(app?.tip("Start error: $e"));
-          try {
-            await vpn?.stop();
-          } catch (stopError) {
-            debugPrint("Tile vpn.stop() error (ignored): $stopError");
-          }
-          exit(0);
-        }
-      },
-      onStop: () async {
-        try {
-          unawaited(app?.tip(appLocalizations.stopVpn));
-          await mihomoLibHandler.stopListener();
-        } catch (e) {
-          debugPrint("Tile stop listener error: $e");
-        }
-        try {
-          await vpn?.stop();
-        } catch (e) {
-          // MissingPluginException may occur if VpnPlugin not yet attached
-          // VPN will be stopped by native side via VpnPlugin.handleStop()
-          debugPrint("Tile vpn.stop() error (ignored): $e");
-        }
-        exit(0);
-      },
-    ),
-  );
-
-  // Provide foreground notification params using data from globalState.config
-  // This runs in service isolate, so we read from the in-memory config (loaded at service start)
-  vpn?.handleGetStartForegroundParams = () {
-    try {
-      final traffic = mihomoLibHandler.getTraffic();
-      final profile = globalState.config.currentProfile;
-      final profileName = profile?.label ?? profile?.id ?? "MihoX";
-
-      // Get server group name from header (may be base64-encoded)
-      var groupName = profile?.providerHeaders['mihox-serverinfo'];
-      if (groupName != null && groupName.isNotEmpty) {
-        groupName = utils.decodeBase64(groupName);
-      }
-
-      // Get selected proxy name from selectedMap
-      var serverName = "";
-      if (groupName != null && groupName.isNotEmpty) {
-        final selectedMap = profile?.selectedMap ?? const <String, String>{};
-        serverName = selectedMap[groupName] ?? "";
-      }
-
-      // Build title using active server (keep flags/emojis)
-      final serverDisplay = serverName.trim();
-      final title = serverDisplay.isNotEmpty
-          ? "$profileName / $serverDisplay"
-          : profileName;
-
-      // Service name (subtext) from header mihox-servicename (constant per profile)
-      var serviceName = "";
-      try {
-        var svc = profile?.providerHeaders['mihox-servicename'];
-        if (svc != null && svc.isNotEmpty) {
-          svc = utils.decodeBase64(svc);
-          serviceName = svc.trim();
-        }
-      } catch (_) {}
-
-      return json.encode(
-          {"title": title, "server": serviceName, "content": "$traffic"});
-    } catch (_) {
-      // Fallback minimal
-      return json.encode({"title": "MihoX", "server": "", "content": ""});
-    }
-  };
-
-  commonPrint.log("[DART] Adding VPN listener");
-  vpn?.addListener(
-    _VpnListenerWithService(
-      onDnsChanged: (dns) {
-        commonPrint.log("handle dns $dns");
-        mihomoLibHandler.updateDns(dns);
-      },
-    ),
-  );
-
-  // Signal to native side that Dart service is ready to receive commands
-  // This must be called AFTER adding tile listener so pending actions can be handled
-  commonPrint.log("[DART] Signaling service ready to native side");
-  await tile?.signalServiceReady();
-  commonPrint.log("[DART] Service ready signal sent");
-
-  // Push initial mode to widget so the active button is highlighted correctly.
-  try {
-    final currentMode = globalState.config.patchMihomoConfig.mode.name;
-    unawaited(tile?.updateMode(currentMode));
-    final globalHeader =
-        globalState.config.currentProfile?.providerHeaders['mihox-globalmode'];
-    final globalEnabled = globalHeader?.toLowerCase() != 'false';
-    unawaited(tile?.updateGlobalModeEnabled(enabled: globalEnabled));
-  } catch (e) {
-    debugPrint("Initial updateMode error (ignored): $e");
-  }
-
-  commonPrint.log("[DART] quickStart=$quickStart");
-  if (quickStart) {
-    // App was not in memory - VPN will be started via pending action triggered by signalServiceReady()
-    // The onStart callback in tile listener will handle the actual VPN startup
-    commonPrint.log(
-        "[DART] QuickStart mode - VPN will be started via pending action from tile service");
-    return;
-  }
-  // App is in memory - set up IPC for communication with main isolate
-  commonPrint.log("[DART] Not quickStart, calling _handleMainIpc");
-  _handleMainIpc(mihomoLibHandler);
+/// Handles start/stop/mode intents coming from the quick-settings tile or the
+/// home-screen widget. Runs entirely in the main Flutter isolate now that the
+/// `:remote` process hosts the Go core and the foreground service.
+void _wireAndroidTileListener() {
+  tile?.addListener(_MainTileListener());
+  // Signal readiness so Kotlin can replay a pending START/STOP/CHANGE that
+  // was queued while the Flutter engine was still booting (e.g. cold-start
+  // from Always-on or a widget tap with no running UI).
+  unawaited(tile?.signalServiceReady());
 }
 
-void _handleMainIpc(MihomoLibHandler mihomoLibHandler) {
-  final sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
-  if (sendPort == null) {
-    return;
-  }
-  final serviceReceiverPort = ReceivePort()
-    ..listen((message) async {
-      // Handle special IPC messages for foreground notification updates
-      if (message is Map<String, dynamic>) {
-        final action = message['action'];
-        if (action == 'updateForegroundServer') {
-          final serverName = message['serverName'] as String? ?? '';
-          final groupName = message['groupName'] as String? ?? '';
-          // Update selectedMap in globalState.config
-          final profile = globalState.config.currentProfile;
-          if (profile != null && groupName.isNotEmpty) {
-            final newSelectedMap =
-                Map<String, String>.from(profile.selectedMap);
-            newSelectedMap[groupName] = serverName;
-            final updatedProfile =
-                profile.copyWith(selectedMap: newSelectedMap);
-            globalState.config = globalState.config.copyWith(
-              profiles: globalState.config.profiles
-                  .map((p) => p.id == profile.id ? updatedProfile : p)
-                  .toList(),
-            );
-          }
-          sendPort.send({'success': true});
-          return;
-        }
-      }
-      final res = await mihomoLibHandler.invokeAction(message);
-      sendPort.send(res);
-    });
-  sendPort.send(serviceReceiverPort.sendPort);
-  final messageReceiverPort = ReceivePort();
-  mihomoLibHandler.attachMessagePort(
-    messageReceiverPort.sendPort.nativePort,
-  );
-  messageReceiverPort.listen(sendPort.send);
-}
-
-@immutable
-class _TileListenerWithService with TileListener {
-  const _TileListenerWithService({
-    required this._onStart,
-    required this._onStop,
-    required this._onChangeMode,
-  });
-
-  final Function() _onStart;
-  final Function() _onStop;
-  final Function(String mode) _onChangeMode;
-
+/// Boot-safe tile/widget handler. The UI's TileManager is ALSO registered as a
+/// listener, and both fire for every native tile event — which previously ran
+/// every start/stop twice. To run exactly one handler, this listener defers to
+/// TileManager once the app is ready (it updates the UI run-state via
+/// updateStatus), and only handles events itself during the cold-start window
+/// before appController exists (TileManager.updateStatus would NPE there).
+class _MainTileListener with TileListener {
   @override
   void onStart() {
-    _onStart();
+    if (globalState.isAppControllerReady) return;
+    unawaited(_handleStart());
   }
 
   @override
   void onStop() {
-    _onStop();
+    if (globalState.isAppControllerReady) return;
+    unawaited(_handleStop());
   }
 
   @override
   void onChangeMode(String mode) {
-    _onChangeMode(mode);
+    if (globalState.isAppControllerReady) return;
+    unawaited(_handleChangeMode(mode));
   }
 }
 
-@immutable
-class _VpnListenerWithService with VpnListener {
-  const _VpnListenerWithService({
-    required this._onDnsChanged,
-  });
-  final Function(String dns) _onDnsChanged;
+Future<void> _handleStart() async {
+  try {
+    unawaited(app?.tip(appLocalizations.startVpn));
 
-  @override
-  void onDnsChanged(String dns) {
-    super.onDnsChanged(dns);
-    _onDnsChanged(dns);
+    final profileId = globalState.config.currentProfileId;
+    if (profileId == null) {
+      unawaited(app?.tip("No profile selected"));
+      return;
+    }
+
+    // Wait for _initCore to finish — it runs in addPostFrameCallback
+    // concurrently with this handler. Starting VPN before core is ready
+    // causes concurrent Go map access → SIGABRT.
+    for (var i = 0; i < 30; i++) {
+      if (await mihomoCore.isInit) break;
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    final profile = globalState.config.currentProfile;
+    final title = _buildNotificationTitle(profile);
+    unawaited(mihomoLib?.updateNotificationParams(title: title));
+
+    final rt = await mihomoLib?.startVpn() ?? 0;
+    if (rt == 0) {
+      commonPrint.log("Tile start: startVpn returned 0");
+      unawaited(app?.tip("VPN start failed"));
+      return;
+    }
+
+    await mihomoCore.startListener();
+  } catch (e, stackTrace) {
+    commonPrint.log("Tile onStart error: $e\n$stackTrace");
+    unawaited(app?.tip("Start error: $e"));
+  }
+}
+
+String _buildNotificationTitle(Profile? profile) {
+  if (profile == null) return 'MihoX';
+  final profileName = profile.label ?? profile.id;
+
+  var serviceName = '';
+  final svc = profile.providerHeaders['mihox-servicename'];
+  if (svc != null && svc.isNotEmpty) {
+    try {
+      final normalized = base64.normalize(svc);
+      serviceName = utf8.decode(base64.decode(normalized)).trim();
+    } catch (_) {
+      serviceName = svc.trim();
+    }
+  }
+
+  return serviceName.isNotEmpty ? serviceName : profileName;
+}
+
+Future<void> _handleStop() async {
+  try {
+    unawaited(app?.tip(appLocalizations.stopVpn));
+    // Cold-start window: appController doesn't exist yet, so go straight to the
+    // native stop primitive (stopListener + stopVpn). Routing through
+    // appController.updateStatus(false) NPEs on the null appController and the
+    // stop is silently swallowed by the catch — i.e. a headless VPN can't be
+    // stopped from the tile until Flutter finishes init. UI run-state reconciles
+    // on the later resume/sync.
+    await globalState.handleStop();
+  } catch (e) {
+    commonPrint.log("Tile onStop error: $e");
+  }
+}
+
+Future<void> _handleChangeMode(String mode) async {
+  try {
+    final modeEnum = Mode.values.byName(mode);
+    final patched = globalState.config.patchMihomoConfig.copyWith(
+      mode: modeEnum,
+    );
+    globalState.config = globalState.config.copyWith(
+      patchMihomoConfig: patched,
+    );
+    await preferences.saveConfig(globalState.config);
+
+    final updateParamsMap = UpdateParams(
+      tun: patched.tun.getRealTun(globalState.config.networkProps.routeMode),
+      allowLan: patched.allowLan,
+      findProcessMode: patched.findProcessMode,
+      mode: modeEnum,
+      logLevel: patched.logLevel,
+      ipv6: patched.ipv6,
+      tcpConcurrent: patched.tcpConcurrent,
+      externalController: patched.externalController,
+      unifiedDelay: patched.unifiedDelay,
+      mixedPort: patched.mixedPort,
+    ).toJson();
+
+    final effective = globalState.effectiveExternalController.value;
+    if (effective.isNotEmpty) {
+      updateParamsMap['external-controller'] = effective;
+    }
+    final actionJson = json.encode(
+      core_models.Action(
+        id: "${ActionMethod.updateConfig.name}#${utils.id}",
+        method: ActionMethod.updateConfig,
+        data: json.encode(updateParamsMap),
+      ),
+    );
+    unawaited(mihomoLib?.sendMessage(actionJson));
+    unawaited(tile?.updateMode(mode));
+  } catch (e) {
+    commonPrint.log("Tile onChangeMode error: $e");
   }
 }

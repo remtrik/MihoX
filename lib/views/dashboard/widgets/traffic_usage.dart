@@ -15,116 +15,105 @@ class TrafficUsage extends StatelessWidget {
     BuildContext context,
     Icon icon,
     TrafficValue trafficValue,
-  ) =>
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            flex: 1,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                icon,
-                const SizedBox(
-                  width: 8,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: Text(
-                    trafficValue.showValue,
-                    style: context.textTheme.bodySmall,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
+  ) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    mainAxisSize: MainAxisSize.max,
+    children: [
+      Flexible(
+        flex: 1,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Flexible(
+              flex: 1,
+              child: Text(
+                trafficValue.showValue,
+                style: context.textTheme.bodySmall,
+                maxLines: 1,
+              ),
             ),
-          ),
-          Text(
-            trafficValue.showUnit,
-            style: context.textTheme.bodySmall?.toLighter,
-          ),
-        ],
-      );
+          ],
+        ),
+      ),
+      Text(
+        trafficValue.showUnit,
+        style: context.textTheme.bodySmall?.toLighter,
+      ),
+    ],
+  );
 
   Widget _buildLegend(
     BuildContext context,
     Color primaryColor,
     Color secondaryColor,
-  ) =>
-      LayoutBuilder(
-        builder: (_, container) {
-          final bodySmall = context.textTheme.bodySmall;
-          final uploadText = Text(
-            maxLines: 1,
-            appLocalizations.upload,
-            overflow: TextOverflow.ellipsis,
-            style: bodySmall,
-          );
-          final downloadText = Text(
-            maxLines: 1,
-            appLocalizations.download,
-            overflow: TextOverflow.ellipsis,
-            style: bodySmall,
-          );
-          final uploadTextSize =
-              globalState.measure.computeTextSize(uploadText);
-          final downloadTextSize =
-              globalState.measure.computeTextSize(downloadText);
-          final maxTextWidth =
-              max(uploadTextSize.width, downloadTextSize.width);
-          if (maxTextWidth + 24 > container.maxWidth) {
-            return Container();
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 20,
-                    height: 8,
-                    decoration: ShapeDecoration(
-                      color: primaryColor,
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 4,
-                  ),
-                  uploadText,
-                ],
-              ),
-              const SizedBox(
-                height: 4,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 20,
-                    height: 8,
-                    decoration: ShapeDecoration(
-                      color: secondaryColor,
-                      shape: RoundedSuperellipseBorder(
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 4,
-                  ),
-                  downloadText,
-                ],
-              ),
-            ],
-          );
-        },
+  ) => LayoutBuilder(
+    builder: (_, container) {
+      final bodySmall = context.textTheme.bodySmall;
+      final uploadText = Text(
+        maxLines: 1,
+        appLocalizations.upload,
+        overflow: TextOverflow.ellipsis,
+        style: bodySmall,
       );
+      final downloadText = Text(
+        maxLines: 1,
+        appLocalizations.download,
+        overflow: TextOverflow.ellipsis,
+        style: bodySmall,
+      );
+      final uploadTextSize = globalState.measure.computeTextSize(uploadText);
+      final downloadTextSize = globalState.measure.computeTextSize(
+        downloadText,
+      );
+      final maxTextWidth = max(uploadTextSize.width, downloadTextSize.width);
+      if (maxTextWidth + 24 > container.maxWidth) {
+        return Container();
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 20,
+                height: 8,
+                decoration: ShapeDecoration(
+                  color: primaryColor,
+                  shape: RoundedSuperellipseBorder(
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              uploadText,
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 20,
+                height: 8,
+                decoration: ShapeDecoration(
+                  color: secondaryColor,
+                  shape: RoundedSuperellipseBorder(
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              downloadText,
+            ],
+          ),
+        ],
+      );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +128,7 @@ class TrafficUsage extends StatelessWidget {
         ),
         onPressed: () {},
         child: Padding(
-          padding: baseInfoEdgeInsets.copyWith(
-            top: 0,
-          ),
+          padding: baseInfoEdgeInsets.copyWith(top: 0),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -149,9 +136,7 @@ class TrafficUsage extends StatelessWidget {
             children: [
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -160,8 +145,9 @@ class TrafficUsage extends StatelessWidget {
                         aspectRatio: 1,
                         child: Consumer(
                           builder: (_, ref, _) {
-                            final totalTraffic =
-                                ref.watch(totalTrafficProvider);
+                            final totalTraffic = ref.watch(
+                              totalTrafficProvider,
+                            );
                             return DonutChart(
                               data: [
                                 DonutChartData(
@@ -177,9 +163,7 @@ class TrafficUsage extends StatelessWidget {
                           },
                         ),
                       ),
-                      const SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 8),
                       Flexible(
                         child: _buildLegend(
                           context,
@@ -200,16 +184,10 @@ class TrafficUsage extends StatelessWidget {
                     children: [
                       _buildTrafficDataItem(
                         context,
-                        Icon(
-                          Icons.arrow_upward,
-                          color: primaryColor,
-                          size: 14,
-                        ),
+                        Icon(Icons.arrow_upward, color: primaryColor, size: 14),
                         totalTraffic.up,
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
+                      const SizedBox(height: 8),
                       _buildTrafficDataItem(
                         context,
                         Icon(

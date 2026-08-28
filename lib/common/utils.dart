@@ -14,11 +14,7 @@ import 'package:mihox/enum/enum.dart';
 class Utils {
   String decodeBase64(String value) {
     try {
-      return utf8
-          .decode(
-            base64.decode(base64.normalize(value)),
-          )
-          .trim();
+      return utf8.decode(base64.decode(base64.normalize(value))).trim();
     } catch (_) {
       // not a base64
       return value.trim();
@@ -35,16 +31,15 @@ class Utils {
   String get id {
     final timestamp = DateTime.now().microsecondsSinceEpoch;
     final random = Random();
-    final randomStr =
-        String.fromCharCodes(List.generate(8, (_) => random.nextInt(26) + 97));
+    final randomStr = String.fromCharCodes(
+      List.generate(8, (_) => random.nextInt(26) + 97),
+    );
     return "$timestamp$randomStr";
   }
 
   String getDateStringLast2(int value) {
     final valueRaw = "0$value";
-    return valueRaw.substring(
-      valueRaw.length - 2,
-    );
+    return valueRaw.substring(valueRaw.length - 2);
   }
 
   String generateRandomString({int minLength = 10, int maxLength = 100}) {
@@ -57,8 +52,9 @@ class Utils {
     var result = '';
     for (var i = 0; i < length; i++) {
       if (random.nextBool()) {
-        result +=
-            String.fromCharCode(0x4E00 + random.nextInt(0x9FA5 - 0x4E00 + 1));
+        result += String.fromCharCode(
+          0x4E00 + random.nextInt(0x9FA5 - 0x4E00 + 1),
+        );
       } else {
         result += latinChars[random.nextInt(latinChars.length)];
       }
@@ -74,8 +70,9 @@ class Utils {
     bytes[6] = (bytes[6] & 0x0F) | 0x40;
     bytes[8] = (bytes[8] & 0x3F) | 0x80;
 
-    final hex =
-        bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    final hex = bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
 
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
@@ -116,10 +113,10 @@ class Utils {
       1 => Locale(parts[0]),
       2 => Locale(parts[0], parts[1]),
       3 => Locale.fromSubtags(
-          languageCode: parts[0],
-          scriptCode: parts[1],
-          countryCode: parts[2],
-        ),
+        languageCode: parts[0],
+        scriptCode: parts[1],
+        countryCode: parts[2],
+      ),
       _ => null,
     };
   }
@@ -151,7 +148,7 @@ class Utils {
 
     final match = matches.last;
     final number = int.parse(match[1] ?? '0') + 1;
-    return label.replaceFirst(reg, '($number)', label.length - 3 - 1);
+    return label.replaceFirst(reg, '($number)');
   }
 
   String getTrayIconPath({
@@ -169,7 +166,8 @@ class Utils {
   }
 
   int compareVersions(String version1, String version2) {
-    List<int> parts(String v) => v.split('+')[0].split('.').map(int.parse).toList();
+    List<int> parts(String v) =>
+        v.split('+')[0].split('.').map(int.parse).toList();
     int build(String v) => v.contains('+') ? int.parse(v.split('+')[1]) : 0;
 
     final v1 = parts(version1);
@@ -230,19 +228,7 @@ class Utils {
 
   int getProfilesColumns(double viewWidth) => max((viewWidth / 320).floor(), 1);
 
-  final _indexPrimary = [
-    50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    600,
-    700,
-    800,
-    850,
-    900,
-  ];
+  final _indexPrimary = [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900];
 
   MaterialColor _createPrimarySwatch(Color color) {
     final swatch = <int, Color>{};
@@ -302,11 +288,7 @@ class Utils {
 
   SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
     const control = true;
-    return SingleActivator(
-      trigger,
-      control: control,
-      meta: !control,
-    );
+    return SingleActivator(trigger, control: control, meta: !control);
   }
 
   FutureOr<T> handleWatch<T>(FutureOr<T> Function() function) async {

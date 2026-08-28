@@ -27,24 +27,31 @@ class Preferences {
     final preferences = await sharedPreferencesCompleter.future;
     final mihomoConfigString = preferences?.getString(mihomoConfigKey);
     if (mihomoConfigString == null) return null;
+    try {
     final mihomoConfigMap = json.decode(mihomoConfigString);
     return MihomoConfig.fromJson(mihomoConfigMap);
+    } catch (_) {
+      await preferences?.remove(mihomoConfigKey);
+      return null;
+    }
   }
 
   Future<Config?> getConfig() async {
     final preferences = await sharedPreferencesCompleter.future;
     final configString = preferences?.getString(configKey);
     if (configString == null) return null;
+    try {
     final configMap = json.decode(configString);
     return Config.compatibleFromJson(configMap);
+    } catch (_) {
+      await preferences?.remove(configKey);
+      return null;
+    }
   }
 
   Future<bool> saveConfig(Config config) async {
     final preferences = await sharedPreferencesCompleter.future;
-    return await preferences?.setString(
-          configKey,
-          json.encode(config),
-        ) ??
+    return await preferences?.setString(configKey, json.encode(config)) ??
         false;
   }
 
